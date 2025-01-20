@@ -350,6 +350,7 @@ h2 {
   margin-bottom: 20px;
 }
 
+
 .articles-table th, .articles-table td {
   border: 1px solid #ddd;
   padding: 10px;
@@ -387,18 +388,30 @@ h2 {
   background-color: #0056b3;
 }
 
+/* Default state - hide the description column */
 .description-header,
 .description-cell {
-  display: none; /* Hide by default */
+  display: none !important;
 }
 
 /* Show description column only on screens wider than 600px */
 @media screen and (min-width: 600px) {
   .description-header,
   .description-cell {
-    display: table-cell;
+    display: table-cell !important;
   }
 }
 
+/* Default state - hide the description column */
+
+.nodescription {
+  display: none !important;
+}
+
+/* Default state - hide the description column */
+
+.yesdescription {
+  display:inline-block;
+}
 
 

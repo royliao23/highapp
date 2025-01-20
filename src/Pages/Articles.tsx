@@ -173,7 +173,7 @@ const Articles: React.FC = () => {
   };
   
 
-  const handleUpdate = async () => {
+  const handleUpdate_supa = async () => {
     try {
       if (!editingArticle) return;
 
@@ -203,8 +203,95 @@ const Articles: React.FC = () => {
     }
   };
 
+  const handleUpdate = async (): Promise<void> => {
+    try {
+      if (!editingArticle) return;
+  
+      // Check if author exists
+      if (!editingArticle.author || editingArticle.author.id === undefined) {
+        throw new Error("Author is not defined for the article.");
+      }
+  
+      const API_URL = `https://royliao.pythonanywhere.com/api/article/${editingArticle.id}/`;
+      const TOKEN = "Token 8854d62680edf3c63c27ee8bf6d2c320cb902f51";
+  
+      const response = await fetch(API_URL, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: TOKEN,
+        },
+        body: JSON.stringify({
+          title: editingArticle.title,
+          desc: editingArticle.desc,
+          year: editingArticle.year, // Assume year is always defined
+          author: editingArticle.author.id, // Use author ID
+        }),
+      });
+  
+      if (!response.ok) {
+        throw new Error(`Failed to update article: ${response.statusText}`);
+      }
+  
+      const updatedArticle = await response.json();
+  
+      // Update the articles list with the updated article
+      setArticles((prev) =>
+        prev.map((article) =>
+          article.id === editingArticle.id
+            ? {
+                ...article,
+                ...updatedArticle,
+                year: parseInt(updatedArticle.year, 10), // Ensure year is a number
+                author: {
+                  id: updatedArticle.author,
+                  name: updatedArticle.author_name,
+                  age: article.author?.age || undefined, // Retain existing age or set as undefined
+                },
+              }
+            : article
+        )
+      );
+  
+      setEditingArticle(null); // Clear editing state after successful update
+    } catch (error: unknown) {
+      if (error instanceof Error) {
+        console.error("Error updating article:", error.message);
+      } else {
+        console.error("Unknown error occurred while updating the article");
+      }
+    }
+  };
+
+  const handleDelete = async (id: number): Promise<void> => {
+    try {
+      const API_URL = `https://royliao.pythonanywhere.com/api/article/${id}/`;
+      const TOKEN = "Token 8854d62680edf3c63c27ee8bf6d2c320cb902f51";
+  
+      const response = await fetch(API_URL, {
+        method: "DELETE",
+        headers: {
+          Authorization: TOKEN, // Authentication token
+        },
+      });
+  
+      if (!response.ok) {
+        throw new Error(`Failed to delete article: ${response.statusText}`);
+      }
+  
+      // Remove the deleted article from the state
+      setArticles((prev) => prev.filter((article) => article.id !== id));
+    } catch (error: unknown) {
+      if (error instanceof Error) {
+        console.error("Error deleting article:", error.message);
+      } else {
+        console.error("Unknown error occurred while deleting the article");
+      }
+    }
+  };
+  
   // Handle article deletion
-  const handleDelete = async (id: number) => {
+  const handleDelete_supa = async (id: number) => {
     try {
       const { error } = await supabase.from("article").delete().eq("id", id);
 
@@ -215,6 +302,8 @@ const Articles: React.FC = () => {
       console.error("Error deleting article:", error.message);
     }
   };
+
+  
 
   if (loading) {
     return <p>Loading...</p>;
@@ -229,8 +318,8 @@ const Articles: React.FC = () => {
         <thead>
           <tr>
             <th>ID</th>
-            <th>Title</th>
-            <th className="description-cell">Description</th>
+            <th className={window.innerWidth >= 600 ? "yesdescription" : "nodescription"}>Title</th>
+            <th className={window.innerWidth >= 600 ? "yesdescription" : "nodescription"}>Description</th>
             <th>Year</th>
             <th>Author</th>
             <th>Actions</th>
@@ -240,8 +329,8 @@ const Articles: React.FC = () => {
           {articles.map((article) => (
             <tr key={article.id}>
               <td>{article.id}</td>
-              <td>{article.title}</td>
-              <td className="description-cell">{article.desc || "No description"}</td>
+              <td className={window.innerWidth >= 600 ? "yesdescription" : "nodescription"}>{article.title}</td>
+              <td className={window.innerWidth >= 600 ? "yesdescription" : "nodescription"}>{article.desc || "No description"}</td>
               <td>{article.year}</td>
               <td>
                 {article.author?.name || "Unknown"} (Age: {article.author?.age || "N/A"})
