@@ -4,7 +4,7 @@ import React, { useEffect, useState } from "react";
 import { HashRouter, Routes, Route, useLocation, useNavigate } from "react-router-dom";
 import "./styles.css";
 import Home from "./Pages/Home";
-import About from "./Pages/About";
+import Task from "./Pages/Task";
 import Contact from "./Pages/Contact";
 import Authors from "./Pages/Author";
 import Articles from "./Pages/Articles";
@@ -47,7 +47,7 @@ const MainApp: React.FC<MainAppProps> = ({ isLoggedIn, onLoginSuccess }) => {
       <Routes>
         <Route path="/login" element={<Login onLoginSuccess={onLoginSuccess} />} />
         {isLoggedIn && <Route path="/home" element={<Home />} />}
-        {isLoggedIn && <Route path="/about" element={<About />} />}
+        {isLoggedIn && <Route path="/task" element={<Task />} />}
         {isLoggedIn && <Route path="/contact" element={<Contact />} />}
         {isLoggedIn && <Route path="/articles" element={<Articles />} />}
         {isLoggedIn && <Route path="/authors" element={<Authors />} />}

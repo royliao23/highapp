@@ -39,19 +39,19 @@ const Nav = () => {
               Home
             </Link>
           </li>
-          <li className="menu-item">
+          {/* <li className="menu-item">
             <Link to="/articles" className="menu-link" onClick={() => handleMenuClick()}>
               Articles
             </Link>
-          </li>
+          </li> */}
           <li className="menu-item">
             <Link to="/authors" className="menu-link" onClick={() => handleMenuClick()}>
               Authors
             </Link>
           </li>
           <li className="menu-item">
-            <Link to="/about" className="menu-link" onClick={() => handleMenuClick()}>
-              About
+            <Link to="/task" className="menu-link" onClick={() => handleMenuClick()}>
+              Tasks
             </Link>
           </li>
           <li className="menu-item">

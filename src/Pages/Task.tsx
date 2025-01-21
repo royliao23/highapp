@@ -5,7 +5,7 @@ import TodoList from "../components/ToDoList";
 import { Todo } from "../models";
 import { useSelector } from "react-redux";
 import { RootState } from "../state/store";
-const About = () => {
+const Task = () => {
   const [todo, setTodo] = useState<string>("");
   const [todos, setTodos] = useState<Todo[]>([]);
   const isLoggedIn = useSelector((state: RootState) => state.counter.login_status);
@@ -39,4 +39,4 @@ const About = () => {
   );
 }
 
-export default About
+export default Task
