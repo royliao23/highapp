@@ -5,7 +5,9 @@ import TodoList from "../components/ToDoList";
 import { Todo } from "../models";
 import { useSelector } from "react-redux";
 import { RootState } from "../state/store";
-const Task = () => {
+import { supabase } from "../supabaseClient";
+
+const Task =  () => {
   const [todo, setTodo] = useState<string>("");
   const [todos, setTodos] = useState<Todo[]>([]);
   const isLoggedIn = useSelector((state: RootState) => state.counter.login_status);
@@ -17,13 +19,58 @@ const Task = () => {
     }
   }, [isLoggedIn, navigate]);
 
-  const handleAdd = (e: React.FormEvent) => {
+  // Fetch todos from Supabase when the component mounts
+  useEffect(() => {
+    const fetchTodos = async () => {
+      try {
+        const { data, error } = await supabase
+          .from("task")
+          .select("id, todo, isDone");
+
+        if (error) {
+          console.error("Error fetching todos:", error.message);
+        } else {
+          // Update the todos state with fetched data
+          setTodos(data as Todo[]);
+        }
+      } catch (err) {
+        console.error("Unexpected error fetching todos:", err);
+      }
+    };
+
+    fetchTodos();
+  }, [setTodos]); // Dependency ensures the function runs only when `setTodos` changes
+
+  const handleAdd = async (e: React.FormEvent) => {
     e.preventDefault();
 
     if (todo) {
+      const newTask = { id: Date.now(), todo, isDone: false };
       setTodos([...todos, { id: Date.now(), todo, isDone: false }]);
-      setTodo("");
+      try {
+        // Save the new task to the Supabase task table
+        const { data, error } = await supabase
+          .from("task")
+          .insert(newTask);
+  
+        if (error) {
+          console.error("Error adding task:", error.message);
+        } else {
+          console.log("Task added:", data);
+  
+          // Update local state with the new task
+          setTodos([...todos, newTask]);
+  
+          // Clear the input field
+          setTodo("");
+        }
+      } catch (err) {
+        console.error("Unexpected error:", err);
+      }
     }
+
+      setTodo("");
+    
   };
 
   

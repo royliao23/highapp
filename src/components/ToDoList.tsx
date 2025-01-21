@@ -1,13 +1,16 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { Todo } from "../models";
 import SingleTodo from "./SingleToDo";
+import { supabase } from "../supabaseClient";
 
-interface props {
+interface Props {
   todos: Todo[];
   setTodos: React.Dispatch<React.SetStateAction<Todo[]>>;
 }
 
-const TodoList: React.FC<props> = ({ todos, setTodos }) => {
+const TodoList: React.FC<Props> = ({ todos, setTodos }) => {
+  
+
   return (
     <div className="todos">
       {todos?.map((todo) => (
