@@ -36,7 +36,7 @@ const Nav = () => {
         <ul className={`menu ${isDropdownOpen ? "dropdown-active" : ""}`}>
           <li className="menu-item">
             <Link to="/home" className="menu-link" onClick={() => handleMenuClick()}>
-              Home
+              Purchase Order
             </Link>
           </li>
           {/* <li className="menu-item">
