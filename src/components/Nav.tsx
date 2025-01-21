@@ -18,7 +18,7 @@ const Nav = () => {
       <div className="navbar-container">
         {/* Logo */}
         <Link to="/home" className="navbar-logo" onClick={() => setIsDropdownOpen(false)}>
-          <img src="/react_typescript_project/logo192.png" alt="/logo192.png" />
+          <img src="/bm/logo192.png" alt="/logo192.png" />
           FlexiApp
         </Link>
 
