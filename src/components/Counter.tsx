@@ -7,11 +7,11 @@ function Counter() {
     const dispatch =useDispatch()
   return (
     <div>
-      <h1>Count: {count}</h1>
-      <div>
-        <button onClick={()=>dispatch(increment())}>+</button>
-        <button onClick={()=>dispatch(decrement())}>-</button>
-        <button onClick={()=>dispatch(incrementByAmount(17))}>+17</button>
+      <h4>How many time do you want to contact me?: {count}</h4>
+      <div className="act_div">
+        <button className="button_count" onClick={()=>dispatch(increment())}>+1</button>
+        <button className="button_count" onClick={()=>dispatch(decrement())}>-1</button>
+        <button className="button_count" onClick={()=>dispatch(incrementByAmount(17))}>+8</button>
       </div>
     </div>
   )

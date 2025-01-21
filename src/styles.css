@@ -183,7 +183,7 @@ code {
 }
 
 /* Hide menu for small screens */
-@media (max-width: 900px) {
+@media (max-width: 1200px) {
   .menu {
     display: none; /* Hidden by default */
     flex-direction: column;
@@ -248,7 +248,7 @@ code {
 }
 
 /* Show hamburger menu for small screens */
-@media (max-width: 900px) {
+@media (max-width: 1200px) {
   .hamburger {
     display: flex; /* Visible only on small screens */
   }
@@ -395,7 +395,7 @@ h2 {
 }
 
 /* Show description column only on screens wider than 600px */
-@media screen and (min-width: 600px) {
+@media screen and (min-width: 1200px) {
   .description-header,
   .description-cell {
     display: table-cell !important;
@@ -412,6 +412,36 @@ h2 {
 
 .yesdescription {
   display:inline-block;
+}
+
+/* counter css */
+
+.act_div {
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+  margin-top: 40px;
+}
+
+.button_count {
+  background-color: #4CAF50; /* Green background */
+  color: white; /* White text */
+  border: none;
+  border-radius: 5px;
+  padding: 10px 20px;
+  font-size: 16px;
+  cursor: pointer;
+  transition: background-color 0.3s ease, transform 0.2s ease;
+}
+
+.button_count:hover {
+  background-color: #45a049; /* Darker green on hover */
+  transform: scale(1.05); /* Slight zoom effect */
+}
+
+.button_count:active {
+  background-color: #388E3C; /* Even darker green on click */
+  transform: scale(0.95); /* Slight shrink effect */
 }
 
 
