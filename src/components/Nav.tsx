@@ -45,6 +45,11 @@ const Nav = () => {
             </Link>
           </li> */}
           <li className="menu-item">
+            <Link to="/contractor" className="menu-link" onClick={() => handleMenuClick()}>
+              Supplier
+            </Link>
+          </li>
+          <li className="menu-item">
             <Link to="/authors" className="menu-link" onClick={() => handleMenuClick()}>
               Authors
             </Link>
