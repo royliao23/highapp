@@ -10,6 +10,7 @@ import Authors from "./Pages/Author";
 import Articles from "./Pages/Articles";
 import Login from "./Pages/Login";
 import Contractor from "./Pages/Contractor";
+import Category from "./Pages/Category";
 import Nav from "./components/Nav";
 
 const App: React.FC = () => {
@@ -51,7 +52,7 @@ const MainApp: React.FC<MainAppProps> = ({ isLoggedIn, onLoginSuccess }) => {
         {isLoggedIn && <Route path="/task" element={<Task />} />}
         {isLoggedIn && <Route path="/contact" element={<Contact />} />}
         {isLoggedIn && <Route path="/articles" element={<Articles />} />}
-        {isLoggedIn && <Route path="/authors" element={<Authors />} />}
+        {isLoggedIn && <Route path="/category" element={<Category />} />}
         {isLoggedIn && <Route path="/contractor" element={<Contractor />} />}
         {!isLoggedIn && <Route path="/" element={<Authors />} />}
         {/* Fallback route */}

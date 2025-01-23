@@ -285,11 +285,11 @@ const Contractor: React.FC = () => {
       contractor.phone_number.includes(searchTerm)
     );
   });
-  
-    // Handle Form Input
-    const handleInputChange = (e: ChangeEvent<HTMLInputElement>) => {
-      setFormData({ ...formData, [e.target.name]: e.target.value });
-    };
+
+  // Handle Form Input
+  const handleInputChange = (e: ChangeEvent<HTMLInputElement>) => {
+    setFormData({ ...formData, [e.target.name]: e.target.value });
+  };
 
   return (
     <Container>
@@ -347,72 +347,80 @@ const Contractor: React.FC = () => {
         <ModalContent>
           <CloseButton onClick={handleCloseModal}>&times;</CloseButton>
           <Form onSubmit={handleSubmit}>
-  <Input
-    type="text"
-    name="contact_person"
-    value={formData.contact_person}
-    onChange={handleInputChange}
-    placeholder="Contact Person"
-    required
-  />
-  <Input
-    type="text"
-    name="company_name"
-    value={formData.company_name}
-    onChange={handleInputChange}
-    placeholder="Company Name"
-    required
-  />
-  <Input
-    type="text"
-    name="phone_number"
-    value={formData.phone_number}
-    onChange={handleInputChange}
-    placeholder="Phone Number"
-    required
-  />
-  <Input
-    type="email"
-    name="email"
-    value={formData.email}
-    onChange={handleInputChange}
-    placeholder="Email"
-    required
-  />
-  <Input
-    type="text"
-    name="bsb"
-    value={formData.bsb}
-    onChange={handleInputChange}
-    placeholder="BSB"
-    required
-  />
-  <Input
-    type="text"
-    name="account_no"
-    value={formData.account_no}
-    onChange={handleInputChange}
-    placeholder="Account Number"
-    required
-  />
-  <Input
-    type="text"
-    name="account_name"
-    value={formData.account_name}
-    onChange={handleInputChange}
-    placeholder="Account Name"
-    required
-  />
-  <Input
-    type="text"
-    name="address"
-    value={formData.address}
-    onChange={handleInputChange}
-    placeholder="Address"
-    required
-  />
-  <Button type="submit">Save Contractor</Button>
-</Form>
+            <Input
+              type="text"
+              name="contact_person"
+              value={formData.contact_person}
+              onChange={handleInputChange}
+              placeholder="Contact Person"
+              autoComplete="off"
+              required
+            />
+            <Input
+              type="text"
+              name="company_name"
+              value={formData.company_name}
+              onChange={handleInputChange}
+              placeholder="Company Name"
+              autoComplete="off"
+              required
+            />
+            <Input
+              type="text"
+              name="phone_number"
+              value={formData.phone_number}
+              onChange={handleInputChange}
+              placeholder="Phone Number"
+              autoComplete="off"
+              required
+            />
+            <Input
+              type="email"
+              name="email"
+              value={formData.email}
+              onChange={handleInputChange}
+              placeholder="Email"
+              autoComplete="off"
+              required
+            />
+            <Input
+              type="text"
+              name="bsb"
+              value={formData.bsb}
+              onChange={handleInputChange}
+              placeholder="BSB"
+              autoComplete="off"
+              required
+            />
+            <Input
+              type="text"
+              name="account_no"
+              value={formData.account_no}
+              onChange={handleInputChange}
+              placeholder="Account Number"
+              autoComplete="off"
+              required
+            />
+            <Input
+              type="text"
+              name="account_name"
+              value={formData.account_name}
+              onChange={handleInputChange}
+              placeholder="Account Name"
+              autoComplete="off"
+              required
+            />
+            <Input
+              type="text"
+              name="address"
+              value={formData.address}
+              onChange={handleInputChange}
+              placeholder="Address"
+              autoComplete="off"
+              required
+            />
+            <Button type="submit">Save Contractor</Button>
+          </Form>
 
         </ModalContent>
       </Modal>

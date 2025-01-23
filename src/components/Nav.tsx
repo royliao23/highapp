@@ -50,8 +50,8 @@ const Nav = () => {
             </Link>
           </li>
           <li className="menu-item">
-            <Link to="/authors" className="menu-link" onClick={() => handleMenuClick()}>
-              Authors
+            <Link to="/category" className="menu-link" onClick={() => handleMenuClick()}>
+              Category
             </Link>
           </li>
           <li className="menu-item">
