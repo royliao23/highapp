@@ -297,7 +297,8 @@ const Contractor: React.FC = () => {
             <Th>Account No</Th>
             <Th>Account Name</Th>
             <Th>Address</Th>
-            <Th>Actions</Th>
+            <Th>Edit</Th>
+            <Th>Delete</Th>
           </tr>
         </thead>
         <tbody>
@@ -314,6 +315,9 @@ const Contractor: React.FC = () => {
               <Td>
                 {/* <Button onClick={() => handleEdit(contractor)}>Edit</Button> */}
                 <Button onClick={() => handleOpenModal(contractor)}>Edit</Button>
+              </Td>
+              <Td>
+                {/* <Button onClick={() => handleEdit(contractor)}>Edit</Button> */}
                 <DeleteButton onClick={() => handleDelete(contractor.code)}>Delete</DeleteButton>
               </Td>
             </tr>
