@@ -120,19 +120,26 @@ const Modal = styled.div<{ show: boolean }>`
   z-index: 1000;
 `;
 
+
 const ModalContent = styled.div`
   background: white;
   padding: 2rem;
   border-radius: 8px;
+  max-height: 90vh;
   width: 90%;
   max-width: 500px;
   position: relative;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+  overflow-y: auto; /* Enable scrolling for modal content */
+  @media (max-width: 768px) {
+      width: 95%;
+    }
 `;
 
 const CloseButton = styled.button`
   position: absolute;
-  top: 1rem;
-  right: 1rem;
+  top: 0.5rem;
+  right: 0.5rem;
   background: none;
   border: none;
   font-size: 1.5rem;
@@ -171,6 +178,17 @@ const Contractor: React.FC = () => {
   useEffect(() => {
     fetchContractors();
   }, []);
+
+  useEffect(() => {
+    if (isModalOpen) {
+      document.body.classList.add("no-scroll");
+    } else {
+      document.body.classList.remove("no-scroll");
+    }
+    return () => {
+      document.body.classList.remove("no-scroll"); // Cleanup on unmount
+    };
+  }, [isModalOpen]);
 
   useEffect(() => {
     const handleResize = () => setIsMobileView(window.innerWidth < 1000);
