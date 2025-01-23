@@ -86,6 +86,51 @@ const DeleteButton = styled.button`
     background-color: #c82333;
   }
 `;
+const List = styled.ul`
+  list-style-type: none;
+  padding: 0;
+  margin-top: 2rem;
+`;
+
+const ListItem = styled.li`
+  padding: 1rem;
+  border: 1px solid #ddd;
+  margin-bottom: 1rem;
+  border-radius: 4px;
+  background-color: #fff;
+`;
+
+const Modal = styled.div<{ show: boolean }>`
+  display: ${(props) => (props.show ? "flex" : "none")};
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.5);
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+`;
+
+const ModalContent = styled.div`
+  background: white;
+  padding: 2rem;
+  border-radius: 8px;
+  width: 90%;
+  max-width: 500px;
+  position: relative;
+`;
+
+const CloseButton = styled.button`
+  position: absolute;
+  top: 1rem;
+  right: 1rem;
+  background: none;
+  border: none;
+  font-size: 1.5rem;
+  cursor: pointer;
+`;
 
 const Contractor: React.FC = () => {
   const [contractors, setContractors] = useState<Contractor[]>([]);
@@ -100,7 +145,8 @@ const Contractor: React.FC = () => {
     address: "",
   });
   const [editingCode, setEditingCode] = useState<number | null>(null); // Track which contractor is being edited
-
+  const [isMobileView, setIsMobileView] = useState<boolean>(window.innerWidth < 1000);
+  const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
   // Fetch Contractors from Supabase
   const fetchContractors = async () => {
     try {
@@ -115,6 +161,34 @@ const Contractor: React.FC = () => {
   useEffect(() => {
     fetchContractors();
   }, []);
+  useEffect(() => {
+    const handleResize = () => setIsMobileView(window.innerWidth < 1000);
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
+
+  const handleOpenModal = (contractor?: Contractor) => {
+    if (contractor) {
+      handleEdit(contractor);
+    }
+    setIsModalOpen(true);
+  };
+
+  const handleCloseModal = () => {
+    setFormData({
+      contact_person: "",
+      company_name: "",
+      phone_number: "",
+      email: "",
+      bsb: "",
+      account_no: "",
+      account_name: "",
+      address: "",
+    });
+    setEditingCode(null);
+    setIsModalOpen(false);
+  };
+
 
   // Handle Form Input
   const handleInputChange = (e: ChangeEvent<HTMLInputElement>) => {
@@ -155,6 +229,7 @@ const Contractor: React.FC = () => {
         account_name: "",
         address: "",
       });
+      handleCloseModal();
     } catch (error) {
       console.error("Error saving contractor:", error);
     }
@@ -190,10 +265,67 @@ const Contractor: React.FC = () => {
   return (
     <Container>
       <Title>Contractor Management</Title>
-
-      {/* Form to Add Contractor */}
-      <Form onSubmit={handleSubmit}>
-        <Input
+      <Button onClick={() => handleOpenModal()}>Add Contractor</Button>
+      
+      {isMobileView ? (
+        // Render as a list for mobile view
+        <List>
+          {contractors.map((contractor) => (
+            <ListItem key={contractor.code}>
+              <strong>Contact Person:</strong> {contractor.contact_person} <br />
+              <strong>Company Name:</strong> {contractor.company_name} <br />
+              <strong>Phone Number:</strong> {contractor.phone_number} <br />
+              <strong>Email:</strong> {contractor.email} <br />
+              <strong>BSB:</strong> {contractor.bsb} <br />
+              <strong>Account No:</strong> {contractor.account_no} <br />
+              <strong>Account Name:</strong> {contractor.account_name} <br />
+              <strong>Address:</strong> {contractor.address} <br />
+              <Button onClick={() => handleEdit(contractor)}>Edit</Button>
+              <DeleteButton onClick={() => handleDelete(contractor.code)}>Delete</DeleteButton>
+            </ListItem>
+          ))}
+        </List>
+      ) :
+      (<Table>
+        <thead>
+          <tr>
+            <Th>Contact Person</Th>
+            <Th>Company Name</Th>
+            <Th>Phone Number</Th>
+            <Th>Email</Th>
+            <Th>bsb</Th>
+            <Th>Account No</Th>
+            <Th>Account Name</Th>
+            <Th>Address</Th>
+            <Th>Actions</Th>
+          </tr>
+        </thead>
+        <tbody>
+          {contractors.map((contractor) => (
+            <tr key={contractor.code}>
+              <Td>{contractor.contact_person}</Td>
+              <Td>{contractor.company_name}</Td>
+              <Td>{contractor.phone_number}</Td>
+              <Td>{contractor.email}</Td>
+              <Td>{contractor.bsb}</Td>
+              <Td>{contractor.account_no}</Td>
+              <Td>{contractor.account_name}</Td>
+              <Td>{contractor.address}</Td>
+              <Td>
+                {/* <Button onClick={() => handleEdit(contractor)}>Edit</Button> */}
+                <Button onClick={() => handleOpenModal(contractor)}>Edit</Button>
+                <DeleteButton onClick={() => handleDelete(contractor.code)}>Delete</DeleteButton>
+              </Td>
+            </tr>
+          ))}
+        </tbody>
+      </Table>)}
+      <Modal show={isModalOpen}>
+        <ModalContent>
+          <CloseButton onClick={handleCloseModal}>&times;</CloseButton>
+          <Form onSubmit={handleSubmit}>
+            {/* Form Fields */}
+            <Input
           type="text"
           name="contact_person"
           placeholder="Contact Person"
@@ -250,44 +382,11 @@ const Contractor: React.FC = () => {
           value={formData.address}
           onChange={handleInputChange}
         />
-        {/* <Button type="submit">Add Contractor</Button> */}
-        <Button type="submit">{editingCode === null ? "Add Contractor" : "Update Contractor"}</Button>
-      </Form>
-
-      {/* Table to Display Contractors */}
-      <Table>
-        <thead>
-          <tr>
-            <Th>Contact Person</Th>
-            <Th>Company Name</Th>
-            <Th>Phone Number</Th>
-            <Th>Email</Th>
-            {/* <Th>bsb</Th>
-            <Th>Account No</Th>
-            <Th>Account Name</Th> */}
-            <Th>Address</Th>
-            <Th>Actions</Th>
-          </tr>
-        </thead>
-        <tbody>
-          {contractors.map((contractor) => (
-            <tr key={contractor.code}>
-              <Td>{contractor.contact_person}</Td>
-              <Td>{contractor.company_name}</Td>
-              <Td>{contractor.phone_number}</Td>
-              <Td>{contractor.email}</Td>
-              {/* <Td>{contractor.bsb}</Td>
-              <Td>{contractor.account_no}</Td>
-              <Td>{contractor.account_name}</Td> */}
-              <Td>{contractor.address}</Td>
-              <Td>
-                <Button onClick={() => handleEdit(contractor)}>Edit</Button>
-                <DeleteButton onClick={() => handleDelete(contractor.code)}>Delete</DeleteButton>
-              </Td>
-            </tr>
-          ))}
-        </tbody>
-      </Table>
+            <Button type="submit">{editingCode === null ? "Add Contractor" : "Update Contractor"}</Button>
+            <Button type="button" onClick={handleCloseModal}>Cancel</Button>
+          </Form>
+        </ModalContent>
+      </Modal>
     </Container>
   );
 };
