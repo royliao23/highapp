@@ -266,7 +266,7 @@ const Category: React.FC = () => {
       <Title>Category Management</Title>
       <ButtonRow>
         <SearchBox searchTerm={searchTerm} onSearchChange={handleSearchChange} />
-        <Button onClick={() => handleOpenModal()}>Add Contractor</Button>
+        <Button onClick={() => handleOpenModal()}>Add Category</Button>
       </ButtonRow>
 
       {isMobileView ? (

@@ -50,6 +50,11 @@ const Nav = () => {
             </Link>
           </li>
           <li className="menu-item">
+            <Link to="/project" className="menu-link" onClick={() => handleMenuClick()}>
+              Project
+            </Link>
+          </li>
+          <li className="menu-item">
             <Link to="/category" className="menu-link" onClick={() => handleMenuClick()}>
               Category
             </Link>

@@ -4,16 +4,12 @@ import styled from "styled-components";
 import SearchBox from "../components/SearchBox";
 
 // Define the Contractor type based on the table schema
-interface Contractor {
+interface Project {
   code: number;
-  contact_person: string;
-  company_name: string;
-  phone_number: string;
-  email: string;
-  bsb: string;
-  account_no: string;
-  account_name: string;
-  address: string;
+  project_name: string;
+  manager: string;
+  description: string;
+  status: string;
 }
 
 // Styled Components for Styling
@@ -148,17 +144,13 @@ const CloseButton = styled.button`
 
 // Inside the Contractor component...
 
-const Contractor: React.FC = () => {
-  const [contractors, setContractors] = useState<Contractor[]>([]);
-  const [formData, setFormData] = useState<Omit<Contractor, "code">>({
-    contact_person: "",
-    company_name: "",
-    phone_number: "",
-    email: "",
-    bsb: "",
-    account_no: "",
-    account_name: "",
-    address: "",
+const Project: React.FC = () => {
+  const [contractors, setContractors] = useState<Project[]>([]);
+  const [formData, setFormData] = useState<Omit<Project, "code">>({
+    project_name: "",
+    manager: "",
+    description: "",
+    status: "",
   });
   const [editingCode, setEditingCode] = useState<number | null>(null); // Track which contractor is being edited
   const [isMobileView, setIsMobileView] = useState<boolean>(window.innerWidth < 1000);
@@ -167,7 +159,7 @@ const Contractor: React.FC = () => {
 
   const fetchContractors = async () => {
     try {
-      const { data, error } = await supabase.from("contractor").select("*");
+      const { data, error } = await supabase.from("project").select("*");
       if (error) throw error;
       setContractors(data || []);
     } catch (error) {
@@ -200,7 +192,7 @@ const Contractor: React.FC = () => {
     setSearchTerm(e.target.value.toLowerCase()); // Normalize search term for case-insensitive search
   };
 
-  const handleOpenModal = (contractor?: Contractor) => {
+  const handleOpenModal = (contractor?: Project) => {
     if (contractor) {
       handleEdit(contractor);
     }
@@ -209,14 +201,10 @@ const Contractor: React.FC = () => {
 
   const handleCloseModal = () => {
     setFormData({
-      contact_person: "",
-      company_name: "",
-      phone_number: "",
-      email: "",
-      bsb: "",
-      account_no: "",
-      account_name: "",
-      address: "",
+      project_name: "",
+      manager: "",
+      description: "",
+      status: "",
     });
     setEditingCode(null);
     setIsModalOpen(false);
@@ -229,7 +217,7 @@ const Contractor: React.FC = () => {
       if (editingCode !== null) {
         // Update an existing contractor
         const { error } = await supabase
-          .from("contractor")
+          .from("project")
           .update(formData)
           .eq("code", editingCode);
 
@@ -239,7 +227,7 @@ const Contractor: React.FC = () => {
         setEditingCode(null);
       } else {
         // Add a new contractor
-        const { error } = await supabase.from("contractor").insert([formData]);
+        const { error } = await supabase.from("project").insert([formData]);
 
         if (error) throw error;
       }
@@ -252,23 +240,19 @@ const Contractor: React.FC = () => {
     }
   };
 
-  const handleEdit = (contractor: Contractor) => {
+  const handleEdit = (contractor: Project) => {
     setEditingCode(contractor.code);
     setFormData({
-      contact_person: contractor.contact_person,
-      company_name: contractor.company_name,
-      phone_number: contractor.phone_number,
-      email: contractor.email,
-      bsb: contractor.bsb,
-      account_no: contractor.account_no,
-      account_name: contractor.account_name,
-      address: contractor.address,
+      project_name: contractor.project_name,
+      manager: contractor.manager,
+      description: contractor.description,
+      status: contractor.status,
     });
   };
 
   const handleDelete = async (code: number) => {
     try {
-      const { error } = await supabase.from("contractor").delete().eq("code", code);
+      const { error } = await supabase.from("project").delete().eq("code", code);
       if (error) throw error;
       fetchContractors(); // Refresh the list
     } catch (error) {
@@ -279,10 +263,10 @@ const Contractor: React.FC = () => {
   // Filter contractors dynamically based on the search term
   const filteredContractors = contractors.filter((contractor) => {
     return (
-      contractor.contact_person.toLowerCase().includes(searchTerm) ||
-      contractor.company_name.toLowerCase().includes(searchTerm) ||
-      contractor.email.toLowerCase().includes(searchTerm) ||
-      contractor.phone_number.includes(searchTerm)
+      contractor.project_name.toLowerCase().includes(searchTerm) ||
+      contractor.manager.toLowerCase().includes(searchTerm) ||
+      contractor.description.toLowerCase().includes(searchTerm) ||
+      contractor.status.includes(searchTerm)
     );
   });
 
@@ -296,17 +280,17 @@ const Contractor: React.FC = () => {
       <Title>Contractor Management</Title>
       <ButtonRow>
         <SearchBox searchTerm={searchTerm} onSearchChange={handleSearchChange} />
-        <Button onClick={() => handleOpenModal()}>Add Contractor</Button>
+        <Button onClick={() => handleOpenModal()}>Add Project</Button>
       </ButtonRow>
 
       {isMobileView ? (
         <List>
           {filteredContractors.map((contractor) => (
             <ListItem key={contractor.code}>
-              <strong>Contact Person:</strong> {contractor.contact_person} <br />
-              <strong>Company Name:</strong> {contractor.company_name} <br />
-              <strong>Phone Number:</strong> {contractor.phone_number} <br />
-              <strong>Email:</strong> {contractor.email} <br />
+              <strong>Project Name:</strong> {contractor.project_name} <br />
+              <strong>Manager:</strong> {contractor.manager} <br />
+              <strong>Description:</strong> {contractor.description} <br />
+              <strong>Status:</strong> {contractor.status} <br />
               <Button onClick={() => handleOpenModal(contractor)}>Edit</Button>
               <DeleteButton onClick={() => handleDelete(contractor.code)}>Delete</DeleteButton>
             </ListItem>
@@ -327,10 +311,10 @@ const Contractor: React.FC = () => {
           <tbody>
             {filteredContractors.map((contractor) => (
               <tr key={contractor.code}>
-                <Td>{contractor.contact_person}</Td>
-                <Td>{contractor.company_name}</Td>
-                <Td>{contractor.phone_number}</Td>
-                <Td>{contractor.email}</Td>
+                <Td>{contractor.project_name}</Td>
+                <Td>{contractor.manager}</Td>
+                <Td>{contractor.description}</Td>
+                <Td>{contractor.status}</Td>
                 <Td>
                   <Button onClick={() => handleOpenModal(contractor)}>Edit</Button>
                 </Td>
@@ -349,77 +333,41 @@ const Contractor: React.FC = () => {
           <Form onSubmit={handleSubmit}>
             <Input
               type="text"
-              name="contact_person"
-              value={formData.contact_person}
+              name="project_name"
+              value={formData.project_name}
               onChange={handleInputChange}
-              placeholder="Contact Person"
+              placeholder="Project Name"
               autoComplete="off"
               required
             />
             <Input
               type="text"
-              name="company_name"
-              value={formData.company_name}
+              name="manager"
+              value={formData.manager}
               onChange={handleInputChange}
-              placeholder="Company Name"
+              placeholder="Manager"
               autoComplete="off"
               required
             />
             <Input
               type="text"
-              name="phone_number"
-              value={formData.phone_number}
+              name="description"
+              value={formData.description}
               onChange={handleInputChange}
-              placeholder="Phone Number"
-              autoComplete="off"
-              required
-            />
-            <Input
-              type="email"
-              name="email"
-              value={formData.email}
-              onChange={handleInputChange}
-              placeholder="Email"
+              placeholder="Description"
               autoComplete="off"
               required
             />
             <Input
               type="text"
-              name="bsb"
-              value={formData.bsb}
+              name="status"
+              value={formData.status}
               onChange={handleInputChange}
-              placeholder="BSB"
+              placeholder="Status"
               autoComplete="off"
-              required
             />
-            <Input
-              type="text"
-              name="account_no"
-              value={formData.account_no}
-              onChange={handleInputChange}
-              placeholder="Account Number"
-              autoComplete="off"
-              required
-            />
-            <Input
-              type="text"
-              name="account_name"
-              value={formData.account_name}
-              onChange={handleInputChange}
-              placeholder="Account Name"
-              autoComplete="off"
-              required
-            />
-            <Input
-              type="text"
-              name="address"
-              value={formData.address}
-              onChange={handleInputChange}
-              placeholder="Address"
-              autoComplete="off"
-              required
-            />
-            <Button type="submit">Save Contractor</Button>
+            
+            <Button type="submit">Save Project</Button>
           </Form>
 
         </ModalContent>
@@ -428,4 +376,4 @@ const Contractor: React.FC = () => {
   );
 };
 
-export default Contractor;
+export default Project;
