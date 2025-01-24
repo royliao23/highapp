@@ -263,7 +263,7 @@ const Category: React.FC = () => {
 
   return (
     <Container>
-      <Title>Contractor Management</Title>
+      <Title>Category Management</Title>
       <ButtonRow>
         <SearchBox searchTerm={searchTerm} onSearchChange={handleSearchChange} />
         <Button onClick={() => handleOpenModal()}>Add Contractor</Button>
@@ -284,10 +284,8 @@ const Category: React.FC = () => {
         <Table>
           <thead>
             <tr>
-              <Th>Contact Person</Th>
-              <Th>Company Name</Th>
-              <Th>Phone Number</Th>
-              <Th>Email</Th>
+              <Th>Code</Th>
+              <Th>Category Name</Th>
               <Th>Edit</Th>
               <Th>Delete</Th>
             </tr>
@@ -317,10 +315,10 @@ const Category: React.FC = () => {
             
             <Input
               type="text"
-              name="company_name"
+              name="name"
               value={formData.name}
               onChange={handleInputChange}
-              placeholder="Company Name"
+              placeholder="Name"
               autoComplete="off"
               required
             />
