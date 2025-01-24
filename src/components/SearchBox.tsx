@@ -18,7 +18,7 @@ const SearchBox: React.FC<SearchBoxProps> = ({ searchTerm, onSearchChange }) => 
   return (
     <Input
       type="text"
-      placeholder="Search contractors..."
+      placeholder="Search"
       value={searchTerm}
       onChange={onSearchChange}
     />

@@ -3,7 +3,7 @@ import { supabase } from "../supabaseClient";
 import styled from "styled-components";
 import SearchBox from "../components/SearchBox";
 
-// Define the Contractor type based on the table schema
+// Define the category type based on the table schema
 interface Categ {
   code: number;
   name: string;
@@ -100,7 +100,9 @@ const ListItem = styled.li`
   background-color: #fff;
 `;
 
-const Modal = styled.div<{ show: boolean }>`
+const Modal = styled.div.withConfig({
+  shouldForwardProp: (prop) => prop !== "show", // Exclude 'show' prop
+})<{ show: boolean }>`
   display: ${(props) => (props.show ? "flex" : "none")};
   position: fixed;
   top: 0;
@@ -111,7 +113,18 @@ const Modal = styled.div<{ show: boolean }>`
   justify-content: center;
   align-items: center;
   z-index: 1000;
+  .modal-content {
+    background: #fff;
+    border-radius: 10px;
+    width: 90%;
+    max-width: 500px;
+    max-height: 90vh;
+    overflow-y: auto;
+    padding: 20px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+  }
 `;
+
 
 
 const ModalContent = styled.div`
@@ -139,30 +152,30 @@ const CloseButton = styled.button`
   cursor: pointer;
 `;
 
-// Inside the Contractor component...
+// Inside the category component...
 
 const Category: React.FC = () => {
-  const [contractors, setContractors] = useState<Categ[]>([]);
+  const [categorys, setCategories] = useState<Categ[]>([]);
   const [formData, setFormData] = useState<Omit<Categ, "code">>({
     name: "",
   });
-  const [editingCode, setEditingCode] = useState<number | null>(null); // Track which contractor is being edited
+  const [editingCode, setEditingCode] = useState<number | null>(null); // Track which category is being edited
   const [isMobileView, setIsMobileView] = useState<boolean>(window.innerWidth < 1000);
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
   const [searchTerm, setSearchTerm] = useState<string>("");
 
-  const fetchContractors = async () => {
+  const fetchCategories = async () => {
     try {
       const { data, error } = await supabase.from("categ").select("*");
       if (error) throw error;
-      setContractors(data || []);
+      setCategories(data || []);
     } catch (error) {
-      console.error("Error fetching contractors:", error);
+      console.error("Error fetching categorys:", error);
     }
   };
 
   useEffect(() => {
-    fetchContractors();
+    fetchCategories();
   }, []);
 
   useEffect(() => {
@@ -186,9 +199,9 @@ const Category: React.FC = () => {
     setSearchTerm(e.target.value?.toLowerCase()); // Normalize search term for case-insensitive search
   };
 
-  const handleOpenModal = (contractor?: Categ) => {
-    if (contractor) {
-      handleEdit(contractor);
+  const handleOpenModal = (category?: Categ) => {
+    if (category) {
+      handleEdit(category);
     }
     setIsModalOpen(true);
   };
@@ -206,7 +219,7 @@ const Category: React.FC = () => {
 
     try {
       if (editingCode !== null) {
-        // Update an existing contractor
+        // Update an existing category
         const { error } = await supabase
           .from("categ")
           .update(formData)
@@ -217,24 +230,24 @@ const Category: React.FC = () => {
         // Clear editing state after updating
         setEditingCode(null);
       } else {
-        // Add a new contractor
+        // Add a new category
         const { error } = await supabase.from("categ").insert([formData]);
 
         if (error) throw error;
       }
 
       // Refresh the list and reset the form
-      fetchContractors();
+      fetchCategories();
       handleCloseModal();
     } catch (error) {
-      console.error("Error saving contractor:", error);
+      console.error("Error saving category:", error);
     }
   };
 
-  const handleEdit = (contractor: Categ) => {
-    setEditingCode(contractor.code);
+  const handleEdit = (category: Categ) => {
+    setEditingCode(category.code);
     setFormData({
-      name: contractor.name,
+      name: category.name,
       
     });
   };
@@ -243,16 +256,16 @@ const Category: React.FC = () => {
     try {
       const { error } = await supabase.from("categ").delete().eq("code", code);
       if (error) throw error;
-      fetchContractors(); // Refresh the list
+      fetchCategories(); // Refresh the list
     } catch (error) {
-      console.error("Error deleting contractor:", error);
+      console.error("Error deleting category:", error);
     }
   };
 
-  // Filter contractors dynamically based on the search term
-  const filteredContractors = contractors.filter((contractor) => {
+  // Filter categorys dynamically based on the search term
+  const filteredCategories = categorys.filter((category) => {
     return (
-      contractor.name?.toLowerCase().includes(searchTerm)
+      category.name?.toLowerCase().includes(searchTerm)
     );
   });
 
@@ -271,12 +284,12 @@ const Category: React.FC = () => {
 
       {isMobileView ? (
         <List>
-          {filteredContractors.map((contractor) => (
-            <ListItem key={contractor.code}>
-              <strong>Code:</strong> {contractor.code} <br />
-              <strong>Category Name:</strong> {contractor.name} <br />
-              <Button onClick={() => handleOpenModal(contractor)}>Edit</Button>
-              <DeleteButton onClick={() => handleDelete(contractor.code)}>Delete</DeleteButton>
+          {filteredCategories.map((category) => (
+            <ListItem key={category.code}>
+              <strong>Code:</strong> {category.code} <br />
+              <strong>Category Name:</strong> {category.name} <br />
+              <Button onClick={() => handleOpenModal(category)}>Edit</Button>
+              <DeleteButton onClick={() => handleDelete(category.code)}>Delete</DeleteButton>
             </ListItem>
           ))}
         </List>
@@ -291,16 +304,16 @@ const Category: React.FC = () => {
             </tr>
           </thead>
           <tbody>
-            {filteredContractors.map((contractor) => (
-              <tr key={contractor.code}>
-                <Td>{contractor.code}</Td>
-                <Td>{contractor.name}</Td>
+            {filteredCategories.map((category) => (
+              <tr key={category.code}>
+                <Td>{category.code}</Td>
+                <Td>{category.name}</Td>
                 
                 <Td>
-                  <Button onClick={() => handleOpenModal(contractor)}>Edit</Button>
+                  <Button onClick={() => handleOpenModal(category)}>Edit</Button>
                 </Td>
                 <Td>
-                  <DeleteButton onClick={() => handleDelete(contractor.code)}>Delete</DeleteButton>
+                  <DeleteButton onClick={() => handleDelete(category.code)}>Delete</DeleteButton>
                 </Td>
               </tr>
             ))}

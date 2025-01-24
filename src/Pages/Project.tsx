@@ -103,7 +103,9 @@ const ListItem = styled.li`
   background-color: #fff;
 `;
 
-const Modal = styled.div<{ show: boolean }>`
+const Modal = styled.div.withConfig({
+  shouldForwardProp: (prop) => prop !== "show", // Exclude 'show' prop
+})<{ show: boolean }>`
   display: ${(props) => (props.show ? "flex" : "none")};
   position: fixed;
   top: 0;
@@ -114,6 +116,16 @@ const Modal = styled.div<{ show: boolean }>`
   justify-content: center;
   align-items: center;
   z-index: 1000;
+  .modal-content {
+    background: #fff;
+    border-radius: 10px;
+    width: 90%;
+    max-width: 500px;
+    max-height: 90vh;
+    overflow-y: auto;
+    padding: 20px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+  }
 `;
 
 
@@ -144,7 +156,7 @@ const CloseButton = styled.button`
 
 // Inside the Contractor component...
 
-const Project: React.FC = () => {
+const ProjectComp: React.FC = () => {
   const [contractors, setContractors] = useState<Project[]>([]);
   const [formData, setFormData] = useState<Omit<Project, "code">>({
     project_name: "",
@@ -376,4 +388,4 @@ const Project: React.FC = () => {
   );
 };
 
-export default Project;
+export default ProjectComp;
