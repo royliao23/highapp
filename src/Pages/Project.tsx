@@ -3,7 +3,7 @@ import { supabase } from "../supabaseClient";
 import styled from "styled-components";
 import SearchBox from "../components/SearchBox";
 
-// Define the Contractor type based on the table schema
+// Define the project type based on the table schema
 interface Project {
   code: number;
   project_name: string;
@@ -154,33 +154,33 @@ const CloseButton = styled.button`
   cursor: pointer;
 `;
 
-// Inside the Contractor component...
+// Inside the project component...
 
 const ProjectComp: React.FC = () => {
-  const [contractors, setContractors] = useState<Project[]>([]);
+  const [projects, setProjects] = useState<Project[]>([]);
   const [formData, setFormData] = useState<Omit<Project, "code">>({
     project_name: "",
     manager: "",
     description: "",
     status: "",
   });
-  const [editingCode, setEditingCode] = useState<number | null>(null); // Track which contractor is being edited
+  const [editingCode, setEditingCode] = useState<number | null>(null); // Track which project is being edited
   const [isMobileView, setIsMobileView] = useState<boolean>(window.innerWidth < 1000);
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
   const [searchTerm, setSearchTerm] = useState<string>("");
 
-  const fetchContractors = async () => {
+  const fetchProjects = async () => {
     try {
       const { data, error } = await supabase.from("project").select("*");
       if (error) throw error;
-      setContractors(data || []);
+      setProjects(data || []);
     } catch (error) {
-      console.error("Error fetching contractors:", error);
+      console.error("Error fetching projects:", error);
     }
   };
 
   useEffect(() => {
-    fetchContractors();
+    fetchProjects();
   }, []);
 
   useEffect(() => {
@@ -204,9 +204,9 @@ const ProjectComp: React.FC = () => {
     setSearchTerm(e.target.value.toLowerCase()); // Normalize search term for case-insensitive search
   };
 
-  const handleOpenModal = (contractor?: Project) => {
-    if (contractor) {
-      handleEdit(contractor);
+  const handleOpenModal = (project?: Project) => {
+    if (project) {
+      handleEdit(project);
     }
     setIsModalOpen(true);
   };
@@ -227,7 +227,7 @@ const ProjectComp: React.FC = () => {
 
     try {
       if (editingCode !== null) {
-        // Update an existing contractor
+        // Update an existing project
         const { error } = await supabase
           .from("project")
           .update(formData)
@@ -238,27 +238,27 @@ const ProjectComp: React.FC = () => {
         // Clear editing state after updating
         setEditingCode(null);
       } else {
-        // Add a new contractor
+        // Add a new project
         const { error } = await supabase.from("project").insert([formData]);
 
         if (error) throw error;
       }
 
       // Refresh the list and reset the form
-      fetchContractors();
+      fetchProjects();
       handleCloseModal();
     } catch (error) {
-      console.error("Error saving contractor:", error);
+      console.error("Error saving project:", error);
     }
   };
 
-  const handleEdit = (contractor: Project) => {
-    setEditingCode(contractor.code);
+  const handleEdit = (project: Project) => {
+    setEditingCode(project.code);
     setFormData({
-      project_name: contractor.project_name,
-      manager: contractor.manager,
-      description: contractor.description,
-      status: contractor.status,
+      project_name: project.project_name,
+      manager: project.manager,
+      description: project.description,
+      status: project.status,
     });
   };
 
@@ -266,19 +266,19 @@ const ProjectComp: React.FC = () => {
     try {
       const { error } = await supabase.from("project").delete().eq("code", code);
       if (error) throw error;
-      fetchContractors(); // Refresh the list
+      fetchProjects(); // Refresh the list
     } catch (error) {
-      console.error("Error deleting contractor:", error);
+      console.error("Error deleting project:", error);
     }
   };
 
-  // Filter contractors dynamically based on the search term
-  const filteredContractors = contractors.filter((contractor) => {
+  // Filter projects dynamically based on the search term
+  const filteredProjects = projects.filter((project) => {
     return (
-      contractor.project_name.toLowerCase().includes(searchTerm) ||
-      contractor.manager.toLowerCase().includes(searchTerm) ||
-      contractor.description.toLowerCase().includes(searchTerm) ||
-      contractor.status.includes(searchTerm)
+      project.project_name.toLowerCase().includes(searchTerm) ||
+      project.manager.toLowerCase().includes(searchTerm) ||
+      project.description.toLowerCase().includes(searchTerm) ||
+      project.status.includes(searchTerm)
     );
   });
 
@@ -289,7 +289,7 @@ const ProjectComp: React.FC = () => {
 
   return (
     <Container>
-      <Title>Contractor Management</Title>
+      <Title>Project Management</Title>
       <ButtonRow>
         <SearchBox searchTerm={searchTerm} onSearchChange={handleSearchChange} />
         <Button onClick={() => handleOpenModal()}>Add Project</Button>
@@ -297,14 +297,14 @@ const ProjectComp: React.FC = () => {
 
       {isMobileView ? (
         <List>
-          {filteredContractors.map((contractor) => (
-            <ListItem key={contractor.code}>
-              <strong>Project Name:</strong> {contractor.project_name} <br />
-              <strong>Manager:</strong> {contractor.manager} <br />
-              <strong>Description:</strong> {contractor.description} <br />
-              <strong>Status:</strong> {contractor.status} <br />
-              <Button onClick={() => handleOpenModal(contractor)}>Edit</Button>
-              <DeleteButton onClick={() => handleDelete(contractor.code)}>Delete</DeleteButton>
+          {filteredProjects.map((project) => (
+            <ListItem key={project.code}>
+              <strong>Project Name:</strong> {project.project_name} <br />
+              <strong>Manager:</strong> {project.manager} <br />
+              <strong>Description:</strong> {project.description} <br />
+              <strong>Status:</strong> {project.status} <br />
+              <Button onClick={() => handleOpenModal(project)}>Edit</Button>
+              <DeleteButton onClick={() => handleDelete(project.code)}>Delete</DeleteButton>
             </ListItem>
           ))}
         </List>
@@ -321,17 +321,17 @@ const ProjectComp: React.FC = () => {
             </tr>
           </thead>
           <tbody>
-            {filteredContractors.map((contractor) => (
-              <tr key={contractor.code}>
-                <Td>{contractor.project_name}</Td>
-                <Td>{contractor.manager}</Td>
-                <Td>{contractor.description}</Td>
-                <Td>{contractor.status}</Td>
+            {filteredProjects.map((project) => (
+              <tr key={project.code}>
+                <Td>{project.project_name}</Td>
+                <Td>{project.manager}</Td>
+                <Td>{project.description}</Td>
+                <Td>{project.status}</Td>
                 <Td>
-                  <Button onClick={() => handleOpenModal(contractor)}>Edit</Button>
+                  <Button onClick={() => handleOpenModal(project)}>Edit</Button>
                 </Td>
                 <Td>
-                  <DeleteButton onClick={() => handleDelete(contractor.code)}>Delete</DeleteButton>
+                  <DeleteButton onClick={() => handleDelete(project.code)}>Delete</DeleteButton>
                 </Td>
               </tr>
             ))}
