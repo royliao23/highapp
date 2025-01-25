@@ -13,7 +13,9 @@ import Contractor from "./Pages/Contractor";
 import Category from "./Pages/Category";
 import ProjectComp from "./Pages/Project";
 import JobComp from "./Pages/Job";
+import PurchaseComp from "./Pages/Purchase";
 import Nav from "./components/Nav";
+
 
 const App: React.FC = () => {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
@@ -51,6 +53,7 @@ const MainApp: React.FC<MainAppProps> = ({ isLoggedIn, onLoginSuccess }) => {
       <Routes>
         <Route path="/login" element={<Login onLoginSuccess={onLoginSuccess} />} />
         {isLoggedIn && <Route path="/home" element={<Home />} />}
+        {isLoggedIn && <Route path="/purchase" element={<PurchaseComp />} />}
         {isLoggedIn && <Route path="/task" element={<Task />} />}
         {isLoggedIn && <Route path="/contact" element={<Contact />} />}
         {isLoggedIn && <Route path="/articles" element={<Articles />} />}

@@ -36,14 +36,14 @@ const Nav = () => {
         <ul className={`menu ${isDropdownOpen ? "dropdown-active" : ""}`}>
           <li className="menu-item">
             <Link to="/home" className="menu-link" onClick={() => handleMenuClick()}>
-              Purchase Order
+              Home
             </Link>
           </li>
-          {/* <li className="menu-item">
-            <Link to="/articles" className="menu-link" onClick={() => handleMenuClick()}>
-              Articles
+          <li className="menu-item">
+            <Link to="/purchase" className="menu-link" onClick={() => handleMenuClick()}>
+              Purchase
             </Link>
-          </li> */}
+          </li>
           <li className="menu-item">
             <Link to="/contractor" className="menu-link" onClick={() => handleMenuClick()}>
               Supplier
