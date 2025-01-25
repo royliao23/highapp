@@ -12,6 +12,7 @@ import Login from "./Pages/Login";
 import Contractor from "./Pages/Contractor";
 import Category from "./Pages/Category";
 import ProjectComp from "./Pages/Project";
+import JobComp from "./Pages/Job";
 import Nav from "./components/Nav";
 
 const App: React.FC = () => {
@@ -54,6 +55,7 @@ const MainApp: React.FC<MainAppProps> = ({ isLoggedIn, onLoginSuccess }) => {
         {isLoggedIn && <Route path="/contact" element={<Contact />} />}
         {isLoggedIn && <Route path="/articles" element={<Articles />} />}
         {isLoggedIn && <Route path="/category" element={<Category />} />}
+        {isLoggedIn && <Route path="/job" element={<JobComp />} />}
         {isLoggedIn && <Route path="/project" element={<ProjectComp />} />}
         {isLoggedIn && <Route path="/contractor" element={<Contractor />} />}
         {!isLoggedIn && <Route path="/" element={<Authors />} />}

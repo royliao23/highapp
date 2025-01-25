@@ -4,16 +4,11 @@ import styled from "styled-components";
 import SearchBox from "../components/SearchBox";
 
 // Define the Contractor type based on the table schema
-interface Contractor {
+interface Job {
   code: number;
-  contact_person: string;
-  company_name: string;
-  phone_number: string;
-  email: string;
-  bsb: string;
-  account_no: string;
-  account_name: string;
-  address: string;
+  job_category_id: number;
+  name: string;
+  description: string;
 }
 
 // Styled Components for Styling
@@ -148,17 +143,12 @@ const CloseButton = styled.button`
 
 // Inside the Contractor component...
 
-const Contractor: React.FC = () => {
-  const [contractors, setContractors] = useState<Contractor[]>([]);
-  const [formData, setFormData] = useState<Omit<Contractor, "code">>({
-    contact_person: "",
-    company_name: "",
-    phone_number: "",
-    email: "",
-    bsb: "",
-    account_no: "",
-    account_name: "",
-    address: "",
+const JobComp: React.FC = () => {
+  const [contractors, setContractors] = useState<Job[]>([]);
+  const [formData, setFormData] = useState<Omit<Job, "code">>({
+    job_category_id: 0,
+    name: '',
+    description: '',
   });
   const [editingCode, setEditingCode] = useState<number | null>(null); // Track which contractor is being edited
   const [isMobileView, setIsMobileView] = useState<boolean>(window.innerWidth < 1000);
@@ -167,7 +157,7 @@ const Contractor: React.FC = () => {
 
   const fetchContractors = async () => {
     try {
-      const { data, error } = await supabase.from("contractor").select("*");
+      const { data, error } = await supabase.from("job").select("*");
       if (error) throw error;
       setContractors(data || []);
     } catch (error) {
@@ -197,10 +187,10 @@ const Contractor: React.FC = () => {
   }, []);
 
   const handleSearchChange = (e: ChangeEvent<HTMLInputElement>) => {
-    setSearchTerm(e.target.value.toLowerCase()); // Normalize search term for case-insensitive search
+    setSearchTerm(e.target.value?.toLowerCase()); // Normalize search term for case-insensitive search
   };
 
-  const handleOpenModal = (contractor?: Contractor) => {
+  const handleOpenModal = (contractor?: Job) => {
     if (contractor) {
       handleEdit(contractor);
     }
@@ -209,14 +199,9 @@ const Contractor: React.FC = () => {
 
   const handleCloseModal = () => {
     setFormData({
-      contact_person: "",
-      company_name: "",
-      phone_number: "",
-      email: "",
-      bsb: "",
-      account_no: "",
-      account_name: "",
-      address: "",
+      job_category_id: 0,
+      name: '',
+      description: '',
     });
     setEditingCode(null);
     setIsModalOpen(false);
@@ -229,7 +214,7 @@ const Contractor: React.FC = () => {
       if (editingCode !== null) {
         // Update an existing contractor
         const { error } = await supabase
-          .from("contractor")
+          .from("job")
           .update(formData)
           .eq("code", editingCode);
 
@@ -239,7 +224,7 @@ const Contractor: React.FC = () => {
         setEditingCode(null);
       } else {
         // Add a new contractor
-        const { error } = await supabase.from("contractor").insert([formData]);
+        const { error } = await supabase.from("job").insert([formData]);
 
         if (error) throw error;
       }
@@ -252,23 +237,18 @@ const Contractor: React.FC = () => {
     }
   };
 
-  const handleEdit = (contractor: Contractor) => {
+  const handleEdit = (contractor: Job) => {
     setEditingCode(contractor.code);
     setFormData({
-      contact_person: contractor.contact_person,
-      company_name: contractor.company_name,
-      phone_number: contractor.phone_number,
-      email: contractor.email,
-      bsb: contractor.bsb,
-      account_no: contractor.account_no,
-      account_name: contractor.account_name,
-      address: contractor.address,
+      job_category_id: contractor.job_category_id,
+      name: contractor.name,
+      description: contractor.description,
     });
   };
 
   const handleDelete = async (code: number) => {
     try {
-      const { error } = await supabase.from("contractor").delete().eq("code", code);
+      const { error } = await supabase.from("job").delete().eq("code", code);
       if (error) throw error;
       fetchContractors(); // Refresh the list
     } catch (error) {
@@ -277,14 +257,14 @@ const Contractor: React.FC = () => {
   };
 
   // Filter contractors dynamically based on the search term
-  const filteredContractors = contractors.filter((contractor) => {
+  
+  const filteredContractors = contractors.filter((contractor) => { 
     return (
-      contractor.contact_person.toLowerCase().includes(searchTerm) ||
-      contractor.company_name.toLowerCase().includes(searchTerm) ||
-      contractor.email.toLowerCase().includes(searchTerm) ||
-      contractor.phone_number.includes(searchTerm)
+      (contractor.name?.toLowerCase() || "").includes(searchTerm.toLowerCase()) ||
+      (contractor.description?.toLowerCase() || "").includes(searchTerm.toLowerCase())
     );
   });
+
 
   // Handle Form Input
   const handleInputChange = (e: ChangeEvent<HTMLInputElement>) => {
@@ -293,20 +273,20 @@ const Contractor: React.FC = () => {
 
   return (
     <Container>
-      <Title>Contractor Management</Title>
+      <Title>Job Management</Title>
       <ButtonRow>
         <SearchBox searchTerm={searchTerm} onSearchChange={handleSearchChange} />
-        <Button onClick={() => handleOpenModal()}>Add Contractor</Button>
+        <Button onClick={() => handleOpenModal()}>Add Job</Button>
       </ButtonRow>
 
       {isMobileView ? (
         <List>
           {filteredContractors.map((contractor) => (
             <ListItem key={contractor.code}>
-              <strong>Contact Person:</strong> {contractor.contact_person} <br />
-              <strong>Company Name:</strong> {contractor.company_name} <br />
-              <strong>Phone Number:</strong> {contractor.phone_number} <br />
-              <strong>Email:</strong> {contractor.email} <br />
+              <strong>Job Code:</strong> {contractor.code} <br />
+              <strong>Name:</strong> {contractor.name} <br />
+              <strong>Description:</strong> {contractor.description} <br />
+              <strong>Category:</strong> {contractor.job_category_id} <br />
               <Button onClick={() => handleOpenModal(contractor)}>Edit</Button>
               <DeleteButton onClick={() => handleDelete(contractor.code)}>Delete</DeleteButton>
             </ListItem>
@@ -316,10 +296,10 @@ const Contractor: React.FC = () => {
         <Table>
           <thead>
             <tr>
-              <Th>Contact Person</Th>
-              <Th>Company Name</Th>
-              <Th>Phone Number</Th>
-              <Th>Email</Th>
+              <Th>Job Code</Th>
+              <Th>Job Name</Th>
+              <Th>Description</Th>
+              <Th>Category</Th>
               <Th>Edit</Th>
               <Th>Delete</Th>
             </tr>
@@ -327,10 +307,10 @@ const Contractor: React.FC = () => {
           <tbody>
             {filteredContractors.map((contractor) => (
               <tr key={contractor.code}>
-                <Td>{contractor.contact_person}</Td>
-                <Td>{contractor.company_name}</Td>
-                <Td>{contractor.phone_number}</Td>
-                <Td>{contractor.email}</Td>
+                <Td>{contractor.code}</Td>
+                <Td>{contractor.name}</Td>
+                <Td>{contractor.description}</Td>
+                <Td>{contractor.job_category_id}</Td>
                 <Td>
                   <Button onClick={() => handleOpenModal(contractor)}>Edit</Button>
                 </Td>
@@ -349,77 +329,33 @@ const Contractor: React.FC = () => {
           <Form onSubmit={handleSubmit}>
             <Input
               type="text"
-              name="contact_person"
-              value={formData.contact_person}
+              name="name"
+              value={formData.name}
               onChange={handleInputChange}
-              placeholder="Contact Person"
+              placeholder="Job Name"
               autoComplete="off"
               required
             />
             <Input
               type="text"
-              name="company_name"
-              value={formData.company_name}
+              name="description"
+              value={formData.description}
               onChange={handleInputChange}
-              placeholder="Company Name"
+              placeholder="Description"
               autoComplete="off"
-              required
+              
             />
             <Input
               type="text"
-              name="phone_number"
-              value={formData.phone_number}
+              name="job_category_id"
+              value={formData.job_category_id}
               onChange={handleInputChange}
-              placeholder="Phone Number"
+              placeholder="Job Category"
               autoComplete="off"
               required
             />
-            <Input
-              type="email"
-              name="email"
-              value={formData.email}
-              onChange={handleInputChange}
-              placeholder="Email"
-              autoComplete="off"
-              required
-            />
-            <Input
-              type="text"
-              name="bsb"
-              value={formData.bsb}
-              onChange={handleInputChange}
-              placeholder="BSB"
-              autoComplete="off"
-              required
-            />
-            <Input
-              type="text"
-              name="account_no"
-              value={formData.account_no}
-              onChange={handleInputChange}
-              placeholder="Account Number"
-              autoComplete="off"
-              required
-            />
-            <Input
-              type="text"
-              name="account_name"
-              value={formData.account_name}
-              onChange={handleInputChange}
-              placeholder="Account Name"
-              autoComplete="off"
-              required
-            />
-            <Input
-              type="text"
-              name="address"
-              value={formData.address}
-              onChange={handleInputChange}
-              placeholder="Address"
-              autoComplete="off"
-              required
-            />
-            <Button type="submit">Save Contractor</Button>
+            
+            <Button type="submit">Save Job</Button>
           </Form>
 
         </ModalContent>
@@ -428,4 +364,4 @@ const Contractor: React.FC = () => {
   );
 };
 
-export default Contractor;
+export default JobComp;
