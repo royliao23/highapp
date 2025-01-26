@@ -2,6 +2,7 @@ import React, { useState, useEffect, ChangeEvent, FormEvent } from "react";
 import { supabase } from "../supabaseClient";
 import styled from "styled-components";
 import SearchBox from "../components/SearchBox";
+import Dropdown from "../components/Dropdown";
 
 // Define the Contractor type based on the table schema
 interface Job {
@@ -271,6 +272,23 @@ const JobComp: React.FC = () => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
+  const handleDropChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
+    const { name, value } = event.target;
+    setFormData((prevData) => ({
+      ...prevData,
+      [name]: value,
+    }));
+  };
+
+  const jobCategoryOptions = [
+    { value: "1", label: "Engineering" },
+    { value: "2", label: "Accounting" },
+    { value: "3", label: "Computer" },
+    { value: "4", label: "Marketing" },
+    { value: "5", label: "Sales" },
+    // Add more options as needed
+  ];
+
   return (
     <Container>
       <Title>Job Management</Title>
@@ -345,13 +363,12 @@ const JobComp: React.FC = () => {
               autoComplete="off"
               
             />
-            <Input
-              type="text"
+            <Dropdown
               name="job_category_id"
               value={formData.job_category_id}
-              onChange={handleInputChange}
-              placeholder="Job Category"
-              autoComplete="off"
+              onChange={handleDropChange}
+              options={jobCategoryOptions}
+              placeholder="Select Job Category"
               required
             />
             
