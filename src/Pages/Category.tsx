@@ -129,6 +129,7 @@ const Modal = styled.div.withConfig({
 
 const ModalContent = styled.div`
   background: white;
+  margin-top:20px;
   padding: 2rem;
   border-radius: 8px;
   max-height: 90vh;
@@ -325,8 +326,10 @@ const Category: React.FC = () => {
         <ModalContent>
           <CloseButton onClick={handleCloseModal}>&times;</CloseButton>
           <Form onSubmit={handleSubmit}>
-            
+          <div>
+            <label htmlFor="name">Name</label>
             <Input
+              id="name"
               type="text"
               name="name"
               value={formData.name}
@@ -335,9 +338,11 @@ const Category: React.FC = () => {
               autoComplete="off"
               required
             />
-            
-            <Button type="submit">Save Category</Button>
-          </Form>
+          </div>
+
+  <Button type="submit">Save Category</Button>
+</Form>
+
 
         </ModalContent>
       </Modal>

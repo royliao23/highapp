@@ -131,6 +131,7 @@ const Modal = styled.div.withConfig({
 
 const ModalContent = styled.div`
   background: white;
+  margin-top:20px;
   padding: 2rem;
   border-radius: 8px;
   max-height: 90vh;
@@ -346,44 +347,64 @@ const ProjectComp: React.FC = () => {
         <ModalContent>
           <CloseButton onClick={handleCloseModal}>&times;</CloseButton>
           <Form onSubmit={handleSubmit}>
-            <Input
-              type="text"
-              name="project_name"
-              value={formData.project_name}
-              onChange={handleInputChange}
-              placeholder="Project Name"
-              autoComplete="off"
-              required
-            />
-            <Input
-              type="text"
-              name="manager"
-              value={formData.manager}
-              onChange={handleInputChange}
-              placeholder="Manager"
-              autoComplete="off"
-              required
-            />
-            <Input
-              type="text"
-              name="description"
-              value={formData.description}
-              onChange={handleInputChange}
-              placeholder="Description"
-              autoComplete="off"
-              required
-            />
-            <Input
-              type="text"
-              name="status"
-              value={formData.status}
-              onChange={handleInputChange}
-              placeholder="Status"
-              autoComplete="off"
-            />
-            
-            <Button type="submit">Save Project</Button>
-          </Form>
+  <div>
+    <label htmlFor="project_name">Project Name</label>
+    <Input
+      id="project_name"
+      type="text"
+      name="project_name"
+      value={formData.project_name}
+      onChange={handleInputChange}
+      placeholder="Project Name"
+      autoComplete="off"
+      required
+    />
+  </div>
+
+  <div>
+    <label htmlFor="manager">Manager</label>
+    <Input
+      id="manager"
+      type="text"
+      name="manager"
+      value={formData.manager}
+      onChange={handleInputChange}
+      placeholder="Manager"
+      autoComplete="off"
+      required
+    />
+  </div>
+
+  <div>
+    <label htmlFor="description">Description</label>
+    <Input
+      id="description"
+      type="text"
+      name="description"
+      value={formData.description}
+      onChange={handleInputChange}
+      placeholder="Description"
+      autoComplete="off"
+      required
+    />
+  </div>
+
+  <div>
+    <label htmlFor="status">Status</label>
+    <Input
+      id="status"
+      type="text"
+      name="status"
+      value={formData.status}
+      onChange={handleInputChange}
+      placeholder="Status"
+      autoComplete="off"
+    />
+  </div>
+
+  <Button type="submit">Save Project</Button>
+</Form>
+
 
         </ModalContent>
       </Modal>

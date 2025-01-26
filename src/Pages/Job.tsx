@@ -4,7 +4,7 @@ import styled from "styled-components";
 import SearchBox from "../components/SearchBox";
 import Dropdown from "../components/Dropdown";
 
-// Define the Contractor type based on the table schema
+// Define the job type based on the table schema
 interface Job {
   code: number;
   job_category_id: number;
@@ -119,6 +119,7 @@ const Modal = styled.div<{ show: boolean }>`
 
 const ModalContent = styled.div`
   background: white;
+  margin-top:20px;
   padding: 2rem;
   border-radius: 8px;
   max-height: 90vh;
@@ -142,32 +143,32 @@ const CloseButton = styled.button`
   cursor: pointer;
 `;
 
-// Inside the Contractor component...
+// Inside the job component...
 
 const JobComp: React.FC = () => {
-  const [contractors, setContractors] = useState<Job[]>([]);
+  const [jobs, setJobs] = useState<Job[]>([]);
   const [formData, setFormData] = useState<Omit<Job, "code">>({
     job_category_id: 0,
     name: '',
     description: '',
   });
-  const [editingCode, setEditingCode] = useState<number | null>(null); // Track which contractor is being edited
+  const [editingCode, setEditingCode] = useState<number | null>(null); // Track which job is being edited
   const [isMobileView, setIsMobileView] = useState<boolean>(window.innerWidth < 1000);
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
   const [searchTerm, setSearchTerm] = useState<string>("");
 
-  const fetchContractors = async () => {
+  const fetchJobs = async () => {
     try {
       const { data, error } = await supabase.from("job").select("*");
       if (error) throw error;
-      setContractors(data || []);
+      setJobs(data || []);
     } catch (error) {
-      console.error("Error fetching contractors:", error);
+      console.error("Error fetching jobs:", error);
     }
   };
 
   useEffect(() => {
-    fetchContractors();
+    fetchJobs();
   }, []);
 
   useEffect(() => {
@@ -191,9 +192,9 @@ const JobComp: React.FC = () => {
     setSearchTerm(e.target.value?.toLowerCase()); // Normalize search term for case-insensitive search
   };
 
-  const handleOpenModal = (contractor?: Job) => {
-    if (contractor) {
-      handleEdit(contractor);
+  const handleOpenModal = (job?: Job) => {
+    if (job) {
+      handleEdit(job);
     }
     setIsModalOpen(true);
   };
@@ -213,7 +214,7 @@ const JobComp: React.FC = () => {
 
     try {
       if (editingCode !== null) {
-        // Update an existing contractor
+        // Update an existing job
         const { error } = await supabase
           .from("job")
           .update(formData)
@@ -224,26 +225,26 @@ const JobComp: React.FC = () => {
         // Clear editing state after updating
         setEditingCode(null);
       } else {
-        // Add a new contractor
+        // Add a new job
         const { error } = await supabase.from("job").insert([formData]);
 
         if (error) throw error;
       }
 
       // Refresh the list and reset the form
-      fetchContractors();
+      fetchJobs();
       handleCloseModal();
     } catch (error) {
-      console.error("Error saving contractor:", error);
+      console.error("Error saving job:", error);
     }
   };
 
-  const handleEdit = (contractor: Job) => {
-    setEditingCode(contractor.code);
+  const handleEdit = (job: Job) => {
+    setEditingCode(job.code);
     setFormData({
-      job_category_id: contractor.job_category_id,
-      name: contractor.name,
-      description: contractor.description,
+      job_category_id: job.job_category_id,
+      name: job.name,
+      description: job.description,
     });
   };
 
@@ -251,18 +252,18 @@ const JobComp: React.FC = () => {
     try {
       const { error } = await supabase.from("job").delete().eq("code", code);
       if (error) throw error;
-      fetchContractors(); // Refresh the list
+      fetchJobs(); // Refresh the list
     } catch (error) {
-      console.error("Error deleting contractor:", error);
+      console.error("Error deleting job:", error);
     }
   };
 
-  // Filter contractors dynamically based on the search term
+  // Filter jobs dynamically based on the search term
   
-  const filteredContractors = contractors.filter((contractor) => { 
+  const filteredJobs = jobs.filter((job) => { 
     return (
-      (contractor.name?.toLowerCase() || "").includes(searchTerm.toLowerCase()) ||
-      (contractor.description?.toLowerCase() || "").includes(searchTerm.toLowerCase())
+      (job.name?.toLowerCase() || "").includes(searchTerm.toLowerCase()) ||
+      (job.description?.toLowerCase() || "").includes(searchTerm.toLowerCase())
     );
   });
 
@@ -299,14 +300,14 @@ const JobComp: React.FC = () => {
 
       {isMobileView ? (
         <List>
-          {filteredContractors.map((contractor) => (
-            <ListItem key={contractor.code}>
-              <strong>Job Code:</strong> {contractor.code} <br />
-              <strong>Name:</strong> {contractor.name} <br />
-              <strong>Description:</strong> {contractor.description} <br />
-              <strong>Category:</strong> {contractor.job_category_id} <br />
-              <Button onClick={() => handleOpenModal(contractor)}>Edit</Button>
-              <DeleteButton onClick={() => handleDelete(contractor.code)}>Delete</DeleteButton>
+          {filteredJobs.map((job) => (
+            <ListItem key={job.code}>
+              <strong>Job Code:</strong> {job.code} <br />
+              <strong>Name:</strong> {job.name} <br />
+              <strong>Description:</strong> {job.description} <br />
+              <strong>Category:</strong> {job.job_category_id} <br />
+              <Button onClick={() => handleOpenModal(job)}>Edit</Button>
+              <DeleteButton onClick={() => handleDelete(job.code)}>Delete</DeleteButton>
             </ListItem>
           ))}
         </List>
@@ -323,17 +324,17 @@ const JobComp: React.FC = () => {
             </tr>
           </thead>
           <tbody>
-            {filteredContractors.map((contractor) => (
-              <tr key={contractor.code}>
-                <Td>{contractor.code}</Td>
-                <Td>{contractor.name}</Td>
-                <Td>{contractor.description}</Td>
-                <Td>{contractor.job_category_id}</Td>
+            {filteredJobs.map((job) => (
+              <tr key={job.code}>
+                <Td>{job.code}</Td>
+                <Td>{job.name}</Td>
+                <Td>{job.description}</Td>
+                <Td>{job.job_category_id}</Td>
                 <Td>
-                  <Button onClick={() => handleOpenModal(contractor)}>Edit</Button>
+                  <Button onClick={() => handleOpenModal(job)}>Edit</Button>
                 </Td>
                 <Td>
-                  <DeleteButton onClick={() => handleDelete(contractor.code)}>Delete</DeleteButton>
+                  <DeleteButton onClick={() => handleDelete(job.code)}>Delete</DeleteButton>
                 </Td>
               </tr>
             ))}
@@ -345,35 +346,48 @@ const JobComp: React.FC = () => {
         <ModalContent>
           <CloseButton onClick={handleCloseModal}>&times;</CloseButton>
           <Form onSubmit={handleSubmit}>
-            <Input
-              type="text"
-              name="name"
-              value={formData.name}
-              onChange={handleInputChange}
-              placeholder="Job Name"
-              autoComplete="off"
-              required
-            />
-            <Input
-              type="text"
-              name="description"
-              value={formData.description}
-              onChange={handleInputChange}
-              placeholder="Description"
-              autoComplete="off"
-              
-            />
-            <Dropdown
-              name="job_category_id"
-              value={formData.job_category_id}
-              onChange={handleDropChange}
-              options={jobCategoryOptions}
-              placeholder="Select Job Category"
-              required
-            />
-            
-            <Button type="submit">Save Job</Button>
-          </Form>
+  <div>
+    <label htmlFor="name">Job Name</label>
+    <Input
+      id="name"
+      type="text"
+      name="name"
+      value={formData.name}
+      onChange={handleInputChange}
+      placeholder="Job Name"
+      autoComplete="off"
+      required
+    />
+  </div>
+
+  <div>
+    <label htmlFor="description">Description</label>
+    <Input
+      id="description"
+      type="text"
+      name="description"
+      value={formData.description}
+      onChange={handleInputChange}
+      placeholder="Description"
+      autoComplete="off"
+    />
+  </div>
+
+  <div>
+    <label htmlFor="job_category_id">Job Category</label>
+    <Dropdown
+      name="job_category_id"
+      value={formData.job_category_id}
+      onChange={handleDropChange}
+      options={jobCategoryOptions}
+      placeholder="Select Job Category"
+      required
+    />
+  </div>
+
+  <Button type="submit">Save Job</Button>
+</Form>
+
 
         </ModalContent>
       </Modal>

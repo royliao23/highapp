@@ -4,7 +4,7 @@ import styled from "styled-components";
 import SearchBox from "../components/SearchBox";
 import Dropdown from "../components/Dropdown";
 
-// Define the Contractor type based on the table schema
+// Define the purchase type based on the table schema
 interface Purchase {
   code: number;
   job_id: number;
@@ -125,6 +125,7 @@ const Modal = styled.div<{ show: boolean }>`
 
 const ModalContent = styled.div`
   background: white;
+  margin-top:20px;
   padding: 2rem;
   border-radius: 8px;
   max-height: 90vh;
@@ -148,10 +149,10 @@ const CloseButton = styled.button`
   cursor: pointer;
 `;
 
-// Inside the Contractor component...
+// Inside the purchase component...
 
 const PurchaseComp: React.FC = () => {
-  const [contractors, setContractors] = useState<Purchase[]>([]);
+  const [purchases, setPurchases] = useState<Purchase[]>([]);
   const [formData, setFormData] = useState<Omit<Purchase, "code">>({
     job_id: 0,
     by_id: 0,
@@ -163,23 +164,23 @@ const PurchaseComp: React.FC = () => {
     updated_at: new Date(),
     due_at:new Date(),
   });
-  const [editingCode, setEditingCode] = useState<number | null>(null); // Track which contractor is being edited
+  const [editingCode, setEditingCode] = useState<number | null>(null); // Track which purchase is being edited
   const [isMobileView, setIsMobileView] = useState<boolean>(window.innerWidth < 1000);
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
   const [searchTerm, setSearchTerm] = useState<string>("");
 
-  const fetchContractors = async () => {
+  const fetchPurchases = async () => {
     try {
       const { data, error } = await supabase.from("purchase_order").select("*");
       if (error) throw error;
-      setContractors(data || []);
+      setPurchases(data || []);
     } catch (error) {
-      console.error("Error fetching contractors:", error);
+      console.error("Error fetching purchases:", error);
     }
   };
 
   useEffect(() => {
-    fetchContractors();
+    fetchPurchases();
   }, []);
 
   useEffect(() => {
@@ -203,9 +204,9 @@ const PurchaseComp: React.FC = () => {
     setSearchTerm(e.target.value.toLowerCase()); // Normalize search term for case-insensitive search
   };
 
-  const handleOpenModal = (contractor?: Purchase) => {
-    if (contractor) {
-      handleEdit(contractor);
+  const handleOpenModal = (purchase?: Purchase) => {
+    if (purchase) {
+      handleEdit(purchase);
     }
     setIsModalOpen(true);
   };
@@ -231,7 +232,7 @@ const PurchaseComp: React.FC = () => {
 
     try {
       if (editingCode !== null) {
-        // Update an existing contractor
+        // Update an existing purchase
         const { error } = await supabase
           .from("purchase_order")
           .update(formData)
@@ -242,32 +243,32 @@ const PurchaseComp: React.FC = () => {
         // Clear editing state after updating
         setEditingCode(null);
       } else {
-        // Add a new contractor
+        // Add a new purchase
         const { error } = await supabase.from("purchase_order").insert([formData]);
 
         if (error) throw error;
       }
 
       // Refresh the list and reset the form
-      fetchContractors();
+      fetchPurchases();
       handleCloseModal();
     } catch (error) {
-      console.error("Error saving contractor:", error);
+      console.error("Error saving purchase:", error);
     }
   };
 
-  const handleEdit = (contractor: Purchase) => {
-    setEditingCode(contractor.code);
+  const handleEdit = (purchase: Purchase) => {
+    setEditingCode(purchase.code);
     setFormData({
-      job_id: contractor.job_id,
-      by_id: contractor.by_id,
-      project_id: contractor.project_id,
-      ref: contractor.ref,
-      cost: contractor.cost,
-      contact: contractor.contact,
-      create_at: contractor.create_at,
-      updated_at: contractor.updated_at,
-      due_at:contractor.due_at,
+      job_id: purchase.job_id,
+      by_id: purchase.by_id,
+      project_id: purchase.project_id,
+      ref: purchase.ref,
+      cost: purchase.cost,
+      contact: purchase.contact,
+      create_at: purchase.create_at,
+      updated_at: purchase.updated_at,
+      due_at:purchase.due_at,
     });
   };
 
@@ -275,17 +276,17 @@ const PurchaseComp: React.FC = () => {
     try {
       const { error } = await supabase.from("purchase_order").delete().eq("code", code);
       if (error) throw error;
-      fetchContractors(); // Refresh the list
+      fetchPurchases(); // Refresh the list
     } catch (error) {
-      console.error("Error deleting contractor:", error);
+      console.error("Error deleting purchase:", error);
     }
   };
 
-  // Filter contractors dynamically based on the search term
-  const filteredContractors = contractors.filter((contractor) => {
+  // Filter purchases dynamically based on the search term
+  const filteredPurchases = purchases.filter((purchase) => {
     return (
-      (contractor.ref?.toLowerCase() || "").includes(searchTerm.toLowerCase()) ||
-      (contractor.contact?.toLowerCase() || "").includes(searchTerm.toLowerCase())
+      (purchase.ref?.toLowerCase() || "").includes(searchTerm.toLowerCase()) ||
+      (purchase.contact?.toLowerCase() || "").includes(searchTerm.toLowerCase())
     );
   });
   const projectOptions = [
@@ -315,19 +316,20 @@ const PurchaseComp: React.FC = () => {
       <Title>Purchase Order Management</Title>
       <ButtonRow>
         <SearchBox searchTerm={searchTerm} onSearchChange={handleSearchChange} />
-        <Button onClick={() => handleOpenModal()}>Add Contractor</Button>
+        <Button onClick={() => handleOpenModal()}>Add purchase</Button>
       </ButtonRow>
 
       {isMobileView ? (
         <List>
-          {filteredContractors.map((contractor) => (
-            <ListItem key={contractor.code}>
-              <strong>Contact Person:</strong> {contractor.contact} <br />
-              <strong>Company Name:</strong> {contractor.by_id} <br />
-              <strong>Price:</strong> {contractor.cost} <br />
-              <strong>Job:</strong> {contractor.job_id} <br />
-              <Button onClick={() => handleOpenModal(contractor)}>Edit</Button>
-              <DeleteButton onClick={() => handleDelete(contractor.code)}>Delete</DeleteButton>
+          {filteredPurchases.map((purchase) => (
+            <ListItem key={purchase.code}>
+              <strong>Code:</strong> {purchase.code} <br />
+              <strong>Contact Person:</strong> {purchase.contact} <br />
+              <strong>Supplier Name:</strong> {purchase.by_id} <br />
+              <strong>Price:</strong> {purchase.cost} <br />
+              <strong>Job:</strong> {purchase.job_id} <br />
+              <Button onClick={() => handleOpenModal(purchase)}>Edit</Button>
+              <DeleteButton onClick={() => handleDelete(purchase.code)}>Delete</DeleteButton>
             </ListItem>
           ))}
         </List>
@@ -335,6 +337,7 @@ const PurchaseComp: React.FC = () => {
         <Table>
           <thead>
             <tr>
+              <Th>Code</Th>
               <Th>Contact Person</Th>
               <Th>Company Name</Th>
               <Th>Price</Th>
@@ -345,18 +348,19 @@ const PurchaseComp: React.FC = () => {
             </tr>
           </thead>
           <tbody>
-            {filteredContractors.map((contractor) => (
-              <tr key={contractor.code}>
-                <Td>{contractor.contact}</Td>
-                <Td>{contractor.by_id}</Td>
-                <Td>{contractor.cost}</Td>
-                <Td>{contractor.job_id}</Td>
-                <Td>{contractor.ref}</Td>
+            {filteredPurchases.map((purchase) => (
+              <tr key={purchase.code}>
+                <Td>{purchase.code}</Td>
+                <Td>{purchase.contact}</Td>
+                <Td>{purchase.by_id}</Td>
+                <Td>{purchase.cost}</Td>
+                <Td>{purchase.job_id}</Td>
+                <Td>{purchase.ref}</Td>
                 <Td>
-                  <Button onClick={() => handleOpenModal(contractor)}>Edit</Button>
+                  <Button onClick={() => handleOpenModal(purchase)}>Edit</Button>
                 </Td>
                 <Td>
-                  <DeleteButton onClick={() => handleDelete(contractor.code)}>Delete</DeleteButton>
+                  <DeleteButton onClick={() => handleDelete(purchase.code)}>Delete</DeleteButton>
                 </Td>
               </tr>
             ))}
@@ -464,7 +468,7 @@ const PurchaseComp: React.FC = () => {
     />
   </div>
 
-  <Button type="submit">Save Contractor</Button>
+  <Button type="submit">Save purchase</Button>
 </Form>
 
 

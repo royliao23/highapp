@@ -135,6 +135,7 @@ const Modal = styled.div.withConfig({
 
 const ModalContent = styled.div`
   background: white;
+  margin-top:20px;
   padding: 2rem;
   border-radius: 8px;
   max-height: 90vh;
@@ -362,80 +363,121 @@ const Contractor: React.FC = () => {
         <ModalContent>
           <CloseButton onClick={handleCloseModal}>&times;</CloseButton>
           <Form onSubmit={handleSubmit}>
-            <Input
-              type="text"
-              name="contact_person"
-              value={formData.contact_person}
-              onChange={handleInputChange}
-              placeholder="Contact Person"
-              autoComplete="off"
-              required
-            />
-            <Input
-              type="text"
-              name="company_name"
-              value={formData.company_name}
-              onChange={handleInputChange}
-              placeholder="Company Name"
-              autoComplete="off"
-              required
-            />
-            <Input
-              type="text"
-              name="phone_number"
-              value={formData.phone_number}
-              onChange={handleInputChange}
-              placeholder="Phone Number"
-              autoComplete="off"
-              required
-            />
-            <Input
-              type="email"
-              name="email"
-              value={formData.email}
-              onChange={handleInputChange}
-              placeholder="Email"
-              autoComplete="off"
-              required
-            />
-            <Input
-              type="text"
-              name="bsb"
-              value={formData.bsb}
-              onChange={handleInputChange}
-              placeholder="BSB"
-              autoComplete="off"
-              required
-            />
-            <Input
-              type="text"
-              name="account_no"
-              value={formData.account_no}
-              onChange={handleInputChange}
-              placeholder="Account Number"
-              autoComplete="off"
-              required
-            />
-            <Input
-              type="text"
-              name="account_name"
-              value={formData.account_name}
-              onChange={handleInputChange}
-              placeholder="Account Name"
-              autoComplete="off"
-              required
-            />
-            <Input
-              type="text"
-              name="address"
-              value={formData.address}
-              onChange={handleInputChange}
-              placeholder="Address"
-              autoComplete="off"
-              required
-            />
-            <Button type="submit">Save Contractor</Button>
-          </Form>
+  <div>
+    <label htmlFor="contact_person">Contact Person</label>
+    <Input
+      id="contact_person"
+      type="text"
+      name="contact_person"
+      value={formData.contact_person}
+      onChange={handleInputChange}
+      placeholder="Contact Person"
+      autoComplete="off"
+      required
+    />
+  </div>
+
+  <div>
+    <label htmlFor="company_name">Company Name</label>
+    <Input
+      id="company_name"
+      type="text"
+      name="company_name"
+      value={formData.company_name}
+      onChange={handleInputChange}
+      placeholder="Company Name"
+      autoComplete="off"
+      required
+    />
+  </div>
+
+  <div>
+    <label htmlFor="phone_number">Phone Number</label>
+    <Input
+      id="phone_number"
+      type="text"
+      name="phone_number"
+      value={formData.phone_number}
+      onChange={handleInputChange}
+      placeholder="Phone Number"
+      autoComplete="off"
+      required
+    />
+  </div>
+
+  <div>
+    <label htmlFor="email">Email</label>
+    <Input
+      id="email"
+      type="email"
+      name="email"
+      value={formData.email}
+      onChange={handleInputChange}
+      placeholder="Email"
+      autoComplete="off"
+      required
+    />
+  </div>
+
+  <div>
+    <label htmlFor="bsb">BSB</label>
+    <Input
+      id="bsb"
+      type="text"
+      name="bsb"
+      value={formData.bsb}
+      onChange={handleInputChange}
+      placeholder="BSB"
+      autoComplete="off"
+      required
+    />
+  </div>
+
+  <div>
+    <label htmlFor="account_no">Account Number</label>
+    <Input
+      id="account_no"
+      type="text"
+      name="account_no"
+      value={formData.account_no}
+      onChange={handleInputChange}
+      placeholder="Account Number"
+      autoComplete="off"
+      required
+    />
+  </div>
+
+  <div>
+    <label htmlFor="account_name">Account Name</label>
+    <Input
+      id="account_name"
+      type="text"
+      name="account_name"
+      value={formData.account_name}
+      onChange={handleInputChange}
+      placeholder="Account Name"
+      autoComplete="off"
+      required
+    />
+  </div>
+
+  <div>
+    <label htmlFor="address">Address</label>
+    <Input
+      id="address"
+      type="text"
+      name="address"
+      value={formData.address}
+      onChange={handleInputChange}
+      placeholder="Address"
+      autoComplete="off"
+      required
+    />
+  </div>
+
+  <Button type="submit">Save Contractor</Button>
+</Form>
+
 
         </ModalContent>
       </Modal>
