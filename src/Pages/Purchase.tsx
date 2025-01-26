@@ -2,6 +2,7 @@ import React, { useState, useEffect, ChangeEvent, FormEvent } from "react";
 import { supabase } from "../supabaseClient";
 import styled from "styled-components";
 import SearchBox from "../components/SearchBox";
+import Dropdown from "../components/Dropdown";
 
 // Define the Contractor type based on the table schema
 interface Purchase {
@@ -287,15 +288,31 @@ const PurchaseComp: React.FC = () => {
       (contractor.contact?.toLowerCase() || "").includes(searchTerm.toLowerCase())
     );
   });
+  const projectOptions = [
+    { value: "1", label: "Project1" },
+    { value: "2", label: "Project2" },
+    { value: "3", label: "Mile 3" },
+    { value: "4", label: "Mile 4" },
+    { value: "5", label: "Mile 5" },
+    // Add more options as needed
+  ];
 
   // Handle Form Input
   const handleInputChange = (e: ChangeEvent<HTMLInputElement>) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
+  const handleDropChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
+      const { name, value } = event.target;
+      setFormData((prevData) => ({
+        ...prevData,
+        [name]: value,
+      }));
+    };
+
   return (
     <Container>
-      <Title>Contractor Management</Title>
+      <Title>Purchase Order Management</Title>
       <ButtonRow>
         <SearchBox searchTerm={searchTerm} onSearchChange={handleSearchChange} />
         <Button onClick={() => handleOpenModal()}>Add Contractor</Button>
@@ -351,63 +368,105 @@ const PurchaseComp: React.FC = () => {
         <ModalContent>
           <CloseButton onClick={handleCloseModal}>&times;</CloseButton>
           <Form onSubmit={handleSubmit}>
-            <Input
-              type="text"
-              name="contact"
-              value={formData.contact}
-              onChange={handleInputChange}
-              placeholder="Contact Person"
-              autoComplete="off"
-              required
-            />
-            <Input
-              type="number"
-              name="by_id"
-              value={formData.by_id}
-              onChange={handleInputChange}
-              placeholder="Company Name"
-              autoComplete="off"
-              required
-            />
-            <Input
-              type="number"
-              name="cost"
-              value={formData.cost}
-              onChange={handleInputChange}
-              placeholder="Phone Number"
-              autoComplete="off"
-              required
-            />
-            <Input
-              type="text"
-              name="ref"
-              value={formData.ref}
-              onChange={handleInputChange}
-              placeholder="Ref"
-              autoComplete="off"
-              required
-            />
-            <Input
-              type="number"
-              name="bsb"
-              value={formData.project_id}
-              onChange={handleInputChange}
-              placeholder="Project"
-              autoComplete="off"
-              required
-            />
-            <Input
-              type="job_id"
-              name="job_id"
-              value={formData.job_id}
-              onChange={handleInputChange}
-              placeholder="Job"
-              autoComplete="off"
-              required
-            />
-            
-            <Button type="submit">Save Contractor</Button>
-          </Form>
+  <div>
+    <label htmlFor="contact">Contact Person</label>
+    <Input
+      id="contact"
+      type="text"
+      name="contact"
+      value={formData.contact}
+      onChange={handleInputChange}
+      placeholder="Contact Person"
+      autoComplete="off"
+      required
+    />
+  </div>
+
+  <div>
+    <label htmlFor="by_id">Company Name</label>
+    <Input
+      id="by_id"
+      type="number"
+      name="by_id"
+      value={formData.by_id}
+      onChange={handleInputChange}
+      placeholder="Company Name"
+      autoComplete="off"
+      required
+    />
+  </div>
+
+  <div>
+    <label htmlFor="project">Select Project</label>
+    <Dropdown
+      name="by_id"
+      value={formData.by_id}
+      onChange={handleDropChange}
+      options={projectOptions}
+      placeholder="Select Project"
+      required
+    />
+  </div>
+
+  <div>
+    <label htmlFor="cost">Phone Number</label>
+    <Input
+      id="cost"
+      type="number"
+      name="cost"
+      value={formData.cost}
+      onChange={handleInputChange}
+      placeholder="Phone Number"
+      autoComplete="off"
+      required
+    />
+  </div>
+
+  <div>
+    <label htmlFor="ref">Reference</label>
+    <Input
+      id="ref"
+      type="text"
+      name="ref"
+      value={formData.ref}
+      onChange={handleInputChange}
+      placeholder="Ref"
+      autoComplete="off"
+      required
+    />
+  </div>
+
+  <div>
+    <label htmlFor="project_id">Project ID</label>
+    <Input
+      id="project_id"
+      type="number"
+      name="project_id"
+      value={formData.project_id}
+      onChange={handleInputChange}
+      placeholder="Project"
+      autoComplete="off"
+      required
+    />
+  </div>
+
+  <div>
+    <label htmlFor="job_id">Job</label>
+    <Input
+      id="job_id"
+      type="job_id"
+      name="job_id"
+      value={formData.job_id}
+      onChange={handleInputChange}
+      placeholder="Job"
+      autoComplete="off"
+      required
+    />
+  </div>
+
+  <Button type="submit">Save Contractor</Button>
+</Form>
+
 
         </ModalContent>
       </Modal>

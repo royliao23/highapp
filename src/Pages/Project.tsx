@@ -299,6 +299,7 @@ const ProjectComp: React.FC = () => {
         <List>
           {filteredProjects.map((project) => (
             <ListItem key={project.code}>
+              <strong>Project Code:</strong> {project.code} <br />
               <strong>Project Name:</strong> {project.project_name} <br />
               <strong>Manager:</strong> {project.manager} <br />
               <strong>Description:</strong> {project.description} <br />
@@ -312,6 +313,7 @@ const ProjectComp: React.FC = () => {
         <Table>
           <thead>
             <tr>
+              <Th>Code</Th>
               <Th>Contact Person</Th>
               <Th>Company Name</Th>
               <Th>Phone Number</Th>
@@ -323,6 +325,7 @@ const ProjectComp: React.FC = () => {
           <tbody>
             {filteredProjects.map((project) => (
               <tr key={project.code}>
+                <Td>{project.code}</Td>
                 <Td>{project.project_name}</Td>
                 <Td>{project.manager}</Td>
                 <Td>{project.description}</Td>

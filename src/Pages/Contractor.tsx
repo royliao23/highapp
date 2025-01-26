@@ -315,6 +315,7 @@ const Contractor: React.FC = () => {
         <List>
           {filteredContractors.map((contractor) => (
             <ListItem key={contractor.code}>
+              <strong>Code:</strong> {contractor.code} <br />
               <strong>Contact Person:</strong> {contractor.contact_person} <br />
               <strong>Company Name:</strong> {contractor.company_name} <br />
               <strong>Phone Number:</strong> {contractor.phone_number} <br />
@@ -328,6 +329,7 @@ const Contractor: React.FC = () => {
         <Table>
           <thead>
             <tr>
+              <Th>Code</Th>
               <Th>Contact Person</Th>
               <Th>Company Name</Th>
               <Th>Phone Number</Th>
@@ -339,6 +341,7 @@ const Contractor: React.FC = () => {
           <tbody>
             {filteredContractors.map((contractor) => (
               <tr key={contractor.code}>
+                <Td>{contractor.code}</Td>
                 <Td>{contractor.contact_person}</Td>
                 <Td>{contractor.company_name}</Td>
                 <Td>{contractor.phone_number}</Td>
