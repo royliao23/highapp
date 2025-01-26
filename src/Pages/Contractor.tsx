@@ -135,7 +135,7 @@ const Modal = styled.div.withConfig({
 
 const ModalContent = styled.div`
   background: white;
-  margin-top:20px;
+  margin-top:40px;
   padding: 2rem;
   border-radius: 8px;
   max-height: 90vh;

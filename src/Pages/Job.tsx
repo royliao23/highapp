@@ -156,6 +156,33 @@ const JobComp: React.FC = () => {
   const [isMobileView, setIsMobileView] = useState<boolean>(window.innerWidth < 1000);
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
   const [searchTerm, setSearchTerm] = useState<string>("");
+  const [jobCategoryOptions, setJobCategoryOptions] = useState([
+    { value: 0, label: "" },
+  ]);
+
+  const fetchCategories = async () => {
+    try {
+      const { data, error } = await supabase.from("categ").select("*");
+      if (error) throw error;
+
+      // Transform data into { value, label } format
+      const transformedData = data.map((item) => ({
+        value: item.code, // Assuming `id` is the unique identifier
+        label: item.name, // Assuming `name` is the category name
+      }));
+
+      console.log("Fetched categories:", transformedData);
+
+      // Update the state with fetched categories
+      setJobCategoryOptions(transformedData);
+    } catch (error) {
+      console.error("Error fetching categories:", error);
+    }
+  };
+
+  useEffect(() => {
+    fetchCategories();
+  }, []);
 
   const fetchJobs = async () => {
     try {
@@ -166,6 +193,7 @@ const JobComp: React.FC = () => {
       console.error("Error fetching jobs:", error);
     }
   };
+
 
   useEffect(() => {
     fetchJobs();
@@ -281,14 +309,7 @@ const JobComp: React.FC = () => {
     }));
   };
 
-  const jobCategoryOptions = [
-    { value: "1", label: "Engineering" },
-    { value: "2", label: "Accounting" },
-    { value: "3", label: "Computer" },
-    { value: "4", label: "Marketing" },
-    { value: "5", label: "Sales" },
-    // Add more options as needed
-  ];
+  
 
   return (
     <Container>
@@ -304,8 +325,8 @@ const JobComp: React.FC = () => {
             <ListItem key={job.code}>
               <strong>Job Code:</strong> {job.code} <br />
               <strong>Name:</strong> {job.name} <br />
-              <strong>Description:</strong> {job.description} <br />
-              <strong>Category:</strong> {job.job_category_id} <br />
+              <strong>Description:</strong> {job.description} <br />          
+              <strong>Category:</strong> {jobCategoryOptions.find((option) => option.value === job.job_category_id)?.label || "Unknown"} <br />
               <Button onClick={() => handleOpenModal(job)}>Edit</Button>
               <DeleteButton onClick={() => handleDelete(job.code)}>Delete</DeleteButton>
             </ListItem>
@@ -329,7 +350,7 @@ const JobComp: React.FC = () => {
                 <Td>{job.code}</Td>
                 <Td>{job.name}</Td>
                 <Td>{job.description}</Td>
-                <Td>{job.job_category_id}</Td>
+                <Td>{jobCategoryOptions.find((option) => option.value === job.job_category_id)?.label || "Unknown"}</Td>
                 <Td>
                   <Button onClick={() => handleOpenModal(job)}>Edit</Button>
                 </Td>
