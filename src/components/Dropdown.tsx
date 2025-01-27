@@ -23,9 +23,9 @@ const Dropdown: React.FC<DropdownProps> = ({
       value={value}
       onChange={onChange}
       required={required}
-      className="dropdown" // Add your CSS class here
+      className="dropdown" 
     >
-      <option value="" disabled>
+      <option value="" >
         {placeholder}
       </option>
       {options.map((option) => (

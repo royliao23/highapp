@@ -125,7 +125,7 @@ const Modal = styled.div<{ show: boolean }>`
 
 const ModalContent = styled.div`
   background: white;
-  margin-top:40px;
+  margin-top:50px;
   padding: 2rem;
   border-radius: 8px;
   max-height: 90vh;
@@ -417,7 +417,7 @@ const PurchaseComp: React.FC = () => {
               <Th>Code</Th>
               <Th>Contact Person</Th>
               <Th>Project</Th>
-              <Th>Company Name</Th>
+              <Th>Supplier</Th>
               <Th>Price</Th>
               <Th>Job</Th>
               <Th>Ref</Th>
@@ -466,7 +466,7 @@ const PurchaseComp: React.FC = () => {
   </div>
 
   <div>
-    <label htmlFor="project">Company</label>
+    <label htmlFor="project">Supplier</label>
     <Dropdown
       name="by_id"
       value={formData.by_id}

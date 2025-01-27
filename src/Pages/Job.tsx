@@ -119,7 +119,7 @@ const Modal = styled.div<{ show: boolean }>`
 
 const ModalContent = styled.div`
   background: white;
-  margin-top:20px;
+  margin-top:30px;
   padding: 2rem;
   border-radius: 8px;
   max-height: 90vh;
