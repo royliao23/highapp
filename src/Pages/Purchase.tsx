@@ -178,6 +178,89 @@ const PurchaseComp: React.FC = () => {
       console.error("Error fetching purchases:", error);
     }
   };
+  const [projectOptions, setProjectOptions] = useState([
+      { value: 0, label: "" },
+    ]);
+
+  const fetchProjects = async () => {
+      try {
+        const { data, error } = await supabase.from("project").select("*");
+        if (error) throw error;
+  
+        // Transform data into { value, label } format
+        const transformedData = data.map((item) => ({
+          value: item.code, // Assuming `id` is the unique identifier
+          label: item.project_name, // Assuming `name` is the category name
+        }));
+  
+        console.log("Fetched projects:", transformedData);
+  
+        // Update the state with fetched categories
+        setProjectOptions(transformedData);
+      } catch (error) {
+        console.error("Error fetching projects:", error);
+      }
+    };
+  
+    useEffect(() => {
+      fetchProjects();
+    }, []);
+
+  const [contractorOptions, setContractorOptions] = useState([
+      { value: 0, label: "" },
+    ]);
+
+  const fetchContractors = async () => {
+      try {
+        const { data, error } = await supabase.from("contractor").select("*");
+        if (error) throw error;
+  
+        // Transform data into { value, label } format
+        const transformedData = data.map((item) => ({
+          value: item.code, // Assuming `id` is the unique identifier
+          label: item.company_name, // Assuming `name` is the category name
+        }));
+  
+        console.log("Fetched contractors:", transformedData);
+  
+        // Update the state with fetched categories
+        setContractorOptions(transformedData);
+      } catch (error) {
+        console.error("Error fetching contractors:", error);
+      }
+    };
+  
+    useEffect(() => {
+      fetchContractors();
+    }, []);
+  
+  const [jobOptions, setJobOptions] = useState([
+      { value: 0, label: "" },
+    ]);
+
+  const fetchJobs = async () => {
+      try {
+        const { data, error } = await supabase.from("job").select("*");
+        if (error) throw error;
+  
+        // Transform data into { value, label } format
+        const transformedData = data.map((item) => ({
+          value: item.code, 
+          label: item.name, 
+        }));
+  
+        console.log("Fetched jobs:", transformedData);
+  
+        // Update the state with fetched categories
+        setJobOptions(transformedData);
+      } catch (error) {
+        console.error("Error fetching jobs:", error);
+      }
+    };
+  
+    useEffect(() => {
+      fetchJobs();
+    }, []);
 
   useEffect(() => {
     fetchPurchases();
@@ -289,14 +372,7 @@ const PurchaseComp: React.FC = () => {
       (purchase.contact?.toLowerCase() || "").includes(searchTerm.toLowerCase())
     );
   });
-  const projectOptions = [
-    { value: "1", label: "Project1" },
-    { value: "2", label: "Project2" },
-    { value: "3", label: "Mile 3" },
-    { value: "4", label: "Mile 4" },
-    { value: "5", label: "Mile 5" },
-    // Add more options as needed
-  ];
+  
 
   // Handle Form Input
   const handleInputChange = (e: ChangeEvent<HTMLInputElement>) => {
@@ -325,9 +401,10 @@ const PurchaseComp: React.FC = () => {
             <ListItem key={purchase.code}>
               <strong>Code:</strong> {purchase.code} <br />
               <strong>Contact Person:</strong> {purchase.contact} <br />
-              <strong>Supplier Name:</strong> {purchase.by_id} <br />
+              <strong>Project:</strong> {projectOptions.find((option) => option.value === purchase.project_id)?.label || "Unknown"} <br />
+              <strong>Supplier Name:</strong> {contractorOptions.find((option) => option.value === purchase.by_id)?.label || "Unknown"} <br />
               <strong>Price:</strong> {purchase.cost} <br />
-              <strong>Job:</strong> {purchase.job_id} <br />
+              <strong>Job:</strong> {jobOptions.find((option) => option.value === purchase.job_id)?.label || "Unknown"} <br />
               <Button onClick={() => handleOpenModal(purchase)}>Edit</Button>
               <DeleteButton onClick={() => handleDelete(purchase.code)}>Delete</DeleteButton>
             </ListItem>
@@ -339,6 +416,7 @@ const PurchaseComp: React.FC = () => {
             <tr>
               <Th>Code</Th>
               <Th>Contact Person</Th>
+              <Th>Project</Th>
               <Th>Company Name</Th>
               <Th>Price</Th>
               <Th>Job</Th>
@@ -352,9 +430,10 @@ const PurchaseComp: React.FC = () => {
               <tr key={purchase.code}>
                 <Td>{purchase.code}</Td>
                 <Td>{purchase.contact}</Td>
-                <Td>{purchase.by_id}</Td>
+                <Td>{projectOptions.find((option) => option.value === purchase.project_id)?.label || "Unknown"}</Td>
+                <Td>{jobOptions.find((option) => option.value === purchase.job_id)?.label || "Unknown"}</Td>
                 <Td>{purchase.cost}</Td>
-                <Td>{purchase.job_id}</Td>
+                <Td>{contractorOptions.find((option) => option.value === purchase.by_id)?.label || "Unknown"}</Td>
                 <Td>{purchase.ref}</Td>
                 <Td>
                   <Button onClick={() => handleOpenModal(purchase)}>Edit</Button>
@@ -387,15 +466,13 @@ const PurchaseComp: React.FC = () => {
   </div>
 
   <div>
-    <label htmlFor="by_id">Company Name</label>
-    <Input
-      id="by_id"
-      type="number"
+    <label htmlFor="project">Company</label>
+    <Dropdown
       name="by_id"
       value={formData.by_id}
-      onChange={handleInputChange}
-      placeholder="Company Name"
-      autoComplete="off"
+      onChange={handleDropChange}
+      options={contractorOptions}
+      placeholder="Select Contractor"
       required
     />
   </div>
@@ -403,8 +480,8 @@ const PurchaseComp: React.FC = () => {
   <div>
     <label htmlFor="project">Select Project</label>
     <Dropdown
-      name="by_id"
-      value={formData.by_id}
+      name="project_id"
+      value={formData.project_id}
       onChange={handleDropChange}
       options={projectOptions}
       placeholder="Select Project"
@@ -413,7 +490,7 @@ const PurchaseComp: React.FC = () => {
   </div>
 
   <div>
-    <label htmlFor="cost">Phone Number</label>
+    <label htmlFor="cost">Cost</label>
     <Input
       id="cost"
       type="number"
@@ -425,6 +502,19 @@ const PurchaseComp: React.FC = () => {
       required
     />
   </div>
+
+  {/* <div>
+    <label htmlFor="phone_number">Phone</label>
+    <Input
+      id="phone"
+      type="string"
+      name="phone_number"
+      value={formData.phone_number}
+      onChange={handleInputChange}
+      placeholder="Phone Number"
+      autoComplete="off"
+    />
+  </div> */}
 
   <div>
     <label htmlFor="ref">Reference</label>
@@ -441,32 +531,17 @@ const PurchaseComp: React.FC = () => {
   </div>
 
   <div>
-    <label htmlFor="project_id">Project ID</label>
-    <Input
-      id="project_id"
-      type="number"
-      name="project_id"
-      value={formData.project_id}
-      onChange={handleInputChange}
-      placeholder="Project"
-      autoComplete="off"
+    <label htmlFor="job">Job</label>
+    <Dropdown
+      name="job_id"
+      value={formData.job_id}
+      onChange={handleDropChange}
+      options={jobOptions}
+      placeholder="Select Job"
       required
     />
   </div>
 
-  <div>
-    <label htmlFor="job_id">Job</label>
-    <Input
-      id="job_id"
-      type="job_id"
-      name="job_id"
-      value={formData.job_id}
-      onChange={handleInputChange}
-      placeholder="Job"
-      autoComplete="off"
-      required
-    />
-  </div>
 
   <Button type="submit">Save purchase</Button>
 </Form>

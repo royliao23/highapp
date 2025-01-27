@@ -287,8 +287,8 @@ const JobComp: React.FC = () => {
   };
 
   // Filter jobs dynamically based on the search term
-  
-  const filteredJobs = jobs.filter((job) => { 
+
+  const filteredJobs = jobs.filter((job) => {
     return (
       (job.name?.toLowerCase() || "").includes(searchTerm.toLowerCase()) ||
       (job.description?.toLowerCase() || "").includes(searchTerm.toLowerCase())
@@ -309,7 +309,7 @@ const JobComp: React.FC = () => {
     }));
   };
 
-  
+
 
   return (
     <Container>
@@ -325,7 +325,7 @@ const JobComp: React.FC = () => {
             <ListItem key={job.code}>
               <strong>Job Code:</strong> {job.code} <br />
               <strong>Name:</strong> {job.name} <br />
-              <strong>Description:</strong> {job.description} <br />          
+              <strong>Description:</strong> {job.description} <br />
               <strong>Category:</strong> {jobCategoryOptions.find((option) => option.value === job.job_category_id)?.label || "Unknown"} <br />
               <Button onClick={() => handleOpenModal(job)}>Edit</Button>
               <DeleteButton onClick={() => handleDelete(job.code)}>Delete</DeleteButton>
@@ -367,47 +367,47 @@ const JobComp: React.FC = () => {
         <ModalContent>
           <CloseButton onClick={handleCloseModal}>&times;</CloseButton>
           <Form onSubmit={handleSubmit}>
-  <div>
-    <label htmlFor="name">Job Name</label>
-    <Input
-      id="name"
-      type="text"
-      name="name"
-      value={formData.name}
-      onChange={handleInputChange}
-      placeholder="Job Name"
-      autoComplete="off"
-      required
-    />
-  </div>
+            <div>
+              <label htmlFor="name">Job Name</label>
+              <Input
+                id="name"
+                type="text"
+                name="name"
+                value={formData.name}
+                onChange={handleInputChange}
+                placeholder="Job Name"
+                autoComplete="off"
+                required
+              />
+            </div>
 
-  <div>
-    <label htmlFor="description">Description</label>
-    <Input
-      id="description"
-      type="text"
-      name="description"
-      value={formData.description}
-      onChange={handleInputChange}
-      placeholder="Description"
-      autoComplete="off"
-    />
-  </div>
+            <div>
+              <label htmlFor="description">Description</label>
+              <Input
+                id="description"
+                type="text"
+                name="description"
+                value={formData.description}
+                onChange={handleInputChange}
+                placeholder="Description"
+                autoComplete="off"
+              />
+            </div>
 
-  <div>
-    <label htmlFor="job_category_id">Job Category</label>
-    <Dropdown
-      name="job_category_id"
-      value={formData.job_category_id}
-      onChange={handleDropChange}
-      options={jobCategoryOptions}
-      placeholder="Select Job Category"
-      required
-    />
-  </div>
+            <div>
+              <label htmlFor="job_category_id">Job Category</label>
+              <Dropdown
+                name="job_category_id"
+                value={formData.job_category_id}
+                onChange={handleDropChange}
+                options={jobCategoryOptions}
+                placeholder="Select Job Category"
+                required
+              />
+            </div>
 
-  <Button type="submit">Save Job</Button>
-</Form>
+            <Button type="submit">Save Job</Button>
+          </Form>
 
 
         </ModalContent>

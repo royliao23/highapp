@@ -19,7 +19,7 @@ const Nav = () => {
         {/* Logo */}
         <Link to="/home" className="navbar-logo" onClick={() => setIsDropdownOpen(false)}>
           <img src="/bm/logo192.png" alt="/logo192.png" />
-          ProApp
+          ConstrucorApp
         </Link>
 
         {/* Hamburger Menu */}
