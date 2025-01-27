@@ -3,19 +3,19 @@ import { supabase } from "../supabaseClient";
 import styled from "styled-components";
 import SearchBox from "../components/SearchBox";
 import Dropdown from "../components/Dropdown";
-
+import JobModalComp from "../components/JobModal";
 // Define the purchase type based on the table schema
 interface Purchase {
   code: number;
   job_id: number;
   by_id: number;
   project_id: number;
-  cost:number;
+  cost: number;
   ref: string;
   contact: string;
   create_at: Date;
   updated_at: Date;
-  due_at:Date
+  due_at: Date
 }
 
 // Styled Components for Styling
@@ -162,7 +162,7 @@ const PurchaseComp: React.FC = () => {
     contact: "",
     create_at: new Date(),
     updated_at: new Date(),
-    due_at:new Date(),
+    due_at: new Date(),
   });
   const [editingCode, setEditingCode] = useState<number | null>(null); // Track which purchase is being edited
   const [isMobileView, setIsMobileView] = useState<boolean>(window.innerWidth < 1000);
@@ -179,88 +179,88 @@ const PurchaseComp: React.FC = () => {
     }
   };
   const [projectOptions, setProjectOptions] = useState([
-      { value: 0, label: "" },
-    ]);
+    { value: 0, label: "" },
+  ]);
 
   const fetchProjects = async () => {
-      try {
-        const { data, error } = await supabase.from("project").select("*");
-        if (error) throw error;
-  
-        // Transform data into { value, label } format
-        const transformedData = data.map((item) => ({
-          value: item.code, // Assuming `id` is the unique identifier
-          label: item.project_name, // Assuming `name` is the category name
-        }));
-  
-        console.log("Fetched projects:", transformedData);
-  
-        // Update the state with fetched categories
-        setProjectOptions(transformedData);
-      } catch (error) {
-        console.error("Error fetching projects:", error);
-      }
-    };
-  
-    useEffect(() => {
-      fetchProjects();
-    }, []);
+    try {
+      const { data, error } = await supabase.from("project").select("*");
+      if (error) throw error;
+
+      // Transform data into { value, label } format
+      const transformedData = data.map((item) => ({
+        value: item.code, // Assuming `id` is the unique identifier
+        label: item.project_name, // Assuming `name` is the category name
+      }));
+
+      console.log("Fetched projects:", transformedData);
+
+      // Update the state with fetched categories
+      setProjectOptions(transformedData);
+    } catch (error) {
+      console.error("Error fetching projects:", error);
+    }
+  };
+
+  useEffect(() => {
+    fetchProjects();
+  }, []);
 
   const [contractorOptions, setContractorOptions] = useState([
-      { value: 0, label: "" },
-    ]);
+    { value: 0, label: "" },
+  ]);
 
   const fetchContractors = async () => {
-      try {
-        const { data, error } = await supabase.from("contractor").select("*");
-        if (error) throw error;
-  
-        // Transform data into { value, label } format
-        const transformedData = data.map((item) => ({
-          value: item.code, // Assuming `id` is the unique identifier
-          label: item.company_name, // Assuming `name` is the category name
-        }));
-  
-        console.log("Fetched contractors:", transformedData);
-  
-        // Update the state with fetched categories
-        setContractorOptions(transformedData);
-      } catch (error) {
-        console.error("Error fetching contractors:", error);
-      }
-    };
-  
-    useEffect(() => {
-      fetchContractors();
-    }, []);
-  
+    try {
+      const { data, error } = await supabase.from("contractor").select("*");
+      if (error) throw error;
+
+      // Transform data into { value, label } format
+      const transformedData = data.map((item) => ({
+        value: item.code, // Assuming `id` is the unique identifier
+        label: item.company_name, // Assuming `name` is the category name
+      }));
+
+      console.log("Fetched contractors:", transformedData);
+
+      // Update the state with fetched categories
+      setContractorOptions(transformedData);
+    } catch (error) {
+      console.error("Error fetching contractors:", error);
+    }
+  };
+
+  useEffect(() => {
+    fetchContractors();
+  }, []);
+
   const [jobOptions, setJobOptions] = useState([
-      { value: 0, label: "" },
-    ]);
+    { value: 0, label: "" },
+  ]);
 
   const fetchJobs = async () => {
-      try {
-        const { data, error } = await supabase.from("job").select("*");
-        if (error) throw error;
-  
-        // Transform data into { value, label } format
-        const transformedData = data.map((item) => ({
-          value: item.code, 
-          label: item.name, 
-        }));
-  
-        console.log("Fetched jobs:", transformedData);
-  
-        // Update the state with fetched categories
-        setJobOptions(transformedData);
-      } catch (error) {
-        console.error("Error fetching jobs:", error);
-      }
-    };
-  
-    useEffect(() => {
-      fetchJobs();
-    }, []);
+    try {
+      const { data, error } = await supabase.from("job").select("*");
+      if (error) throw error;
+
+      // Transform data into { value, label } format
+      const transformedData = data.map((item) => ({
+        value: item.code,
+        label: item.name,
+      }));
+
+      console.log("Fetched jobs:", transformedData);
+
+      // Update the state with fetched categories
+      setJobOptions(transformedData);
+    } catch (error) {
+      console.error("Error fetching jobs:", error);
+    }
+  };
+
+  useEffect(() => {
+    fetchJobs();
+  }, []);
 
   useEffect(() => {
     fetchPurchases();
@@ -304,7 +304,7 @@ const PurchaseComp: React.FC = () => {
       contact: "",
       create_at: new Date(),
       updated_at: new Date(),
-      due_at:new Date(),
+      due_at: new Date(),
     });
     setEditingCode(null);
     setIsModalOpen(false);
@@ -351,7 +351,7 @@ const PurchaseComp: React.FC = () => {
       contact: purchase.contact,
       create_at: purchase.create_at,
       updated_at: purchase.updated_at,
-      due_at:purchase.due_at,
+      due_at: purchase.due_at,
     });
   };
 
@@ -372,7 +372,7 @@ const PurchaseComp: React.FC = () => {
       (purchase.contact?.toLowerCase() || "").includes(searchTerm.toLowerCase())
     );
   });
-  
+
 
   // Handle Form Input
   const handleInputChange = (e: ChangeEvent<HTMLInputElement>) => {
@@ -380,12 +380,12 @@ const PurchaseComp: React.FC = () => {
   };
 
   const handleDropChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
-      const { name, value } = event.target;
-      setFormData((prevData) => ({
-        ...prevData,
-        [name]: value,
-      }));
-    };
+    const { name, value } = event.target;
+    setFormData((prevData) => ({
+      ...prevData,
+      [name]: value,
+    }));
+  };
 
   return (
     <Container>
@@ -451,59 +451,59 @@ const PurchaseComp: React.FC = () => {
         <ModalContent>
           <CloseButton onClick={handleCloseModal}>&times;</CloseButton>
           <Form onSubmit={handleSubmit}>
-  <div>
-    <label htmlFor="contact">Contact Person</label>
-    <Input
-      id="contact"
-      type="text"
-      name="contact"
-      value={formData.contact}
-      onChange={handleInputChange}
-      placeholder="Contact Person"
-      autoComplete="off"
-      required
-    />
-  </div>
+            <div>
+              <label htmlFor="contact">Contact Person</label>
+              <Input
+                id="contact"
+                type="text"
+                name="contact"
+                value={formData.contact}
+                onChange={handleInputChange}
+                placeholder="Contact Person"
+                autoComplete="off"
+                required
+              />
+            </div>
 
-  <div>
-    <label htmlFor="project">Supplier</label>
-    <Dropdown
-      name="by_id"
-      value={formData.by_id}
-      onChange={handleDropChange}
-      options={contractorOptions}
-      placeholder="Select Contractor"
-      required
-    />
-  </div>
+            <div>
+              <label htmlFor="project">Supplier</label>
+              <Dropdown
+                name="by_id"
+                value={formData.by_id}
+                onChange={handleDropChange}
+                options={contractorOptions}
+                placeholder="Select Contractor"
+                required
+              />
+            </div>
 
-  <div>
-    <label htmlFor="project">Select Project</label>
-    <Dropdown
-      name="project_id"
-      value={formData.project_id}
-      onChange={handleDropChange}
-      options={projectOptions}
-      placeholder="Select Project"
-      required
-    />
-  </div>
+            <div>
+              <label htmlFor="project">Select Project</label>
+              <Dropdown
+                name="project_id"
+                value={formData.project_id}
+                onChange={handleDropChange}
+                options={projectOptions}
+                placeholder="Select Project"
+                required
+              />
+            </div>
 
-  <div>
-    <label htmlFor="cost">Cost</label>
-    <Input
-      id="cost"
-      type="number"
-      name="cost"
-      value={formData.cost}
-      onChange={handleInputChange}
-      placeholder="Phone Number"
-      autoComplete="off"
-      required
-    />
-  </div>
+            <div>
+              <label htmlFor="cost">Cost</label>
+              <Input
+                id="cost"
+                type="number"
+                name="cost"
+                value={formData.cost}
+                onChange={handleInputChange}
+                placeholder="Phone Number"
+                autoComplete="off"
+                required
+              />
+            </div>
 
-  {/* <div>
+            {/* <div>
     <label htmlFor="phone_number">Phone</label>
     <Input
       id="phone"
@@ -516,39 +516,49 @@ const PurchaseComp: React.FC = () => {
     />
   </div> */}
 
-  <div>
-    <label htmlFor="ref">Reference</label>
-    <Input
-      id="ref"
-      type="text"
-      name="ref"
-      value={formData.ref}
-      onChange={handleInputChange}
-      placeholder="Ref"
-      autoComplete="off"
-      required
-    />
-  </div>
+            <div>
+              <label htmlFor="ref">Reference</label>
+              <Input
+                id="ref"
+                type="text"
+                name="ref"
+                value={formData.ref}
+                onChange={handleInputChange}
+                placeholder="Ref"
+                autoComplete="off"
+                required
+              />
+            </div>
 
-  <div>
-    <label htmlFor="job">Job</label>
-    <Dropdown
-      name="job_id"
-      value={formData.job_id}
-      onChange={handleDropChange}
-      options={jobOptions}
-      placeholder="Select Job"
-      required
-    />
-  </div>
+            <div>
+              <label htmlFor="job" >Job+</label>
+              <Dropdown
+                name="job_id"
+                value={formData.job_id}
+                onChange={handleDropChange}
+                options={jobOptions}
+                placeholder="Select Job"
+                required
+              />
+            </div>
 
 
-  <Button type="submit">Save purchase</Button>
-</Form>
+            <Button type="submit">Save purchase</Button>
+          </Form>
 
 
         </ModalContent>
       </Modal>
+      {/* <JobModalComp
+        show={isJobModalOpen}
+        onClose={handleJobCloseModal}
+        onSubmit={handleJobSubmit}
+        formData={formJobData}
+        onInputChange={handleJobInputChange}
+        onDropChange={handleJobDropChange}
+        jobCategoryOptions={jobCategoryOptions}
+        isEditing={editingJobCode !== null}
+      /> */}
     </Container>
   );
 };

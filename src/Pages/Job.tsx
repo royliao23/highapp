@@ -2,8 +2,7 @@ import React, { useState, useEffect, ChangeEvent, FormEvent } from "react";
 import { supabase } from "../supabaseClient";
 import styled from "styled-components";
 import SearchBox from "../components/SearchBox";
-import Dropdown from "../components/Dropdown";
-
+import JobModal from "../components/JobModal";
 // Define the job type based on the table schema
 interface Job {
   code: number;
@@ -12,7 +11,7 @@ interface Job {
   description: string;
 }
 
-// Styled Components for Styling
+// (Existing styled-components code...)
 const Container = styled.div`
   max-width: 1500px;
   margin: 2rem auto;
@@ -21,23 +20,9 @@ const Container = styled.div`
   border-radius: 8px;
   background-color: #f9f9f9;
 `;
-
 const Title = styled.h2`
   text-align: center;
   color: #333;
-`;
-
-const Form = styled.form`
-  display: flex;
-  flex-direction: column;
-  gap: 1rem;
-`;
-
-const Input = styled.input`
-  padding: 0.8rem;
-  border: 1px solid #ddd;
-  border-radius: 4px;
-  font-size: 1rem;
 `;
 
 const Button = styled.button`
@@ -102,88 +87,25 @@ const ListItem = styled.li`
   border-radius: 4px;
   background-color: #fff;
 `;
-
-const Modal = styled.div<{ show: boolean }>`
-  display: ${(props) => (props.show ? "flex" : "none")};
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background: rgba(0, 0, 0, 0.5);
-  justify-content: center;
-  align-items: center;
-  z-index: 1000;
-`;
-
-
-const ModalContent = styled.div`
-  background: white;
-  margin-top:30px;
-  padding: 2rem;
-  border-radius: 8px;
-  max-height: 90vh;
-  width: 90%;
-  max-width: 500px;
-  position: relative;
-  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
-  overflow-y: auto; /* Enable scrolling for modal content */
-  @media (max-width: 768px) {
-      width: 95%;
-    }
-`;
-
-const CloseButton = styled.button`
-  position: absolute;
-  top: 0.5rem;
-  right: 0.5rem;
-  background: none;
-  border: none;
-  font-size: 1.5rem;
-  cursor: pointer;
-`;
-
-// Inside the job component...
-
 const JobComp: React.FC = () => {
   const [jobs, setJobs] = useState<Job[]>([]);
   const [formData, setFormData] = useState<Omit<Job, "code">>({
     job_category_id: 0,
-    name: '',
-    description: '',
+    name: "",
+    description: "",
   });
-  const [editingCode, setEditingCode] = useState<number | null>(null); // Track which job is being edited
+  const [editingCode, setEditingCode] = useState<number | null>(null);
   const [isMobileView, setIsMobileView] = useState<boolean>(window.innerWidth < 1000);
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
   const [searchTerm, setSearchTerm] = useState<string>("");
-  const [jobCategoryOptions, setJobCategoryOptions] = useState([
-    { value: 0, label: "" },
-  ]);
-
-  const fetchCategories = async () => {
-    try {
-      const { data, error } = await supabase.from("categ").select("*");
-      if (error) throw error;
-
-      // Transform data into { value, label } format
-      const transformedData = data.map((item) => ({
-        value: item.code, // Assuming `id` is the unique identifier
-        label: item.name, // Assuming `name` is the category name
-      }));
-
-      console.log("Fetched categories:", transformedData);
-
-      // Update the state with fetched categories
-      setJobCategoryOptions(transformedData);
-    } catch (error) {
-      console.error("Error fetching categories:", error);
-    }
-  };
-
+  const [jobCategoryOptions, setJobCategoryOptions] = useState<
+    { value: number; label: string }[]
+  >([]);
   useEffect(() => {
-    fetchCategories();
-  }, []);
-
+      const handleResize = () => setIsMobileView(window.innerWidth < 1000);
+      window.addEventListener("resize", handleResize);
+      return () => window.removeEventListener("resize", handleResize);
+    }, []);
   const fetchJobs = async () => {
     try {
       const { data, error } = await supabase.from("job").select("*");
@@ -194,72 +116,60 @@ const JobComp: React.FC = () => {
     }
   };
 
+  const fetchCategories = async () => {
+    try {
+      const { data, error } = await supabase.from("categ").select("*");
+      if (error) throw error;
+
+      const transformedData = data.map((item) => ({
+        value: item.code,
+        label: item.name,
+      }));
+
+      setJobCategoryOptions(transformedData);
+    } catch (error) {
+      console.error("Error fetching categories:", error);
+    }
+  };
 
   useEffect(() => {
     fetchJobs();
+    fetchCategories();
   }, []);
-
-  useEffect(() => {
-    if (isModalOpen) {
-      document.body.classList.add("no-scroll");
-    } else {
-      document.body.classList.remove("no-scroll");
-    }
-    return () => {
-      document.body.classList.remove("no-scroll"); // Cleanup on unmount
-    };
-  }, [isModalOpen]);
-
-  useEffect(() => {
-    const handleResize = () => setIsMobileView(window.innerWidth < 1000);
-    window.addEventListener("resize", handleResize);
-    return () => window.removeEventListener("resize", handleResize);
-  }, []);
-
-  const handleSearchChange = (e: ChangeEvent<HTMLInputElement>) => {
-    setSearchTerm(e.target.value?.toLowerCase()); // Normalize search term for case-insensitive search
-  };
 
   const handleOpenModal = (job?: Job) => {
     if (job) {
-      handleEdit(job);
+      setEditingCode(job.code);
+      setFormData({
+        job_category_id: job.job_category_id,
+        name: job.name,
+        description: job.description,
+      });
+    } else {
+      setEditingCode(null);
+      setFormData({
+        job_category_id: 0,
+        name: "",
+        description: "",
+      });
     }
     setIsModalOpen(true);
   };
 
-  const handleCloseModal = () => {
-    setFormData({
-      job_category_id: 0,
-      name: '',
-      description: '',
-    });
-    setEditingCode(null);
-    setIsModalOpen(false);
-  };
+  const handleCloseModal = () => setIsModalOpen(false);
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
 
     try {
       if (editingCode !== null) {
-        // Update an existing job
-        const { error } = await supabase
+        await supabase
           .from("job")
           .update(formData)
           .eq("code", editingCode);
-
-        if (error) throw error;
-
-        // Clear editing state after updating
-        setEditingCode(null);
       } else {
-        // Add a new job
-        const { error } = await supabase.from("job").insert([formData]);
-
-        if (error) throw error;
+        await supabase.from("job").insert([formData]);
       }
-
-      // Refresh the list and reset the form
       fetchJobs();
       handleCloseModal();
     } catch (error) {
@@ -267,24 +177,24 @@ const JobComp: React.FC = () => {
     }
   };
 
-  const handleEdit = (job: Job) => {
-    setEditingCode(job.code);
-    setFormData({
-      job_category_id: job.job_category_id,
-      name: job.name,
-      description: job.description,
-    });
+  const handleInputChange = (e: ChangeEvent<HTMLInputElement>) => {
+    setFormData({ ...formData, [e.target.name]: e.target.value });
+  };
+
+  const handleDropChange = (e: ChangeEvent<HTMLSelectElement>) => {
+    const { name, value } = e.target;
+    setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
   const handleDelete = async (code: number) => {
-    try {
-      const { error } = await supabase.from("job").delete().eq("code", code);
-      if (error) throw error;
-      fetchJobs(); // Refresh the list
-    } catch (error) {
-      console.error("Error deleting job:", error);
-    }
-  };
+      try {
+        const { error } = await supabase.from("job").delete().eq("code", code);
+        if (error) throw error;
+        fetchJobs(); // Refresh the list
+      } catch (error) {
+        console.error("Error deleting job:", error);
+      }
+    };
 
   // Filter jobs dynamically based on the search term
 
@@ -295,30 +205,13 @@ const JobComp: React.FC = () => {
     );
   });
 
-
-  // Handle Form Input
-  const handleInputChange = (e: ChangeEvent<HTMLInputElement>) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
-  };
-
-  const handleDropChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
-    const { name, value } = event.target;
-    setFormData((prevData) => ({
-      ...prevData,
-      [name]: value,
-    }));
-  };
-
-
-
   return (
     <Container>
       <Title>Job Management</Title>
       <ButtonRow>
-        <SearchBox searchTerm={searchTerm} onSearchChange={handleSearchChange} />
+        <SearchBox searchTerm={searchTerm} onSearchChange={(e) => setSearchTerm(e.target.value)} />
         <Button onClick={() => handleOpenModal()}>Add Job</Button>
       </ButtonRow>
-
       {isMobileView ? (
         <List>
           {filteredJobs.map((job) => (
@@ -362,56 +255,16 @@ const JobComp: React.FC = () => {
           </tbody>
         </Table>
       )}
-
-      <Modal show={isModalOpen}>
-        <ModalContent>
-          <CloseButton onClick={handleCloseModal}>&times;</CloseButton>
-          <Form onSubmit={handleSubmit}>
-            <div>
-              <label htmlFor="name">Job Name</label>
-              <Input
-                id="name"
-                type="text"
-                name="name"
-                value={formData.name}
-                onChange={handleInputChange}
-                placeholder="Job Name"
-                autoComplete="off"
-                required
-              />
-            </div>
-
-            <div>
-              <label htmlFor="description">Description</label>
-              <Input
-                id="description"
-                type="text"
-                name="description"
-                value={formData.description}
-                onChange={handleInputChange}
-                placeholder="Description"
-                autoComplete="off"
-              />
-            </div>
-
-            <div>
-              <label htmlFor="job_category_id">Job Category</label>
-              <Dropdown
-                name="job_category_id"
-                value={formData.job_category_id}
-                onChange={handleDropChange}
-                options={jobCategoryOptions}
-                placeholder="Select Job Category"
-                required
-              />
-            </div>
-
-            <Button type="submit">Save Job</Button>
-          </Form>
-
-
-        </ModalContent>
-      </Modal>
+      <JobModal
+        show={isModalOpen}
+        onClose={handleCloseModal}
+        onSubmit={handleSubmit}
+        formData={formData}
+        onInputChange={handleInputChange}
+        onDropChange={handleDropChange}
+        jobCategoryOptions={jobCategoryOptions}
+        isEditing={editingCode !== null}
+      />
     </Container>
   );
 };
