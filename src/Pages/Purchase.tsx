@@ -109,9 +109,12 @@ const ListItem = styled.li`
   background-color: #fff;
 `;
 
-const Modal = styled.div<{ show: boolean }>`
+const Modal = styled.div.withConfig({
+  shouldForwardProp: (prop) => prop !== "show", // Exclude 'show' prop
+}) <{ show: boolean }>`
   display: ${(props) => (props.show ? "flex" : "none")};
   position: fixed;
+  margin-top:50px;
   top: 0;
   left: 0;
   width: 100%;
@@ -120,8 +123,17 @@ const Modal = styled.div<{ show: boolean }>`
   justify-content: center;
   align-items: center;
   z-index: 1000;
+  .modal-content {
+    background: #fff;
+    border-radius: 10px;
+    width: 90%;
+    max-width: 500px;
+    max-height: 90vh;
+    overflow-y: auto;
+    padding: 20px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+  }
 `;
-
 
 const ModalContent = styled.div`
   background: white;
