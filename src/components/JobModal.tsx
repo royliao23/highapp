@@ -1,6 +1,6 @@
 import React, { ChangeEvent, FormEvent } from "react";
 import styled from "styled-components";
-
+import compDropdown from "./Dropdown";
 // Styled Components for Modal
 const Modal = styled.div.withConfig({
     shouldForwardProp: (prop) => prop !== "show", // Exclude 'show' prop
@@ -122,6 +122,9 @@ const JobModalComp: React.FC<ModalProps> = ({
               value={formData.job_category_id}
               onChange={onDropChange}
             >
+              <option value="" >
+                Please Select
+              </option>
               {jobCategoryOptions.map((option) => (
                 <option key={option.value} value={option.value}>
                   {option.label}
