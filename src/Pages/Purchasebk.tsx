@@ -114,6 +114,7 @@ const Modal = styled.div.withConfig({
 }) <{ show: boolean }>`
   display: ${(props) => (props.show ? "flex" : "none")};
   position: fixed;
+  margin-top:50px;
   top: 0;
   left: 0;
   width: 100%;
@@ -133,7 +134,6 @@ const Modal = styled.div.withConfig({
     box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
   }
 `;
-
 
 const ModalContent = styled.div`
   background: white;
@@ -180,91 +180,6 @@ const PurchaseComp: React.FC = () => {
   const [isMobileView, setIsMobileView] = useState<boolean>(window.innerWidth < 1000);
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
   const [searchTerm, setSearchTerm] = useState<string>("");
-
-  //new
-  const [isJobModalOpen, setIsJobModalOpen] = useState<boolean>(false);
-  const [formJobData, setFormJobData] = useState({
-    name: "",
-    job_category_id: 0, // Or whatever your data structure requires
-    description:"",
-  });
-  const [editingJobCode, setEditingJobCode] = useState<number | null>(null);
-  const [jobCategoryOptions, setJobCategoryOptions] = useState([
-    { value: 0, label: "" },
-  ]);  // For the dropdown in the job modal
-
-  const fetchJobCategories = async () => {
-    try {
-      const { data, error } = await supabase.from("categ").select("*");
-      if (error) throw error;
-
-      const transformedData = data.map((item) => ({
-        value: item.code,
-        label: item.name,
-      }));
-
-      setJobCategoryOptions(transformedData);
-    } catch (error) {
-      console.error("Error fetching job categories:", error);
-    }
-  };
-
-  useEffect(() => {
-    fetchJobCategories();
-  }, []);
-
-
-  const handleJobOpenModal = () => {
-    setIsJobModalOpen(true);
-  };
-
-  const handleJobCloseModal = () => {
-    setFormJobData({
-      name: "",
-      job_category_id: 0,
-      description:"",
-    });
-    setEditingJobCode(null);
-    setIsJobModalOpen(false);
-  };
-
-  const handleJobInputChange = (e: ChangeEvent<HTMLInputElement>) => {
-    setFormJobData({ ...formJobData, [e.target.name]: e.target.value });
-  };
-
-  const handleJobDropChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
-    const { name, value } = event.target;
-    setFormJobData((prevData) => ({
-      ...prevData,
-      [name]: value,
-    }));
-  };
-
-  const handleJobSubmit = async (e: FormEvent) => {
-    e.preventDefault();
-
-    try {
-      if (editingJobCode !== null) {
-        // Update existing job
-        const { error } = await supabase
-          .from("job")
-          .update(formJobData)
-          .eq("code", editingJobCode); // Assuming 'code' is the ID field
-
-        if (error) throw error;
-      } else {
-        // Insert new job
-        const { error } = await supabase.from("job").insert([formJobData]);
-        if (error) throw error;
-      }
-
-      // Close the modal and refresh job list
-      handleJobCloseModal();
-      fetchJobs(); // Assuming you have this function to refresh job data
-    } catch (error) {
-      console.error("Error saving job:", error);
-    }
-  };
 
   const fetchPurchases = async () => {
     try {
@@ -628,7 +543,7 @@ const PurchaseComp: React.FC = () => {
             </div>
 
             <div>
-              <label htmlFor="job" onClick={handleJobOpenModal}>Job+</label>
+              <label htmlFor="job" >Job+</label>
               <Dropdown
                 name="job_id"
                 value={formData.job_id}
@@ -646,7 +561,7 @@ const PurchaseComp: React.FC = () => {
 
         </ModalContent>
       </Modal>
-      <JobModalComp
+      {/* <JobModalComp
         show={isJobModalOpen}
         onClose={handleJobCloseModal}
         onSubmit={handleJobSubmit}
@@ -655,7 +570,7 @@ const PurchaseComp: React.FC = () => {
         onDropChange={handleJobDropChange}
         jobCategoryOptions={jobCategoryOptions}
         isEditing={editingJobCode !== null}
-      />
+      /> */}
     </Container>
   );
 };

@@ -3,34 +3,34 @@ import styled from "styled-components";
 import compDropdown from "./Dropdown";
 // Styled Components for Modal
 const Modal = styled.div.withConfig({
-    shouldForwardProp: (prop) => prop !== "show", // Exclude 'show' prop
-  }) <{ show: boolean }>`
-    display: ${(props) => (props.show ? "flex" : "none")};
-    position: fixed;
-    margin-top:50px;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: rgba(0, 0, 0, 0.5);
-    justify-content: center;
-    align-items: center;
-    z-index: 1000;
-    .modal-content {
-      background: #fff;
-      border-radius: 10px;
-      width: 90%;
-      max-width: 500px;
-      max-height: 90vh;
-      overflow-y: auto;
-      padding: 20px;
-      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
-    }
-  `;
+  shouldForwardProp: (prop) => prop !== "show", // Exclude 'show' prop
+}) <{ show: boolean }>`
+  display: ${(props) => (props.show ? "flex" : "none")};
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.5);
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+  .modal-content {
+    background: #fff;
+    border-radius: 10px;
+    width: 90%;
+    max-width: 500px;
+    max-height: 90vh;
+    overflow-y: auto;
+    padding: 20px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+  }
+`;
+
 
 const ModalContent = styled.div`
   background: white;
-  margin-top: 30px;
+  margin-top:50px;
   padding: 2rem;
   border-radius: 8px;
   max-height: 90vh;
@@ -38,11 +38,10 @@ const ModalContent = styled.div`
   max-width: 500px;
   position: relative;
   box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
-  overflow-y: auto;
-
+  overflow-y: auto; /* Enable scrolling for modal content */
   @media (max-width: 768px) {
-    width: 95%;
-  }
+      width: 95%;
+    }
 `;
 
 const CloseButton = styled.button`

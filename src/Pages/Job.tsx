@@ -102,6 +102,16 @@ const JobComp: React.FC = () => {
     { value: number; label: string }[]
   >([]);
   useEffect(() => {
+      if (isModalOpen) {
+        document.body.classList.add("no-scroll");
+      } else {
+        document.body.classList.remove("no-scroll");
+      }
+      return () => {
+        document.body.classList.remove("no-scroll"); // Cleanup on unmount
+      };
+    }, [isModalOpen]);
+  useEffect(() => {
       const handleResize = () => setIsMobileView(window.innerWidth < 1000);
       window.addEventListener("resize", handleResize);
       return () => window.removeEventListener("resize", handleResize);
