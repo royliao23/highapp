@@ -3,12 +3,18 @@ import { supabase } from "../supabaseClient";
 import styled from "styled-components";
 import SearchBox from "../components/SearchBox";
 import JobModal from "../components/JobModal";
+
 // Define the job type based on the table schema
 interface Job {
   code: number;
   job_category_id: number;
   name: string;
   description: string;
+}
+
+interface Categ {
+  code: number;
+  name: string;
 }
 
 // (Existing styled-components code...)
@@ -87,12 +93,16 @@ const ListItem = styled.li`
   border-radius: 4px;
   background-color: #fff;
 `;
+
 const JobComp: React.FC = () => {
   const [jobs, setJobs] = useState<Job[]>([]);
   const [formData, setFormData] = useState<Omit<Job, "code">>({
     job_category_id: 0,
     name: "",
     description: "",
+  });
+  const [formCategData, setCategFormData] = useState<Omit<Categ, "code">>({
+    name: "",
   });
   const [editingCode, setEditingCode] = useState<number | null>(null);
   const [isMobileView, setIsMobileView] = useState<boolean>(window.innerWidth < 1000);
@@ -101,21 +111,24 @@ const JobComp: React.FC = () => {
   const [jobCategoryOptions, setJobCategoryOptions] = useState<
     { value: number; label: string }[]
   >([]);
+
   useEffect(() => {
-      if (isModalOpen) {
-        document.body.classList.add("no-scroll");
-      } else {
-        document.body.classList.remove("no-scroll");
-      }
-      return () => {
-        document.body.classList.remove("no-scroll"); // Cleanup on unmount
-      };
-    }, [isModalOpen]);
+    if (isModalOpen) {
+      document.body.classList.add("no-scroll");
+    } else {
+      document.body.classList.remove("no-scroll");
+    }
+    return () => {
+      document.body.classList.remove("no-scroll"); // Cleanup on unmount
+    };
+  }, [isModalOpen]);
+
   useEffect(() => {
-      const handleResize = () => setIsMobileView(window.innerWidth < 1000);
-      window.addEventListener("resize", handleResize);
-      return () => window.removeEventListener("resize", handleResize);
-    }, []);
+    const handleResize = () => setIsMobileView(window.innerWidth < 1000);
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
+
   const fetchJobs = async () => {
     try {
       const { data, error } = await supabase.from("job").select("*");
@@ -197,17 +210,43 @@ const JobComp: React.FC = () => {
   };
 
   const handleDelete = async (code: number) => {
-      try {
-        const { error } = await supabase.from("job").delete().eq("code", code);
-        if (error) throw error;
-        fetchJobs(); // Refresh the list
-      } catch (error) {
-        console.error("Error deleting job:", error);
+    try {
+      const { error } = await supabase.from("job").delete().eq("code", code);
+      if (error) throw error;
+      fetchJobs(); // Refresh the list
+    } catch (error) {
+      console.error("Error deleting job:", error);
+    }
+  };
+
+  // Function to handle adding a new category
+  const handleAddCategory = async (newCategory: { value: number; label: string }) => {
+    try {
+      // Save the new category to the database
+      const { data, error } = await supabase
+        .from("categ")
+        .insert([{ name: newCategory.label }])
+        .select();
+
+      if (error) throw error;
+
+      // Update the jobCategoryOptions state with the new category
+      if (data && data.length > 0) {
+        const addedCategory = data[0];
+        setJobCategoryOptions((prevOptions) => [
+          ...prevOptions,
+          { value: addedCategory.code, label: addedCategory.name },
+        ]);
       }
-    };
+
+      // Refresh the categories list
+      fetchCategories();
+    } catch (error) {
+      console.error("Error adding category:", error);
+    }
+  };
 
   // Filter jobs dynamically based on the search term
-
   const filteredJobs = jobs.filter((job) => {
     return (
       (job.name?.toLowerCase() || "").includes(searchTerm.toLowerCase()) ||
@@ -274,6 +313,7 @@ const JobComp: React.FC = () => {
         onDropChange={handleDropChange}
         jobCategoryOptions={jobCategoryOptions}
         isEditing={editingCode !== null}
+        onAddCategory={handleAddCategory} // Pass the handleAddCategory function
       />
     </Container>
   );

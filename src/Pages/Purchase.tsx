@@ -484,6 +484,49 @@ const PurchaseComp: React.FC = () => {
     }));
   };
 
+  const fetchCategories = async () => {
+      try {
+        const { data, error } = await supabase.from("categ").select("*");
+        if (error) throw error;
+  
+        const transformedData = data.map((item) => ({
+          value: item.code,
+          label: item.name,
+        }));
+  
+        setJobCategoryOptions(transformedData);
+      } catch (error) {
+        console.error("Error fetching categories:", error);
+      }
+    };
+
+  // Function to handle adding a new category
+    const handleAddCategory = async (newCategory: { value: number; label: string }) => {
+      try {
+        // Save the new category to the database
+        const { data, error } = await supabase
+          .from("categ")
+          .insert([{ name: newCategory.label }])
+          .select();
+  
+        if (error) throw error;
+  
+        // Update the jobCategoryOptions state with the new category
+        if (data && data.length > 0) {
+          const addedCategory = data[0];
+          setJobCategoryOptions((prevOptions) => [
+            ...prevOptions,
+            { value: addedCategory.code, label: addedCategory.name },
+          ]);
+        }
+  
+        // Refresh the categories list
+        fetchCategories();
+      } catch (error) {
+        console.error("Error adding category:", error);
+      }
+    };
+
   return (
     <Container>
       <Title>Purchase Order Management</Title>
@@ -655,6 +698,7 @@ const PurchaseComp: React.FC = () => {
         onDropChange={handleJobDropChange}
         jobCategoryOptions={jobCategoryOptions}
         isEditing={editingJobCode !== null}
+        onAddCategory={handleAddCategory}
       />
     </Container>
   );

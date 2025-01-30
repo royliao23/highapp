@@ -1,9 +1,11 @@
-import React, { ChangeEvent, FormEvent } from "react";
+import React, { ChangeEvent, FormEvent, useState } from "react";
 import styled from "styled-components";
+import GeneralModal from "./Modal"; // Import the reusable GeneralModal component
+
 // Styled Components for Modal
 const Modal = styled.div.withConfig({
   shouldForwardProp: (prop) => prop !== "show", // Exclude 'show' prop
-}) <{ show: boolean }>`
+})<{ show: boolean }>`
   display: ${(props) => (props.show ? "flex" : "none")};
   position: fixed;
   top: 0;
@@ -26,10 +28,9 @@ const Modal = styled.div.withConfig({
   }
 `;
 
-
 const ModalContent = styled.div`
   background: white;
-  margin-top:50px;
+  margin-top: 50px;
   padding: 2rem;
   border-radius: 8px;
   max-height: 90vh;
@@ -39,8 +40,8 @@ const ModalContent = styled.div`
   box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
   overflow-y: auto; /* Enable scrolling for modal content */
   @media (max-width: 768px) {
-      width: 95%;
-    }
+    width: 95%;
+  }
 `;
 
 const CloseButton = styled.button`
@@ -82,6 +83,16 @@ const Button = styled.button`
   }
 `;
 
+const AddCategoryButton = styled.span`
+  margin-left: 0.5rem;
+  cursor: pointer;
+  color: #007bff;
+  font-weight: bold;
+  &:hover {
+    text-decoration: underline;
+  }
+`;
+
 // Define the props for the JobModal component
 interface ModalProps {
   show: boolean;
@@ -96,6 +107,7 @@ interface ModalProps {
   onDropChange: (e: ChangeEvent<HTMLSelectElement>) => void;
   jobCategoryOptions: { value: number; label: string }[];
   isEditing: boolean;
+  onAddCategory: (newCategory: { value: number; label: string }) => void; // Callback to add a new category
 }
 
 const JobModalComp: React.FC<ModalProps> = ({
@@ -107,51 +119,93 @@ const JobModalComp: React.FC<ModalProps> = ({
   onDropChange,
   jobCategoryOptions,
   isEditing,
+  onAddCategory,
 }) => {
+  const [isCategoryModalOpen, setIsCategoryModalOpen] = useState(false); // State for nested modal
+  const [newCategoryName, setNewCategoryName] = useState(""); // State for new category name
+
+  // Handle opening the nested modal
+  const handleOpenCategoryModal = () => {
+    setIsCategoryModalOpen(true);
+  };
+
+  // Handle closing the nested modal
+  const handleCloseCategoryModal = () => {
+    setIsCategoryModalOpen(false);
+    setNewCategoryName(""); // Reset the input field
+  };
+
+  // Handle adding a new category
+  const handleAddCategory = () => {
+    if (newCategoryName.trim()) {
+      const newCategory = {
+        value: jobCategoryOptions.length + 1, // Generate a new ID (replace with actual API call if needed)
+        label: newCategoryName,
+      };
+      onAddCategory(newCategory); // Pass the new category to the parent component
+      handleCloseCategoryModal();
+    }
+  };
+
   return (
-    <Modal show={show}>
-      <ModalContent>
-        <CloseButton onClick={onClose}>&times;</CloseButton>
-        <form onSubmit={onSubmit}>
-          <label>
-            Job Category:<span >+</span>
-            <Dropdown
-              name="job_category_id"
-              value={formData.job_category_id}
-              onChange={onDropChange}
-            >
-              <option value="" >
-                Please Select
-              </option>
-              {jobCategoryOptions.map((option) => (
-                <option key={option.value} value={option.value}>
-                  {option.label}
-                </option>
-              ))}
-            </Dropdown>
-          </label>
-          <label>
-            Name:
-            <Input
-              type="text"
-              name="name"
-              value={formData.name}
-              onChange={onInputChange}
-            />
-          </label>
-          <label>
-            Description:
-            <Input
-              type="text"
-              name="description"
-              value={formData.description}
-              onChange={onInputChange}
-            />
-          </label>
-          <Button type="submit">{isEditing ? "Update Job" : "Add Job"}</Button>
-        </form>
-      </ModalContent>
-    </Modal>
+    <>
+      <Modal show={show}>
+        <ModalContent>
+          <CloseButton onClick={onClose}>&times;</CloseButton>
+          <form onSubmit={onSubmit}>
+            <label>
+              Job Category:
+              <AddCategoryButton onClick={handleOpenCategoryModal}>
+                +
+              </AddCategoryButton>
+              <Dropdown
+                name="job_category_id"
+                value={formData.job_category_id}
+                onChange={onDropChange}
+              >
+                <option value="">Please Select</option>
+                {jobCategoryOptions.map((option) => (
+                  <option key={option.value} value={option.value}>
+                    {option.label}
+                  </option>
+                ))}
+              </Dropdown>
+            </label>
+            <label>
+              Name:
+              <Input
+                type="text"
+                name="name"
+                value={formData.name}
+                onChange={onInputChange}
+              />
+            </label>
+            <label>
+              Description:
+              <Input
+                type="text"
+                name="description"
+                value={formData.description}
+                onChange={onInputChange}
+              />
+            </label>
+            <Button type="submit">{isEditing ? "Update Job" : "Add Job"}</Button>
+          </form>
+        </ModalContent>
+      </Modal>
+
+      {/* Nested Modal for Adding a New Category */}
+      <GeneralModal show={isCategoryModalOpen} onClose={handleCloseCategoryModal}>
+        <h3>Add New Category</h3>
+        <Input
+          type="text"
+          placeholder="Enter category name"
+          value={newCategoryName}
+          onChange={(e) => setNewCategoryName(e.target.value)}
+        />
+        <Button onClick={handleAddCategory}>Add Category</Button>
+      </GeneralModal>
+    </>
   );
 };
 
