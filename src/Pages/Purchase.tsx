@@ -628,6 +628,17 @@ const PurchaseComp: React.FC = () => {
                 required
               />
             </div>
+            <div>
+              <label htmlFor="job" onClick={handleJobOpenModal}>Job+</label>
+              <Dropdown
+                name="job_id"
+                value={formData.job_id}
+                onChange={handleDropChange}
+                options={jobOptions}
+                placeholder="Select Job"
+                required
+              />
+            </div>
 
             <div>
               <label htmlFor="cost">Cost</label>
@@ -637,7 +648,7 @@ const PurchaseComp: React.FC = () => {
                 name="cost"
                 value={formData.cost}
                 onChange={handleInputChange}
-                placeholder="Phone Number"
+                placeholder="Cost"
                 autoComplete="off"
                 required
               />
@@ -670,17 +681,7 @@ const PurchaseComp: React.FC = () => {
               />
             </div>
 
-            <div>
-              <label htmlFor="job" onClick={handleJobOpenModal}>Job+</label>
-              <Dropdown
-                name="job_id"
-                value={formData.job_id}
-                onChange={handleDropChange}
-                options={jobOptions}
-                placeholder="Select Job"
-                required
-              />
-            </div>
+            
 
 
             <Button type="submit">Save purchase</Button>

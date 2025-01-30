@@ -70,6 +70,7 @@ const Dropdown = styled.select`
   width: 100%;
 `;
 
+
 const Button = styled.button`
   padding: 0.8rem;
   border: none;
@@ -163,11 +164,13 @@ const JobModalComp: React.FC<ModalProps> = ({
                 value={formData.job_category_id}
                 onChange={onDropChange}
               >
+                
                 <option value="">Please Select</option>
                 {jobCategoryOptions.map((option) => (
                   <option key={option.value} value={option.value}>
                     {option.label}
                   </option>
+                  
                 ))}
               </Dropdown>
             </label>

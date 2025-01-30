@@ -304,6 +304,7 @@ const JobComp: React.FC = () => {
           </tbody>
         </Table>
       )}
+      
       <JobModal
         show={isModalOpen}
         onClose={handleCloseModal}
