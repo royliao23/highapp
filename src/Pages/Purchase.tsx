@@ -4,6 +4,7 @@ import styled from "styled-components";
 import SearchBox from "../components/SearchBox";
 import Dropdown from "../components/Dropdown";
 import JobModalComp from "../components/JobModal";
+import ContractorModal from "../components/Modal";
 // Define the purchase type based on the table schema
 interface Purchase {
   code: number;
@@ -16,6 +17,18 @@ interface Purchase {
   create_at: Date;
   updated_at: Date;
   due_at: Date
+}
+
+interface Contractor {
+  code: number;
+  contact_person: string;
+  company_name: string;
+  phone_number: string;
+  email: string;
+  bsb: string;
+  account_no: string;
+  account_name: string;
+  address: string;
 }
 
 // Styled Components for Styling
@@ -176,9 +189,22 @@ const PurchaseComp: React.FC = () => {
     updated_at: new Date(),
     due_at: new Date(),
   });
+  const [formContractorData, setFormContractorData] = useState<Omit<Contractor, "code">>({
+    contact_person: "",
+    company_name: "",
+    phone_number: "",
+    email: "",
+    bsb: "",
+    account_no: "",
+    account_name: "",
+    address: "",
+  });
   const [editingCode, setEditingCode] = useState<number | null>(null); // Track which purchase is being edited
+  const [contractoreditingCode, setContractorEditingCode] = useState<number | null>(null); // Track which purchase is being edited
+  
   const [isMobileView, setIsMobileView] = useState<boolean>(window.innerWidth < 1000);
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
+  const [isContractorModalOpen, setIsContractorModalOpen] = useState<boolean>(false);
   const [searchTerm, setSearchTerm] = useState<string>("");
 
   //new
@@ -407,6 +433,21 @@ const PurchaseComp: React.FC = () => {
     setIsModalOpen(false);
   };
 
+  const handleContractorCloseModal = () => {
+    setFormContractorData({
+      contact_person: "",
+      company_name: "",
+      phone_number: "",
+      email: "",
+      bsb: "",
+      account_no: "",
+      account_name: "",
+      address: "",
+    });
+    setContractorEditingCode(null);
+    setIsContractorModalOpen(false);
+  };
+
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
 
@@ -436,6 +477,39 @@ const PurchaseComp: React.FC = () => {
       console.error("Error saving purchase:", error);
     }
   };
+
+  const handleContractorSubmit = async (e: FormEvent) => {
+      e.preventDefault();
+  
+      try {
+        if (editingCode !== null) {
+          // Update an existing contractor
+          const { error } = await supabase
+            .from("contractor")
+            .update(formContractorData)
+            .eq("code", editingCode);
+  
+          if (error) throw error;
+  
+          // Clear editing state after updating
+          setContractorEditingCode(null);
+        } else {
+          // Add a new contractor
+          const { error } = await supabase.from("contractor").insert([formContractorData]);
+  
+          if (error) throw error;
+        }
+  
+        // Refresh the list and reset the form
+        fetchContractors();
+        handleContractorCloseModal();
+      } catch (error) {
+        console.error("Error saving contractor:", error);
+      }
+    };
+    const handleContractorOpenModal = () => {
+      setIsContractorModalOpen(true);
+    };
 
   const handleEdit = (purchase: Purchase) => {
     setEditingCode(purchase.code);
@@ -475,6 +549,9 @@ const PurchaseComp: React.FC = () => {
   const handleInputChange = (e: ChangeEvent<HTMLInputElement>) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
+  const handleContractorInputChange = (e: ChangeEvent<HTMLInputElement>) => {
+      setFormContractorData({ ...formContractorData, [e.target.name]: e.target.value });
+    };
 
   const handleDropChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
     const { name, value } = event.target;
@@ -606,7 +683,7 @@ const PurchaseComp: React.FC = () => {
             </div>
 
             <div>
-              <label htmlFor="project">Supplier</label>
+              <label htmlFor="project" onClick={handleContractorOpenModal}>Supplier+</label>
               <Dropdown
                 name="by_id"
                 value={formData.by_id}
@@ -701,6 +778,124 @@ const PurchaseComp: React.FC = () => {
         isEditing={editingJobCode !== null}
         onAddCategory={handleAddCategory}
       />
+      <ContractorModal show={isContractorModalOpen} onClose={handleContractorCloseModal}>
+        <Form onSubmit={handleContractorSubmit}>
+            <div>
+              <label htmlFor="contact_person">Contact Person</label>
+              <Input
+                id="contact_person"
+                type="text"
+                name="contact_person"
+                value={formContractorData.contact_person}
+                onChange={handleContractorInputChange}
+                placeholder="Contact Person"
+                autoComplete="off"
+                required
+              />
+            </div>
+
+            <div>
+              <label htmlFor="company_name">Company Name</label>
+              <Input
+                id="company_name"
+                type="text"
+                name="company_name"
+                value={formContractorData.company_name}
+                onChange={handleContractorInputChange}
+                placeholder="Company Name"
+                autoComplete="off"
+                required
+              />
+            </div>
+
+            <div>
+              <label htmlFor="phone_number">Phone Number</label>
+              <Input
+                id="phone_number"
+                type="text"
+                name="phone_number"
+                value={formContractorData.phone_number}
+                onChange={handleContractorInputChange}
+                placeholder="Phone Number"
+                autoComplete="off"
+                required
+              />
+            </div>
+
+            <div>
+              <label htmlFor="email">Email</label>
+              <Input
+                id="email"
+                type="email"
+                name="email"
+                value={formContractorData.email}
+                onChange={handleContractorInputChange}
+                placeholder="Email"
+                autoComplete="off"
+                required
+              />
+            </div>
+
+            <div>
+              <label htmlFor="bsb">BSB</label>
+              <Input
+                id="bsb"
+                type="text"
+                name="bsb"
+                value={formContractorData.bsb}
+                onChange={handleContractorInputChange}
+                placeholder="BSB"
+                autoComplete="off"
+                required
+              />
+            </div>
+
+            <div>
+              <label htmlFor="account_no">Account Number</label>
+              <Input
+                id="account_no"
+                type="text"
+                name="account_no"
+                value={formContractorData.account_no}
+                onChange={handleContractorInputChange}
+                placeholder="Account Number"
+                autoComplete="off"
+                required
+              />
+            </div>
+
+            <div>
+              <label htmlFor="account_name">Account Name</label>
+              <Input
+                id="account_name"
+                type="text"
+                name="account_name"
+                value={formContractorData.account_name}
+                onChange={handleContractorInputChange}
+                placeholder="Account Name"
+                autoComplete="off"
+                required
+              />
+            </div>
+
+            <div>
+              <label htmlFor="address">Address</label>
+              <Input
+                id="address"
+                type="text"
+                name="address"
+                value={formContractorData.address}
+                onChange={handleContractorInputChange}
+                placeholder="Address"
+                autoComplete="off"
+                required
+              />
+            </div>
+
+            <Button type="submit">Save Contractor</Button>
+          </Form>
+
+      </ContractorModal>
     </Container>
   );
 };
