@@ -309,8 +309,7 @@ const ContractorComp: React.FC = () => {
       )}
 
       <Modal show={isModalOpen} onClose={handleCloseModal}>
-        
-          <Form onSubmit={handleSubmit}>
+        <Form onSubmit={handleSubmit}>
             <div>
               <label htmlFor="contact_person">Contact Person</label>
               <Input
