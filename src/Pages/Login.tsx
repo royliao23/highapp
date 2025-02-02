@@ -3,6 +3,7 @@ import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import { useDispatch } from "react-redux";
 import { loggedin } from "../state/counter/counterSlice";
+import { Eye, EyeOff } from "lucide-react"; // You can use `react-icons` or Lucide
 
 interface LoginProps {
   onLoginSuccess: (username: string) => void;
@@ -22,7 +23,7 @@ const Login: React.FC<LoginProps> = ({ onLoginSuccess }) => {
     e.preventDefault();
     setError(null);
     setIsLoading(true);
-  
+
     try {
       const response = await axios.post(
         `${process.env.REACT_APP_API_URL}/auth/v1/token?grant_type=password`,
@@ -34,7 +35,7 @@ const Login: React.FC<LoginProps> = ({ onLoginSuccess }) => {
           },
         }
       );
-  
+
       localStorage.setItem("authToken", response.data.access_token);
       localStorage.setItem("username", username);
       onLoginSuccess(username);
@@ -46,7 +47,6 @@ const Login: React.FC<LoginProps> = ({ onLoginSuccess }) => {
       setIsLoading(false);
     }
   };
-  
 
   return (
     <div className="login">
@@ -87,10 +87,11 @@ const Login: React.FC<LoginProps> = ({ onLoginSuccess }) => {
                 position: "absolute",
                 right: "10px",
                 top: "50%",
+                transform: "translateY(-50%)",
                 cursor: "pointer",
               }}
             >
-              {showPassword ? "Hide" : "Show"}
+              {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
             </span>
           </div>
 

@@ -634,9 +634,9 @@ const PurchaseComp: React.FC = () => {
               <Th>Code</Th>
               <Th>Contact Person</Th>
               <Th>Project</Th>
-              <Th>Supplier</Th>
-              <Th>Price</Th>
               <Th>Job</Th>
+              <Th>Price</Th>
+              <Th>Supplier</Th>
               <Th>Ref</Th>
               <Th>Edit</Th>
               <Th>Delete</Th>
