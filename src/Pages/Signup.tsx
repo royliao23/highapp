@@ -35,11 +35,11 @@ const Signup: React.FC = () => {
   };
 
   return (
-    <div className="signup">
-      <div className="signup-container">
+    <div className="login">
+      <div className="login-container">
         <h2>Sign Up</h2>
-        <form onSubmit={handleSignup} className="signup_form">
-          <label htmlFor="email" className="signup_label">
+        <form onSubmit={handleSignup} className="login_form">
+          <label htmlFor="email" className="login_label">
             Email
           </label>
           <input
@@ -49,11 +49,11 @@ const Signup: React.FC = () => {
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             aria-label="Email"
-            className="signup_box"
+            className="login_box"
             required
           />
 
-          <label htmlFor="password" className="signup_label">
+          <label htmlFor="password" className="login_label">
             Password
           </label>
           <input
@@ -63,11 +63,11 @@ const Signup: React.FC = () => {
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             aria-label="Password"
-            className="signup_box"
+            className="login_box"
             required
           />
 
-          <button type="submit" disabled={isLoading} className="signup_button">
+          <button type="submit" disabled={isLoading} className="login_button">
             {isLoading ? "Signing up..." : "Sign Up"}
           </button>
           {error && <p className="error">{error}</p>}
