@@ -1,5 +1,3 @@
-
-
 import React, { useEffect, useState } from "react";
 import { HashRouter, Routes, Route, useLocation, useNavigate } from "react-router-dom";
 import "./styles.css";
@@ -15,19 +13,30 @@ import ProjectComp from "./Pages/Project";
 import JobComp from "./Pages/Job";
 import PurchaseComp from "./Pages/Purchase";
 import Nav from "./components/Nav";
-
+import Signup from "./Pages/Signup";
 
 const App: React.FC = () => {
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [isLoggedIn, setIsLoggedIn] = useState(
+    localStorage.getItem("isLoggedIn") === "true"
+  );
 
-  // Function to handle successful login
   const handleLoginSuccess = () => {
-    setIsLoggedIn(true); // Update login state
+    setIsLoggedIn(true);
+    localStorage.setItem("isLoggedIn", "true");
+  };
+
+  const handleLogout = () => {
+    setIsLoggedIn(false);
+    localStorage.removeItem("isLoggedIn");
   };
 
   return (
     <HashRouter>
-      <MainApp isLoggedIn={isLoggedIn} onLoginSuccess={handleLoginSuccess} />
+      <MainApp
+        isLoggedIn={isLoggedIn}
+        onLoginSuccess={handleLoginSuccess}
+        onLogout={handleLogout}
+      />
     </HashRouter>
   );
 };
@@ -35,22 +44,31 @@ const App: React.FC = () => {
 interface MainAppProps {
   isLoggedIn: boolean;
   onLoginSuccess: () => void;
+  onLogout: () => void;
 }
 
-const MainApp: React.FC<MainAppProps> = ({ isLoggedIn, onLoginSuccess }) => {
-  const { pathname } = useLocation(); // Move useLocation to this component
+const MainApp: React.FC<MainAppProps> = ({
+  isLoggedIn,
+  onLoginSuccess,
+  onLogout,
+}) => {
+  const { pathname } = useLocation();
   const navigate = useNavigate();
-  // Redirect to login page if not logged in
+  const hideNavPages = ["/login", "/signup"];
+
   useEffect(() => {
-    if (!isLoggedIn && pathname !== "/login") {
-      navigate("/login"); // Navigate to login and update URL
+    if (!isLoggedIn && pathname !== "/login" && pathname !== "/signup") {
+      navigate("/login");
     }
   }, [isLoggedIn, pathname, navigate]);
+
   return (
     <>
-      {/* Conditionally render Nav if the current path is not "/login" */}
-      {pathname !== "/login" && <Nav />}
+      {isLoggedIn && !hideNavPages.includes(pathname) && (
+        <Nav onLogout={onLogout} />
+      )}
       <Routes>
+        <Route path="/signup" element={<Signup />} />
         <Route path="/login" element={<Login onLoginSuccess={onLoginSuccess} />} />
         {isLoggedIn && <Route path="/home" element={<Home />} />}
         {isLoggedIn && <Route path="/purchase" element={<PurchaseComp />} />}
@@ -62,7 +80,6 @@ const MainApp: React.FC<MainAppProps> = ({ isLoggedIn, onLoginSuccess }) => {
         {isLoggedIn && <Route path="/project" element={<ProjectComp />} />}
         {isLoggedIn && <Route path="/contractor" element={<Contractor />} />}
         {!isLoggedIn && <Route path="/" element={<Authors />} />}
-        {/* Fallback route */}
         <Route path="*" element={<Login onLoginSuccess={onLoginSuccess} />} />
       </Routes>
     </>

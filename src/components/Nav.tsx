@@ -1,28 +1,26 @@
 import { Link, useNavigate } from "react-router-dom";
-import { useDispatch } from "react-redux";
 import { useState } from "react";
-import { loggedin } from "../state/counter/counterSlice";
 
-const Nav = () => {
-  const dispatch = useDispatch();
+interface NavProps {
+  onLogout: () => void;
+}
+
+const Nav: React.FC<NavProps> = ({ onLogout }) => {
   const navigate = useNavigate();
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
 
   const handleMenuClick = (action?: () => void) => {
-    setIsDropdownOpen(false); // Close the dropdown
-    if (action) action(); // Execute additional actions, if any
+    setIsDropdownOpen(false);
+    if (action) action();
   };
 
   return (
     <nav className="navbar">
       <div className="navbar-container">
-        {/* Logo */}
         <Link to="/home" className="navbar-logo" onClick={() => setIsDropdownOpen(false)}>
           <img src="/bm/logo192.png" alt="/logo192.png" />
           ConstrucorApp
         </Link>
-
-        {/* Hamburger Menu */}
         <div
           className={`hamburger ${isDropdownOpen ? "open" : ""}`}
           onClick={() => setIsDropdownOpen(!isDropdownOpen)}
@@ -31,10 +29,8 @@ const Nav = () => {
           <div className="bar"></div>
           <div className="bar"></div>
         </div>
-
-        {/* Menu */}
         <ul className={`menu ${isDropdownOpen ? "dropdown-active" : ""}`}>
-          <li className="menu-item">
+        <li className="menu-item">
             <Link to="/home" className="menu-link" onClick={() => handleMenuClick()}>
               Home
             </Link>
@@ -78,12 +74,12 @@ const Nav = () => {
             <a
               href="#"
               className="menu-link logout-link"
-              onClick={() =>
+              onClick={() => {
                 handleMenuClick(() => {
+                  onLogout(); // Clear state and navigate to login
                   navigate("/login");
-                  dispatch(loggedin(false));
-                })
-              }
+                });
+              }}
             >
               Log Out
             </a>

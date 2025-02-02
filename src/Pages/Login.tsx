@@ -1,9 +1,9 @@
 import React, { useState } from "react";
+import { Eye, EyeOff } from "lucide-react";
 import axios from "axios";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import { useDispatch } from "react-redux";
 import { loggedin } from "../state/counter/counterSlice";
-import { Eye, EyeOff } from "lucide-react"; // You can use `react-icons` or Lucide
 
 interface LoginProps {
   onLoginSuccess: (username: string) => void;
@@ -94,6 +94,13 @@ const Login: React.FC<LoginProps> = ({ onLoginSuccess }) => {
               {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
             </span>
           </div>
+
+          <p style={{ margin: "10px 0" }}>
+            Not registered yet?{" "}
+            <Link to="/signup" style={{ color: "blue", textDecoration: "underline" }}>
+              Sign up here
+            </Link>
+          </p>
 
           <button type="submit" disabled={isLoading} className="login_button">
             {isLoading ? "Logging in..." : "Log In"}
