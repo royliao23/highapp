@@ -14,6 +14,8 @@ import JobComp from "./Pages/Job";
 import PurchaseComp from "./Pages/Purchase";
 import Nav from "./components/Nav";
 import Signup from "./Pages/Signup";
+import ForgotPassword from "./Pages/ForgotPassword";
+import ResetPassword from "./Pages/ResetPassword";
 
 const App: React.FC = () => {
   const [isLoggedIn, setIsLoggedIn] = useState(
@@ -56,11 +58,19 @@ const MainApp: React.FC<MainAppProps> = ({
   const navigate = useNavigate();
   const hideNavPages = ["/login", "/signup"];
 
+  // useEffect(() => {
+  //   if (!isLoggedIn && pathname !== "/login" && pathname !== "/signup" && pathname !== "/forgot-password" && pathname !== "/reset-password") {
+  //     navigate("/login");
+  //   }
+  // }, [isLoggedIn, pathname, navigate]);
+
   useEffect(() => {
-    if (!isLoggedIn && pathname !== "/login" && pathname !== "/signup") {
+    const publicPaths = ["/login", "/signup", "/forgot-password", "/reset-password"];
+    if (!isLoggedIn && !publicPaths.includes(pathname)) {
       navigate("/login");
     }
   }, [isLoggedIn, pathname, navigate]);
+  
 
   return (
     <>
@@ -69,6 +79,8 @@ const MainApp: React.FC<MainAppProps> = ({
       )}
       <Routes>
         <Route path="/signup" element={<Signup />} />
+        <Route path="/forgot-password" element={<ForgotPassword />} />
+        <Route path="/reset-password" element={<ResetPassword />} />
         <Route path="/login" element={<Login onLoginSuccess={onLoginSuccess} />} />
         {isLoggedIn && <Route path="/home" element={<Home />} />}
         {isLoggedIn && <Route path="/purchase" element={<PurchaseComp />} />}
@@ -79,8 +91,8 @@ const MainApp: React.FC<MainAppProps> = ({
         {isLoggedIn && <Route path="/job" element={<JobComp />} />}
         {isLoggedIn && <Route path="/project" element={<ProjectComp />} />}
         {isLoggedIn && <Route path="/contractor" element={<Contractor />} />}
-        {!isLoggedIn && <Route path="/" element={<Authors />} />}
-        <Route path="*" element={<Login onLoginSuccess={onLoginSuccess} />} />
+        {/* {!isLoggedIn && <Route path="/" element={<Authors />} />} */}
+        <Route path="*" element={<h1>404 - Page Not Found</h1>} />
       </Routes>
     </>
   );

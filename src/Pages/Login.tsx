@@ -94,11 +94,22 @@ const Login: React.FC<LoginProps> = ({ onLoginSuccess }) => {
               {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
             </span>
           </div>
+          <p style={{ marginTop: "10px" }}>
+            <Link to="/forgot-password" style={{ color: "blue", textDecoration: "underline" }}>
+              Forgot Password?
+            </Link>
+          </p>
 
           <p style={{ margin: "10px 0" }}>
             Not registered yet?{" "}
             <Link to="/signup" style={{ color: "blue", textDecoration: "underline" }}>
               Sign up here
+            </Link>
+          </p>
+          <p style={{ margin: "10px 0" }}>
+         
+            <Link to="/reset-password?token=64356363" style={{ color: "blue", textDecoration: "underline" }}>
+              Reset Password
             </Link>
           </p>
 
