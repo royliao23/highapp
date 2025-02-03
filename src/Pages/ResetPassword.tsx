@@ -75,22 +75,26 @@ const ResetPassword = () => {
     };
 
     return (
-        <div>
-            <form onSubmit={handleReset}>
-                <label htmlFor="password">New Password</label>
+        <div className="login">
+            <div className="login-container">
+            <h2>Reset Password</h2>
+            <form onSubmit={handleReset} className="login_form">
+                <label htmlFor="password" className="login_label">New Password</label>
                 <input
                     type="password"
                     id="password"
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                     required
+                    className="login_box"
                 />
-                <button type="submit" disabled={loading}>
+                <button type="submit" disabled={loading} className="login_button">
                     {loading ? "Resetting..." : "Reset Password"}
                 </button>
                 {error && <p style={{ color: "red" }}>{error}</p>}
                 {successMessage && <p style={{ color: "green" }}>{successMessage}</p>}
             </form>
+            </div>
         </div>
     );
 };

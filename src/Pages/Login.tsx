@@ -106,12 +106,6 @@ const Login: React.FC<LoginProps> = ({ onLoginSuccess }) => {
               Sign up here
             </Link>
           </p>
-          <p style={{ margin: "10px 0" }}>
-         
-            <Link to="/reset-password?token=64356363" style={{ color: "blue", textDecoration: "underline" }}>
-              Reset Password
-            </Link>
-          </p>
 
           <button type="submit" disabled={isLoading} className="login_button">
             {isLoading ? "Logging in..." : "Log In"}
