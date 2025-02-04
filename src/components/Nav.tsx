@@ -18,8 +18,8 @@ const Nav: React.FC<NavProps> = ({ onLogout }) => {
     <nav className="navbar">
       <div className="navbar-container">
         <Link to="/home" className="navbar-logo" onClick={() => setIsDropdownOpen(false)} >
-          <img src="/bm/logo192.png" alt="/logo192.png"  />
-          ConstrucorApp
+          <img src="/bm/logo192.png" alt="High App"  />
+         
         </Link>
         <div
           className={`hamburger ${isDropdownOpen ? "open" : ""}`}

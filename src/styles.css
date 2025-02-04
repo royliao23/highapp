@@ -172,9 +172,9 @@ code {
 }
 
 .navbar-logo img {
-  width: 30px;
-  height: 30px;
-  margin-right: 0.5rem;
+  width: 100px;
+  height: 100px;
+  margin-right: 1.5rem;
 }
 
 /* Menu styles */
