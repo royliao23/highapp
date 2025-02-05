@@ -91,7 +91,6 @@ const MainApp: React.FC<MainAppProps> = ({
         {isLoggedIn && <Route path="/job" element={<JobComp />} />}
         {isLoggedIn && <Route path="/project" element={<ProjectComp />} />}
         {isLoggedIn && <Route path="/contractor" element={<Contractor />} />}
-        {/* {!isLoggedIn && <Route path="/" element={<Authors />} />} */}
         <Route path="*" element={<h1>404 - Page Not Found</h1>} />
       </Routes>
     </>
