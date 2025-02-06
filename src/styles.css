@@ -430,5 +430,6 @@ label {
   font-weight: bold;
   margin-bottom: 0.5rem;
 }
+.addModal { color: #0d6efd;margin: 5px;cursor: pointer;}
 
 

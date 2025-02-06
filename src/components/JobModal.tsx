@@ -67,7 +67,7 @@ const Dropdown = styled.select`
   border: 1px solid #ddd;
   border-radius: 4px;
   font-size: 1rem;
-  width: 100%;
+  width: 90%;
 `;
 
 
@@ -84,15 +84,6 @@ const Button = styled.button`
   }
 `;
 
-const AddCategoryButton = styled.span`
-  margin-left: 0.5rem;
-  cursor: pointer;
-  color: #007bff;
-  font-weight: bold;
-  &:hover {
-    text-decoration: underline;
-  }
-`;
 
 // Define the props for the JobModal component
 interface ModalProps {
@@ -154,11 +145,10 @@ const JobModalComp: React.FC<ModalProps> = ({
         <ModalContent>
           <CloseButton onClick={onClose}>&times;</CloseButton>
           <form onSubmit={onSubmit}>
+            
             <label>
               Job Category:
-              <AddCategoryButton onClick={handleOpenCategoryModal}>
-                +
-              </AddCategoryButton>
+              
               <Dropdown
                 name="job_category_id"
                 value={formData.job_category_id}
@@ -173,7 +163,9 @@ const JobModalComp: React.FC<ModalProps> = ({
                   
                 ))}
               </Dropdown>
+              <span onClick={handleOpenCategoryModal} className="addModal"> +</span>
             </label>
+            
             <label>
               Name:
               <Input

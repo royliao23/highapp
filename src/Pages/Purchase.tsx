@@ -683,7 +683,7 @@ const PurchaseComp: React.FC = () => {
             </div>
 
             <div>
-              <label htmlFor="project" onClick={handleContractorOpenModal}>Supplier+</label>
+              <label htmlFor="project" >Supplier</label>
               <Dropdown
                 name="by_id"
                 value={formData.by_id}
@@ -692,6 +692,7 @@ const PurchaseComp: React.FC = () => {
                 placeholder="Select Contractor"
                 required
               />
+              <span onClick={handleContractorOpenModal} className="addModal"> +</span>
             </div>
 
             <div>
@@ -706,7 +707,7 @@ const PurchaseComp: React.FC = () => {
               />
             </div>
             <div>
-              <label htmlFor="job" onClick={handleJobOpenModal}>Job+</label>
+              <label htmlFor="job" >Job</label>
               <Dropdown
                 name="job_id"
                 value={formData.job_id}
@@ -715,6 +716,7 @@ const PurchaseComp: React.FC = () => {
                 placeholder="Select Job"
                 required
               />
+              <span onClick={handleJobOpenModal} className="addModal"> +</span>
             </div>
 
             <div>
