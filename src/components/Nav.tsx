@@ -42,7 +42,7 @@ const Nav: React.FC<NavProps> = ({ onLogout }) => {
           </li>
           <li className="menu-item">
             <Link to="/contractor" className="menu-link" onClick={() => handleMenuClick()}>
-              Supplier
+              Contractor
             </Link>
           </li>
           <li className="menu-item">
@@ -60,16 +60,16 @@ const Nav: React.FC<NavProps> = ({ onLogout }) => {
               Category
             </Link>
           </li>
-          <li className="menu-item">
+          {/* <li className="menu-item">
             <Link to="/task" className="menu-link" onClick={() => handleMenuClick()}>
               Tasks
             </Link>
-          </li>
-          <li className="menu-item">
+          </li> */}
+          {/* <li className="menu-item">
             <Link to="/contact" className="menu-link" onClick={() => handleMenuClick()}>
               Contact
             </Link>
-          </li>
+          </li> */}
           <li className="menu-item">
             <a
               href="#"
