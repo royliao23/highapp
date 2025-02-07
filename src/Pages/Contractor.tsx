@@ -126,7 +126,12 @@ const ContractorComp: React.FC = () => {
   const [isMobileView, setIsMobileView] = useState<boolean>(window.innerWidth < 1000);
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
   const [searchTerm, setSearchTerm] = useState<string>("");
-
+  const [currentPage, setCurrentPage] = useState<number>(1);
+  const [itemsPerPage] = useState<number>(5); 
+  const handlePageChange = (newPage: number) => {
+    setCurrentPage(newPage);
+  };
+  
   const fetchContractors = async () => {
     try {
       const { data, error } = await supabase.from("contractor").select("*");
@@ -248,6 +253,12 @@ const ContractorComp: React.FC = () => {
     );
   });
 
+  const paginatedContractors = contractors.slice(
+    (currentPage - 1) * itemsPerPage,
+    currentPage * itemsPerPage
+  );
+  const totalPages = Math.ceil(filteredContractors.length / itemsPerPage);
+
   // Handle Form Input
   const handleInputChange = (e: ChangeEvent<HTMLInputElement>) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -260,10 +271,24 @@ const ContractorComp: React.FC = () => {
         <SearchBox searchTerm={searchTerm} onSearchChange={handleSearchChange} />
         <Button onClick={() => handleOpenModal()}>Add Contractor</Button>
       </ButtonRow>
-
+      {/* Pagination Controls */}
+      <div>
+        {Array.from({ length: totalPages }, (_, index) => (
+          <Button
+            key={index}
+            onClick={() => handlePageChange(index + 1)}
+            style={{ 
+              margin: "0 5px", 
+              backgroundColor: currentPage === index + 1 ? "#007bff" : "#ddd" 
+            }}
+          >
+            {index + 1}
+          </Button>
+        ))}
+      </div>
       {isMobileView ? (
         <List>
-          {filteredContractors.map((contractor) => (
+          {paginatedContractors.map((contractor) => (
             <ListItem key={contractor.code}>
               <strong>Code:</strong> {contractor.code} <br />
               <strong>Contact Person:</strong> {contractor.contact_person} <br />
@@ -289,7 +314,7 @@ const ContractorComp: React.FC = () => {
             </tr>
           </thead>
           <tbody>
-            {filteredContractors.map((contractor) => (
+            {paginatedContractors.map((contractor) => (
               <tr key={contractor.code}>
                 <Td>{contractor.code}</Td>
                 <Td>{contractor.contact_person}</Td>

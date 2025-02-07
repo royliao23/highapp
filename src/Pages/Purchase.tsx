@@ -210,7 +210,6 @@ const PurchaseComp: React.FC = () => {
   const [isContractorModalOpen, setIsContractorModalOpen] = useState<boolean>(false);
   const [searchTerm, setSearchTerm] = useState<string>("");
 
-  //new
   const [isJobModalOpen, setIsJobModalOpen] = useState<boolean>(false);
   const [formJobData, setFormJobData] = useState({
     name: "",
@@ -221,7 +220,12 @@ const PurchaseComp: React.FC = () => {
   const [jobCategoryOptions, setJobCategoryOptions] = useState([
     { value: 0, label: "" },
   ]);  // For the dropdown in the job modal
-
+  const [currentPage, setCurrentPage] = useState<number>(1);
+  const [itemsPerPage] = useState<number>(5); // You can adjust this value based on requirements
+  const handlePageChange = (newPage: number) => {
+    setCurrentPage(newPage);
+  };
+  
   const fetchJobCategories = async () => {
     try {
       const { data, error } = await supabase.from("categ").select("*");
@@ -641,7 +645,12 @@ const PurchaseComp: React.FC = () => {
     };
     onCreateInvoice(invoicePayload);
   };
-
+  const paginatedPurchases = filteredPurchases.slice(
+    (currentPage - 1) * itemsPerPage,
+    currentPage * itemsPerPage
+  );
+  
+  const totalPages = Math.ceil(filteredPurchases.length / itemsPerPage);
   return (
     <Container>
       <Title>Job Order</Title>
@@ -649,10 +658,24 @@ const PurchaseComp: React.FC = () => {
         <SearchBox searchTerm={searchTerm} onSearchChange={handleSearchChange} />
         <Button onClick={() => handleOpenModal()}>Add purchase</Button>
       </ButtonRow>
-
+      {/* Pagination Controls */}
+      <div>
+        {Array.from({ length: totalPages }, (_, index) => (
+          <Button
+            key={index}
+            onClick={() => handlePageChange(index + 1)}
+            style={{ 
+              margin: "0 5px", 
+              backgroundColor: currentPage === index + 1 ? "#007bff" : "#ddd" 
+            }}
+          >
+            {index + 1}
+          </Button>
+        ))}
+      </div>
       {isMobileView ? (
         <List>
-          {filteredPurchases.map((purchase) => (
+          {paginatedPurchases.map((purchase) => (
             <ListItem key={purchase.code}>
               <strong>Code:</strong> {purchase.code} <br />
               <strong>Contact Person:</strong> {purchase.contact} <br />
@@ -681,7 +704,7 @@ const PurchaseComp: React.FC = () => {
             </tr>
           </thead>
           <tbody>
-            {filteredPurchases.map((purchase) => (
+            {paginatedPurchases.map((purchase) => (
               <tr key={purchase.code}>
                 <Td>{purchase.code}</Td>
                 <Td>{purchase.contact}</Td>

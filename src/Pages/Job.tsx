@@ -101,9 +101,7 @@ const JobComp: React.FC = () => {
     name: "",
     description: "",
   });
-  const [formCategData, setCategFormData] = useState<Omit<Categ, "code">>({
-    name: "",
-  });
+  
   const [editingCode, setEditingCode] = useState<number | null>(null);
   const [isMobileView, setIsMobileView] = useState<boolean>(window.innerWidth < 1000);
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
@@ -111,6 +109,13 @@ const JobComp: React.FC = () => {
   const [jobCategoryOptions, setJobCategoryOptions] = useState<
     { value: number; label: string }[]
   >([]);
+
+  const [currentPage, setCurrentPage] = useState<number>(1);
+  const [itemsPerPage] = useState<number>(5);
+  const handlePageChange = (newPage: number) => {
+    setCurrentPage(newPage);
+  };
+  
 
   useEffect(() => {
     if (isModalOpen) {
@@ -253,7 +258,12 @@ const JobComp: React.FC = () => {
       (job.description?.toLowerCase() || "").includes(searchTerm.toLowerCase())
     );
   });
-
+  const paginatedJobs = filteredJobs.slice(
+    (currentPage - 1) * itemsPerPage,
+    currentPage * itemsPerPage
+  );
+  
+  const totalPages = Math.ceil(filteredJobs.length / itemsPerPage);
   return (
     <Container>
       <Title>Job Management</Title>
@@ -261,9 +271,24 @@ const JobComp: React.FC = () => {
         <SearchBox searchTerm={searchTerm} onSearchChange={(e) => setSearchTerm(e.target.value)} />
         <Button onClick={() => handleOpenModal()}>Add Job</Button>
       </ButtonRow>
+      {/* Pagination Controls */}
+    <div>
+      {Array.from({ length: totalPages }, (_, index) => (
+        <Button
+          key={index}
+          onClick={() => handlePageChange(index + 1)}
+          style={{ 
+            margin: "0 5px", 
+            backgroundColor: currentPage === index + 1 ? "#007bff" : "#ddd" 
+          }}
+        >
+          {index + 1}
+        </Button>
+      ))}
+    </div>
       {isMobileView ? (
         <List>
-          {filteredJobs.map((job) => (
+          {paginatedJobs.map((job) => (
             <ListItem key={job.code}>
               <strong>Job Code:</strong> {job.code} <br />
               <strong>Name:</strong> {job.name} <br />
@@ -287,7 +312,7 @@ const JobComp: React.FC = () => {
             </tr>
           </thead>
           <tbody>
-            {filteredJobs.map((job) => (
+            {paginatedJobs.map((job) => (
               <tr key={job.code}>
                 <Td>{job.code}</Td>
                 <Td>{job.name}</Td>
