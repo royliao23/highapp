@@ -5,7 +5,6 @@ import SearchBox from "../components/SearchBox";
 import Dropdown from "../components/Dropdown";
 import JobModalComp from "../components/JobModal";
 import ContractorModal from "../components/Modal";
-// import PurchaseOrderForm from "../components/CreateInvoiceForm";
 // Define the purchase type based on the table schema
 interface Purchase {
   code: number;
@@ -18,7 +17,6 @@ interface Purchase {
   create_at: Date;
   updated_at: Date;
   due_at: Date
-  invoice?:any[]
 }
 
 interface Contractor {
@@ -190,7 +188,6 @@ const PurchaseComp: React.FC = () => {
     create_at: new Date(),
     updated_at: new Date(),
     due_at: new Date(),
-    invoice:[]
   });
   const [formContractorData, setFormContractorData] = useState<Omit<Contractor, "code">>({
     contact_person: "",
@@ -297,13 +294,7 @@ const PurchaseComp: React.FC = () => {
 
   const fetchPurchases = async () => {
     try {
-      const { data, error } = await supabase
-      .from("purchase_order")
-      .select(`
-        *,
-        invoice:jobby (code, ref),
-        job_name:job (code, name)
-      `);
+      const { data, error } = await supabase.from("purchase_order").select("*");
       if (error) throw error;
       setPurchases(data || []);
     } catch (error) {
@@ -532,7 +523,6 @@ const PurchaseComp: React.FC = () => {
       create_at: purchase.create_at,
       updated_at: purchase.updated_at,
       due_at: purchase.due_at,
-      invoice:purchase.invoice
     });
   };
 
@@ -613,38 +603,10 @@ const PurchaseComp: React.FC = () => {
         console.error("Error adding category:", error);
       }
     };
-    const onCreateInvoice = async (invoicePayload:any) => {
-      try {
-          const { error } = await supabase.from("jobby").insert([invoicePayload]);
-          if (error) throw error;
-        // Refresh the list and reset the form
-        fetchPurchases();
-        handleCloseModal();
-      } catch (error) {
-        console.error("Error creating invoice:", error);
-      }
-    };
-  const handleCreateInvoice = () => {
-    const invoicePayload = {
-      po_id: editingCode, // Ensure purchase order code exists
-      job_id: formData.job_id,
-      by_id: formData.by_id,
-      project_id: formData.project_id,
-      paid: 0,
-      note: "test note",
-      discription:"test",
-      ref: formData.ref,
-      cost: formData.cost,
-      contact: formData.contact,
-      due_at: formData.due_at,
-      create_at:new Date(),
-    };
-    onCreateInvoice(invoicePayload);
-  };
 
   return (
     <Container>
-      <Title>Job Order</Title>
+      <Title>Purchase Order Management</Title>
       <ButtonRow>
         <SearchBox searchTerm={searchTerm} onSearchChange={handleSearchChange} />
         <Button onClick={() => handleOpenModal()}>Add purchase</Button>
@@ -771,7 +733,18 @@ const PurchaseComp: React.FC = () => {
               />
             </div>
 
-            
+            {/* <div>
+    <label htmlFor="phone_number">Phone</label>
+    <Input
+      id="phone"
+      type="string"
+      name="phone_number"
+      value={formData.phone_number}
+      onChange={handleInputChange}
+      placeholder="Phone Number"
+      autoComplete="off"
+    />
+  </div> */}
 
             <div>
               <label htmlFor="ref">Reference</label>
@@ -786,30 +759,16 @@ const PurchaseComp: React.FC = () => {
                 required
               />
             </div>
+
             
-            <Button type="submit">Save purchase</Button> 
-            {formData.invoice?.length === 0 && (
-              <Button onClick={handleCreateInvoice} >
-                Create Invoice
-              </Button>
-            )}
-            {/* need update po_id, paid, note,paid, discription */}
+
+
+            <Button type="submit">Save purchase</Button>
           </Form>
 
 
         </ModalContent>
       </Modal>
-      {/* <PurchaseOrderForm 
-      isModalOpen={isModalOpen}
-      handleCloseModal={handleCloseModal}
-      contractorOptions
-      projectOptions
-      jobOptions
-      formData
-      setFormData
-      onSubmitPurchaseOrder
-      onCreateInvoice 
-      /> */}
       <JobModalComp
         show={isJobModalOpen}
         onClose={handleJobCloseModal}
