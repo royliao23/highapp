@@ -5,12 +5,13 @@ import SearchBox from "../components/SearchBox";
 import Dropdown from "../components/Dropdown";
 import JobModalComp from "../components/JobModal";
 import ContractorModal from "../components/Modal";
-// Define the purchase type based on the table schema
-interface Purchase {
+// Define the Invoice type based on the table schema
+interface Invoice {
   code: number;
   job_id: number;
   by_id: number;
   project_id: number;
+  invoice_id?: number;
   cost: number;
   ref: string;
   contact: string;
@@ -174,11 +175,11 @@ const CloseButton = styled.button`
   cursor: pointer;
 `;
 
-// Inside the purchase component...
+// Inside the Invoice component...
 
-const PurchaseComp: React.FC = () => {
-  const [purchases, setPurchases] = useState<Purchase[]>([]);
-  const [formData, setFormData] = useState<Omit<Purchase, "code">>({
+const InvoiceComp: React.FC = () => {
+  const [Invoices, setInvoices] = useState<Invoice[]>([]);
+  const [formData, setFormData] = useState<Omit<Invoice, "code">>({
     job_id: 0,
     by_id: 0,
     project_id: 0,
@@ -199,8 +200,8 @@ const PurchaseComp: React.FC = () => {
     account_name: "",
     address: "",
   });
-  const [editingCode, setEditingCode] = useState<number | null>(null); // Track which purchase is being edited
-  const [contractoreditingCode, setContractorEditingCode] = useState<number | null>(null); // Track which purchase is being edited
+  const [editingCode, setEditingCode] = useState<number | null>(null); // Track which Invoice is being edited
+  const [contractoreditingCode, setContractorEditingCode] = useState<number | null>(null); // Track which Invoice is being edited
   
   const [isMobileView, setIsMobileView] = useState<boolean>(window.innerWidth < 1000);
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
@@ -292,13 +293,13 @@ const PurchaseComp: React.FC = () => {
     }
   };
 
-  const fetchPurchases = async () => {
+  const fetchInvoices = async () => {
     try {
-      const { data, error } = await supabase.from("purchase_order").select("*");
+      const { data, error } = await supabase.from("jobby").select("*");
       if (error) throw error;
-      setPurchases(data || []);
+      setInvoices(data || []);
     } catch (error) {
-      console.error("Error fetching purchases:", error);
+      console.error("Error fetching Invoices:", error);
     }
   };
   const [projectOptions, setProjectOptions] = useState([
@@ -386,7 +387,7 @@ const PurchaseComp: React.FC = () => {
   }, []);
 
   useEffect(() => {
-    fetchPurchases();
+    fetchInvoices();
   }, []);
 
   useEffect(() => {
@@ -410,9 +411,9 @@ const PurchaseComp: React.FC = () => {
     setSearchTerm(e.target.value.toLowerCase()); // Normalize search term for case-insensitive search
   };
 
-  const handleOpenModal = (purchase?: Purchase) => {
-    if (purchase) {
-      handleEdit(purchase);
+  const handleOpenModal = (Invoice?: Invoice) => {
+    if (Invoice) {
+      handleEdit(Invoice);
     }
     setIsModalOpen(true);
   };
@@ -453,9 +454,9 @@ const PurchaseComp: React.FC = () => {
 
     try {
       if (editingCode !== null) {
-        // Update an existing purchase
+        // Update an existing Invoice
         const { error } = await supabase
-          .from("purchase_order")
+          .from("jobby")
           .update(formData)
           .eq("code", editingCode);
 
@@ -464,17 +465,17 @@ const PurchaseComp: React.FC = () => {
         // Clear editing state after updating
         setEditingCode(null);
       } else {
-        // Add a new purchase
-        const { error } = await supabase.from("purchase_order").insert([formData]);
+        // Add a new Invoice
+        const { error } = await supabase.from("jobby").insert([formData]);
 
         if (error) throw error;
       }
 
       // Refresh the list and reset the form
-      fetchPurchases();
+      fetchInvoices();
       handleCloseModal();
     } catch (error) {
-      console.error("Error saving purchase:", error);
+      console.error("Error saving Invoice:", error);
     }
   };
 
@@ -511,36 +512,36 @@ const PurchaseComp: React.FC = () => {
       setIsContractorModalOpen(true);
     };
 
-  const handleEdit = (purchase: Purchase) => {
-    setEditingCode(purchase.code);
+  const handleEdit = (Invoice: Invoice) => {
+    setEditingCode(Invoice.code);
     setFormData({
-      job_id: purchase.job_id,
-      by_id: purchase.by_id,
-      project_id: purchase.project_id,
-      ref: purchase.ref,
-      cost: purchase.cost,
-      contact: purchase.contact,
-      create_at: purchase.create_at,
-      updated_at: purchase.updated_at,
-      due_at: purchase.due_at,
+      job_id: Invoice.job_id,
+      by_id: Invoice.by_id,
+      project_id: Invoice.project_id,
+      ref: Invoice.ref,
+      cost: Invoice.cost,
+      contact: Invoice.contact,
+      create_at: Invoice.create_at,
+      updated_at: Invoice.updated_at,
+      due_at: Invoice.due_at,
     });
   };
 
   const handleDelete = async (code: number) => {
     try {
-      const { error } = await supabase.from("purchase_order").delete().eq("code", code);
+      const { error } = await supabase.from("jobby").delete().eq("code", code);
       if (error) throw error;
-      fetchPurchases(); // Refresh the list
+      fetchInvoices(); // Refresh the list
     } catch (error) {
-      console.error("Error deleting purchase:", error);
+      console.error("Error deleting Invoice:", error);
     }
   };
 
-  // Filter purchases dynamically based on the search term
-  const filteredPurchases = purchases.filter((purchase) => {
+  // Filter Invoices dynamically based on the search term
+  const filteredInvoices = Invoices.filter((Invoice) => {
     return (
-      (purchase.ref?.toLowerCase() || "").includes(searchTerm.toLowerCase()) ||
-      (purchase.contact?.toLowerCase() || "").includes(searchTerm.toLowerCase())
+      (Invoice.ref?.toLowerCase() || "").includes(searchTerm.toLowerCase()) ||
+      (Invoice.contact?.toLowerCase() || "").includes(searchTerm.toLowerCase())
     );
   });
 
@@ -606,24 +607,24 @@ const PurchaseComp: React.FC = () => {
 
   return (
     <Container>
-      <Title>Purchase Order Management</Title>
+      <Title>Invoice Management</Title>
       <ButtonRow>
         <SearchBox searchTerm={searchTerm} onSearchChange={handleSearchChange} />
-        <Button onClick={() => handleOpenModal()}>Add purchase</Button>
+        <Button onClick={() => handleOpenModal()}>Add Invoice</Button>
       </ButtonRow>
 
       {isMobileView ? (
         <List>
-          {filteredPurchases.map((purchase) => (
-            <ListItem key={purchase.code}>
-              <strong>Code:</strong> {purchase.code} <br />
-              <strong>Contact Person:</strong> {purchase.contact} <br />
-              <strong>Project:</strong> {projectOptions.find((option) => option.value === purchase.project_id)?.label || "Unknown"} <br />
-              <strong>Supplier Name:</strong> {contractorOptions.find((option) => option.value === purchase.by_id)?.label || "Unknown"} <br />
-              <strong>Price:</strong> {purchase.cost} <br />
-              <strong>Job:</strong> {jobOptions.find((option) => option.value === purchase.job_id)?.label || "Unknown"} <br />
-              <Button onClick={() => handleOpenModal(purchase)}>Edit</Button>
-              <DeleteButton onClick={() => handleDelete(purchase.code)}>Delete</DeleteButton>
+          {filteredInvoices.map((Invoice) => (
+            <ListItem key={Invoice.code}>
+              <strong>Code:</strong> {Invoice.code} <br />
+              <strong>Contact Person:</strong> {Invoice.contact} <br />
+              <strong>Project:</strong> {projectOptions.find((option) => option.value === Invoice.project_id)?.label || "Unknown"} <br />
+              <strong>Supplier Name:</strong> {contractorOptions.find((option) => option.value === Invoice.by_id)?.label || "Unknown"} <br />
+              <strong>Price:</strong> {Invoice.cost} <br />
+              <strong>Job:</strong> {jobOptions.find((option) => option.value === Invoice.job_id)?.label || "Unknown"} <br />
+              <Button onClick={() => handleOpenModal(Invoice)}>Edit</Button>
+              <DeleteButton onClick={() => handleDelete(Invoice.code)}>Delete</DeleteButton>
             </ListItem>
           ))}
         </List>
@@ -643,20 +644,20 @@ const PurchaseComp: React.FC = () => {
             </tr>
           </thead>
           <tbody>
-            {filteredPurchases.map((purchase) => (
-              <tr key={purchase.code}>
-                <Td>{purchase.code}</Td>
-                <Td>{purchase.contact}</Td>
-                <Td>{projectOptions.find((option) => option.value === purchase.project_id)?.label || "Unknown"}</Td>
-                <Td>{jobOptions.find((option) => option.value === purchase.job_id)?.label || "Unknown"}</Td>
-                <Td>{purchase.cost}</Td>
-                <Td>{contractorOptions.find((option) => option.value === purchase.by_id)?.label || "Unknown"}</Td>
-                <Td>{purchase.ref}</Td>
+            {filteredInvoices.map((Invoice) => (
+              <tr key={Invoice.code}>
+                <Td>{Invoice.code}</Td>
+                <Td>{Invoice.contact}</Td>
+                <Td>{projectOptions.find((option) => option.value === Invoice.project_id)?.label || "Unknown"}</Td>
+                <Td>{jobOptions.find((option) => option.value === Invoice.job_id)?.label || "Unknown"}</Td>
+                <Td>{Invoice.cost}</Td>
+                <Td>{contractorOptions.find((option) => option.value === Invoice.by_id)?.label || "Unknown"}</Td>
+                <Td>{Invoice.ref}</Td>
                 <Td>
-                  <Button onClick={() => handleOpenModal(purchase)}>Edit</Button>
+                  <Button onClick={() => handleOpenModal(Invoice)}>Edit</Button>
                 </Td>
                 <Td>
-                  <DeleteButton onClick={() => handleDelete(purchase.code)}>Delete</DeleteButton>
+                  <DeleteButton onClick={() => handleDelete(Invoice.code)}>Delete</DeleteButton>
                 </Td>
               </tr>
             ))}
@@ -763,7 +764,7 @@ const PurchaseComp: React.FC = () => {
             
 
 
-            <Button type="submit">Save purchase</Button>
+            <Button type="submit">Save Invoice</Button>
           </Form>
 
 
@@ -902,4 +903,4 @@ const PurchaseComp: React.FC = () => {
   );
 };
 
-export default PurchaseComp;
+export default InvoiceComp;

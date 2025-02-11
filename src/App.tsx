@@ -16,6 +16,7 @@ import Nav from "./components/Nav";
 import Signup from "./Pages/Signup";
 import ForgotPassword from "./Pages/ForgotPassword";
 import ResetPassword from "./Pages/ResetPassword";
+import InvoiceComp from "./Pages/Invoice";
 
 const App: React.FC = () => {
   const [isLoggedIn, setIsLoggedIn] = useState(
@@ -91,7 +92,8 @@ const MainApp: React.FC<MainAppProps> = ({
         {isLoggedIn && <Route path="/job" element={<JobComp />} />}
         {isLoggedIn && <Route path="/project" element={<ProjectComp />} />}
         {isLoggedIn && <Route path="/contractor" element={<Contractor />} />}
-        <Route path="*" element={<h1>404 - Page Not Found</h1>} />
+        {isLoggedIn && <Route path="/invoice" element={<InvoiceComp />} />}
+        <Route path="*" element={<Login onLoginSuccess={onLoginSuccess} />} />
       </Routes>
     </>
   );

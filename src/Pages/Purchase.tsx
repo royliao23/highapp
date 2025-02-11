@@ -624,6 +624,7 @@ const PurchaseComp: React.FC = () => {
         // Refresh the list and reset the form
         fetchPurchases();
         handleCloseModal();
+        alert("Invoice created successfully!");
       } catch (error) {
         console.error("Error creating invoice:", error);
       }
@@ -653,7 +654,7 @@ const PurchaseComp: React.FC = () => {
   const totalPages = Math.ceil(filteredPurchases.length / itemsPerPage);
   return (
     <Container>
-      <Title>Job Order</Title>
+      <Title>Order Management</Title>
       <ButtonRow>
         <SearchBox searchTerm={searchTerm} onSearchChange={handleSearchChange} />
         <Button onClick={() => handleOpenModal()}>Add purchase</Button>
