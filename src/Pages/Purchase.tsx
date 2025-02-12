@@ -627,6 +627,14 @@ const PurchaseComp: React.FC = () => {
       }
     };
     const onCreateInvoice = async (invoicePayload:any) => {
+      if (!invoicePayload.po_id) {
+        alert("Please select a purchase order to create an invoice.");
+        return;
+      }
+      if (invoicePayload.cost > originalCost) {
+        alert("Invoice amount cannot exceed the total cost of the purchase order.");
+        return;
+      }
       try {
           const { error } = await supabase.from("jobby").insert([invoicePayload]);
           if (error) throw error;
@@ -638,7 +646,11 @@ const PurchaseComp: React.FC = () => {
         console.error("Error creating invoice:", error);
       }
     };
-  const handleCreateInvoice = () => {
+  const handleCreateInvoice = (balance:number) => {
+    if (formData.cost>balance)
+      {alert("Invoice amount cannot exceed the balance amount.");
+      return;}
+
     const invoicePayload = {
       po_id: editingCode, // Ensure purchase order code exists
       job_id: formData.job_id,
@@ -844,9 +856,18 @@ const PurchaseComp: React.FC = () => {
               ).toFixed(2)}
             </div>
             
-            <Button onClick={handleSubmit}>Save purchase</Button> 
-            {(formData.invoice || []).reduce((total, inv) => total + (inv.cost || 0), 0) <originalCost && (
-              <Button onClick={handleCreateInvoice} >
+            <Button onClick={handleSubmit}>Save purchase</Button>
+
+            {(formData.invoice || []).reduce((total, inv) => total + (inv.cost || 0), 0) < originalCost && (
+              <Button
+                onClick={() => {
+                  const balance = (
+                    originalCost -
+                    (formData.invoice || []).reduce((total, inv) => total + (inv.cost || 0), 0)
+                  ).toFixed(2);
+                  handleCreateInvoice(Number(balance));
+                }}
+              >
                 Create Invoice
               </Button>
             )}
