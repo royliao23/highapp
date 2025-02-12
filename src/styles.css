@@ -432,4 +432,10 @@ label {
 }
 .addModal { color: #0d6efd;margin: 5px;cursor: pointer;}
 
+.invoiceList {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 20px;
+}
+
 

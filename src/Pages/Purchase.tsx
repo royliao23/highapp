@@ -7,6 +7,7 @@ import JobModalComp from "../components/JobModal";
 import ContractorModal from "../components/Modal";
 // import PurchaseOrderForm from "../components/CreateInvoiceForm";
 // Define the purchase type based on the table schema
+interface InvoiceShort { code: number;ref?:string;cost?:number;}
 interface Purchase {
   code: number;
   job_id: number;
@@ -18,7 +19,7 @@ interface Purchase {
   create_at: Date;
   updated_at: Date;
   due_at: Date
-  invoice?:any[]
+  invoice?:InvoiceShort[]
 }
 
 interface Contractor {
@@ -180,6 +181,7 @@ const CloseButton = styled.button`
 
 const PurchaseComp: React.FC = () => {
   const [purchases, setPurchases] = useState<Purchase[]>([]);
+  const [originalCost, setOriginalCost] = useState<number>(0);
   const [formData, setFormData] = useState<Omit<Purchase, "code">>({
     job_id: 0,
     by_id: 0,
@@ -305,7 +307,7 @@ const PurchaseComp: React.FC = () => {
       .from("purchase_order")
       .select(`
         *,
-        invoice:jobby (code, ref),
+        invoice:jobby (code, cost, ref),
         job_name:job (code, name)
       `);
       if (error) throw error;
@@ -463,26 +465,32 @@ const PurchaseComp: React.FC = () => {
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
-
+  
     try {
+      // Create a new object without the `invoice` field
+      const payload = { ...formData };
+      delete payload.invoice; // Remove the `invoice` field
+  
       if (editingCode !== null) {
         // Update an existing purchase
         const { error } = await supabase
           .from("purchase_order")
-          .update(formData)
+          .update(payload) // Use the payload without `invoice`
           .eq("code", editingCode);
-
+  
         if (error) throw error;
-
+  
         // Clear editing state after updating
         setEditingCode(null);
       } else {
         // Add a new purchase
-        const { error } = await supabase.from("purchase_order").insert([formData]);
-
+        const { error } = await supabase
+          .from("purchase_order")
+          .insert([payload]); // Use the payload without `invoice`
+  
         if (error) throw error;
       }
-
+  
       // Refresh the list and reset the form
       fetchPurchases();
       handleCloseModal();
@@ -538,6 +546,7 @@ const PurchaseComp: React.FC = () => {
       due_at: purchase.due_at,
       invoice:purchase.invoice
     });
+  setOriginalCost(purchase.cost);
   };
 
   const handleDelete = async (code: number) => {
@@ -684,6 +693,9 @@ const PurchaseComp: React.FC = () => {
               <strong>Supplier Name:</strong> {contractorOptions.find((option) => option.value === purchase.by_id)?.label || "Unknown"} <br />
               <strong>Price:</strong> {purchase.cost} <br />
               <strong>Job:</strong> {jobOptions.find((option) => option.value === purchase.job_id)?.label || "Unknown"} <br />
+              <strong>Invoices:</strong>{purchase.invoice?.map((inv, index) => (
+                    <span className="invoiceList" key={index}>Inv#{inv.code}: ${inv.cost}</span>
+                  ))}
               <Button onClick={() => handleOpenModal(purchase)}>Edit</Button>
               <DeleteButton onClick={() => handleDelete(purchase.code)}>Delete</DeleteButton>
             </ListItem>
@@ -700,6 +712,7 @@ const PurchaseComp: React.FC = () => {
               <Th>Price</Th>
               <Th>Supplier</Th>
               <Th>Ref</Th>
+              <Th>Invoice</Th>
               <Th>Edit</Th>
               <Th>Delete</Th>
             </tr>
@@ -715,6 +728,11 @@ const PurchaseComp: React.FC = () => {
                 <Td>{contractorOptions.find((option) => option.value === purchase.by_id)?.label || "Unknown"}</Td>
                 <Td>{purchase.ref}</Td>
                 <Td>
+                  {purchase.invoice?.map((inv, index) => (
+                    <span className="invoiceList" key={index}>Inv#{inv.code}: ${inv.cost}</span>
+                  ))}
+                </Td>
+                <Td>
                   <Button onClick={() => handleOpenModal(purchase)}>Edit</Button>
                 </Td>
                 <Td>
@@ -729,7 +747,7 @@ const PurchaseComp: React.FC = () => {
       <Modal show={isModalOpen}>
         <ModalContent>
           <CloseButton onClick={handleCloseModal}>&times;</CloseButton>
-          <Form onSubmit={handleSubmit}>
+          <Form >
             <div>
               <label htmlFor="contact">Contact Person</label>
               <Input
@@ -810,30 +828,35 @@ const PurchaseComp: React.FC = () => {
                 required
               />
             </div>
+
+            {/* Display the total cost of all invoices */}
             
-            <Button type="submit">Save purchase</Button> 
-            {formData.invoice?.length === 0 && (
+            <div>
+              <strong>Total Already Invoiced Amount:</strong>{" "}
+              {(formData.invoice || []).reduce((total, inv) => total + (inv.cost || 0), 0).toFixed(2)}
+            </div>
+
+            <div>
+              <strong>Balance:</strong>{" "}
+              {(
+                originalCost -
+                (formData.invoice || []).reduce((total, inv) => total + (inv.cost || 0), 0)
+              ).toFixed(2)}
+            </div>
+            
+            <Button onClick={handleSubmit}>Save purchase</Button> 
+            {(formData.invoice || []).reduce((total, inv) => total + (inv.cost || 0), 0) <originalCost && (
               <Button onClick={handleCreateInvoice} >
                 Create Invoice
               </Button>
             )}
-            {/* need update po_id, paid, note,paid, discription */}
+            {/* need update po_id, paid, note, discription */}
           </Form>
 
 
         </ModalContent>
       </Modal>
-      {/* <PurchaseOrderForm 
-      isModalOpen={isModalOpen}
-      handleCloseModal={handleCloseModal}
-      contractorOptions
-      projectOptions
-      jobOptions
-      formData
-      setFormData
-      onSubmitPurchaseOrder
-      onCreateInvoice 
-      /> */}
+      
       <JobModalComp
         show={isJobModalOpen}
         onClose={handleJobCloseModal}

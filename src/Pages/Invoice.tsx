@@ -6,8 +6,11 @@ import Dropdown from "../components/Dropdown";
 import JobModalComp from "../components/JobModal";
 import ContractorModal from "../components/Modal";
 // Define the Invoice type based on the table schema
+interface InvoiceFull { code: number; po_id: number; job_id: number; by_id: number; project_id: number; paid: number; note: string; discription: string; ref: string; cost: number; contact: string; due_at: Date; create_at: Date; updated_at: Date; }
+
 interface Invoice {
   code: number;
+  po_id?: number;
   job_id: number;
   by_id: number;
   project_id: number;
@@ -623,6 +626,7 @@ const InvoiceComp: React.FC = () => {
               <strong>Supplier Name:</strong> {contractorOptions.find((option) => option.value === Invoice.by_id)?.label || "Unknown"} <br />
               <strong>Price:</strong> {Invoice.cost} <br />
               <strong>Job:</strong> {jobOptions.find((option) => option.value === Invoice.job_id)?.label || "Unknown"} <br />
+              <strong>PO:</strong> {Invoice.po_id} <br />
               <Button onClick={() => handleOpenModal(Invoice)}>Edit</Button>
               <DeleteButton onClick={() => handleDelete(Invoice.code)}>Delete</DeleteButton>
             </ListItem>
@@ -639,6 +643,7 @@ const InvoiceComp: React.FC = () => {
               <Th>Price</Th>
               <Th>Supplier</Th>
               <Th>Ref</Th>
+              <Th>PO</Th>
               <Th>Edit</Th>
               <Th>Delete</Th>
             </tr>
@@ -653,6 +658,7 @@ const InvoiceComp: React.FC = () => {
                 <Td>{Invoice.cost}</Td>
                 <Td>{contractorOptions.find((option) => option.value === Invoice.by_id)?.label || "Unknown"}</Td>
                 <Td>{Invoice.ref}</Td>
+                <Td>{Invoice.po_id}</Td>
                 <Td>
                   <Button onClick={() => handleOpenModal(Invoice)}>Edit</Button>
                 </Td>
