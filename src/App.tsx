@@ -83,6 +83,7 @@ const MainApp: React.FC<MainAppProps> = ({
         <Route path="/forgot-password" element={<ForgotPassword />} />
         <Route path="/reset-password" element={<ResetPassword />} />
         <Route path="/login" element={<Login onLoginSuccess={onLoginSuccess} />} />
+        {isLoggedIn && <Route path="/" element={<Home />} />}
         {isLoggedIn && <Route path="/home" element={<Home />} />}
         {isLoggedIn && <Route path="/purchase" element={<PurchaseComp />} />}
         {isLoggedIn && <Route path="/task" element={<Task />} />}
