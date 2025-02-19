@@ -13,20 +13,21 @@ import {
   Paper,
   Button,
 } from '@mui/material';
-interface InvoiceShort { code: number; ref?: string; cost?: number; }
-interface Purchase {
-  code: number;
-  job_id: number;
-  by_id: number;
-  project_id: number;
-  cost: number;
-  ref: string;
-  contact: string;
-  create_at: Date;
-  updated_at: Date;
-  due_at: Date
-  invoice?: InvoiceShort[]
-}
+interface Invoice {
+    code: number;
+    po_id?: number;
+    job_id: number;
+    by_id: number;
+    project_id: number;
+    invoice_id?: number;
+    cost: number;
+    ref: string;
+    contact: string;
+    create_at: Date;
+    updated_at: Date;
+    due_at: Date
+  }
+
 export interface Option {
   value: string;
   label: string;
@@ -40,17 +41,18 @@ const PrintHideBox = styled(Box)(({ theme }) => ({
     display: 'none',
   },
 }));
-function PurchaseView() {
+function InvoiceView() {
   const location = useLocation();
-  const { purchase } = location.state as { purchase: Purchase };
+  const { invoice } = location.state as { invoice: Invoice };
+  console.log(invoice);
   const navigate = useNavigate();
 
   const handlePrint = () => {
     window.print();
   };
 
-  const dueDate = new Date(purchase.due_at);
-  const createDate = new Date(purchase.create_at);
+  const dueDate = new Date(invoice.due_at);
+  const createDate = new Date(invoice.create_at);
   const handleEmail = () => {
     // ... (Your email logic)
   };
@@ -58,7 +60,7 @@ function PurchaseView() {
   return (
     <Box sx={{ p: 4, bgcolor: '#f0f0f0' }}> {/* Main container */}
       <Typography variant="h4" fontWeight="bold" sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', mb: 4 }}>
-        PURCHASE ORDER
+        PURCHASE INVOICE
       </Typography>
       <Paper elevation={3} sx={{ p: 8, bgcolor: 'white' }}> {/* Invoice container */}
         <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 4 }}>
@@ -70,10 +72,10 @@ function PurchaseView() {
             <Typography variant="body2">Phone: (02) 9555-5588</Typography>
           </Box>
           <Box sx={{ textAlign: 'right' }}>
-            <Typography variant="body1">Purchase #: {purchase.code}</Typography>
-            <Typography variant="body1">Create Date: {createDate.toLocaleDateString()}</Typography> {/* Handle potential undefined */}
-            <Typography variant="body1">Due Date: {dueDate ? new Date(dueDate).toLocaleDateString() : ''}</Typography> {/* Handle potential undefined */}
-            <Typography variant="body1">Amount Due: ${purchase.cost}</Typography>
+            <Typography variant="body1">Invoice #: {invoice.code}</Typography>
+            <Typography variant="body1">Create Date: {createDate.toLocaleDateString()}</Typography>
+            <Typography variant="body1">Due Date: {dueDate ? new Date(dueDate).toLocaleDateString() : ''}</Typography>
+            <Typography variant="body1">Amount Due: ${invoice.cost}</Typography>
           </Box>
         </Box>
 
@@ -91,24 +93,24 @@ function PurchaseView() {
             <TableBody>
               {/* Map over your purchase items here */}
               <TableRow>
-                <TableCell>{purchase.project_id}</TableCell>
-                <TableCell>{purchase.ref}</TableCell>
-                <TableCell align="right">{purchase.cost}</TableCell>
+                <TableCell>{invoice.project_id}</TableCell>
+                <TableCell>{invoice.ref}</TableCell>
+                <TableCell align="right">{invoice.cost}</TableCell>
                 <TableCell align="right">1</TableCell>
-                <TableCell align="right">{purchase.cost}</TableCell>
+                <TableCell align="right">{invoice.cost}</TableCell>
               </TableRow>
             </TableBody>
           </Table>
         </TableContainer>
 
         <Box mt={4} textAlign="right">
-          <Typography variant="body1">GST: ${purchase.cost/10}</Typography>
+          <Typography variant="body1">GST: ${invoice.cost/10}</Typography>
           <Typography variant="body1">
-            Together with GST: ${purchase.cost}
+            Together with GST: ${invoice.cost}
           </Typography>
-          <Typography variant="body1">Amount Invoiced: $0.00</Typography>
+          <Typography variant="body1">Amount Paid: $0.00</Typography>
           <Typography variant="body1" fontWeight="bold">
-            Balance Due: ${purchase.cost}
+            Balance Due: ${invoice.cost}
           </Typography>
         </Box>
 
@@ -134,4 +136,4 @@ function PurchaseView() {
 }
 
 
-export default PurchaseView;
+export default InvoiceView;

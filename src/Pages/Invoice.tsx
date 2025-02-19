@@ -5,6 +5,7 @@ import SearchBox from "../components/SearchBox";
 import Dropdown from "../components/Dropdown";
 import JobModalComp from "../components/JobModal";
 import ContractorModal from "../components/Modal";
+import { useNavigate } from "react-router-dom";
 // Define the Invoice type based on the table schema
 interface InvoiceFull { code: number; po_id: number; job_id: number; by_id: number; project_id: number; paid: number; note: string; discription: string; ref: string; cost: number; contact: string; due_at: Date; create_at: Date; updated_at: Date; }
 
@@ -618,7 +619,11 @@ const InvoiceComp: React.FC = () => {
     );
 
     const totalPages = Math.ceil(filteredInvoices.length / itemsPerPage);
-
+    const navigate = useNavigate();
+    const handleViewPDF = (invoice: Invoice) => {
+      console.log(invoice);
+      navigate(`/invoice/${invoice.code}`, { state: { invoice } });
+    };
   return (
     <Container>
       <Title>Invoice Management</Title>
@@ -647,7 +652,9 @@ const InvoiceComp: React.FC = () => {
         <List>
           {paginatedInvoices.map((Invoice) => (
             <ListItem key={Invoice.code}>
-              <strong>Code:</strong> {Invoice.code} <br />
+              <button onClick={() => handleViewPDF(Invoice)} className="text-blue-500 underline">
+                    {Invoice.code}
+              </button><br />
               <strong>Contact Person:</strong> {Invoice.contact} <br />
               <strong>Project:</strong> {projectOptions.find((option) => option.value === Invoice.project_id)?.label || "Unknown"} <br />
               <strong>Supplier Name:</strong> {contractorOptions.find((option) => option.value === Invoice.by_id)?.label || "Unknown"} <br />
@@ -678,7 +685,10 @@ const InvoiceComp: React.FC = () => {
           <tbody>
             {paginatedInvoices.map((Invoice) => (
               <tr key={Invoice.code}>
-                <Td>{Invoice.code}</Td>
+                <Td><button onClick={() => handleViewPDF(Invoice)} className="text-blue-500 underline">
+                    {Invoice.code}
+                  </button>
+                </Td>
                 <Td>{Invoice.contact}</Td>
                 <Td>{projectOptions.find((option) => option.value === Invoice.project_id)?.label || "Unknown"}</Td>
                 <Td>{jobOptions.find((option) => option.value === Invoice.job_id)?.label || "Unknown"}</Td>
