@@ -1,6 +1,5 @@
 import { useLocation, useNavigate } from 'react-router-dom';
 import emailjs from '@emailjs/browser';
-import { supabase } from '../supabaseClient';
 import { styled } from '@mui/material/styles';
 import {
   Typography,
@@ -14,7 +13,6 @@ import {
   Paper,
   Button,
 } from '@mui/material';
-import { useEffect, useState } from 'react';
 interface InvoiceShort { code: number; ref?: string; cost?: number; }
 interface Purchase {
   code: number;
@@ -33,13 +31,6 @@ export interface Option {
   value: string;
   label: string;
 }
-
-interface Job {
-  code: number;
-  job_category_id: number;
-  name: string;
-  description: string;
-}
 const PrintHideBox = styled(Box)(({ theme }) => ({
   display: 'flex',
   justifyContent: 'center',
@@ -50,12 +41,6 @@ const PrintHideBox = styled(Box)(({ theme }) => ({
   },
 }));
 function PurchaseView() {
-  const [jobDetails, setJobDetails] = useState<Job>({
-    code: 0,
-    job_category_id: 0,
-    name: "",
-    description: "",
-  });
   const location = useLocation();
   const { purchase } = location.state as { purchase: Purchase };
   const navigate = useNavigate();
@@ -69,31 +54,6 @@ function PurchaseView() {
   const handleEmail = () => {
     // ... (Your email logic)
   };
-
-  const fetchJobs = async () => {
-      try {
-        const { data, error } = await supabase.from("job").select("*").eq("code", purchase.job_id);
-        if (error) throw error;
-  
-        // Transform data into { value, label } format
-        const transformedData = data.map((item) => ({
-          code: item.code,
-          job_category_id: item.job_category_id,
-          name: item.name,
-          description: item.description,
-        }));
-  
-        console.log("Fetched job details:", transformedData);
-  
-        // Update the state with fetched categories
-        setJobDetails(transformedData[0]);
-      } catch (error) {
-        console.error("Error fetching jobs:", error);
-      }
-    };
-  useEffect(() => {
-    fetchJobs();
-    }, []);
 
   return (
     <Box sx={{ p: 4, bgcolor: '#f0f0f0' }}> {/* Main container */}
@@ -112,7 +72,8 @@ function PurchaseView() {
           <Box sx={{ textAlign: 'right' }}>
             <Typography variant="body1">Purchase #: {purchase.code}</Typography>
             <Typography variant="body1">Create Date: {createDate.toLocaleDateString()}</Typography> {/* Handle potential undefined */}
-            <Typography variant="body1">Order Expiry Date: {dueDate ? new Date(dueDate).toLocaleDateString() : ''}</Typography> {/* Handle potential undefined */}
+            <Typography variant="body1">Due Date: {dueDate ? new Date(dueDate).toLocaleDateString() : ''}</Typography> {/* Handle potential undefined */}
+            <Typography variant="body1">Amount Due: ${purchase.cost}</Typography>
           </Box>
         </Box>
 
@@ -131,7 +92,7 @@ function PurchaseView() {
               {/* Map over your purchase items here */}
               <TableRow>
                 <TableCell>{purchase.project_id}</TableCell>
-                <TableCell>Job:{jobDetails.name}, {jobDetails.description}, Ref:{purchase.ref}</TableCell>
+                <TableCell>{purchase.ref}</TableCell>
                 <TableCell align="right">{purchase.cost}</TableCell>
                 <TableCell align="right">1</TableCell>
                 <TableCell align="right">{purchase.cost}</TableCell>
@@ -142,8 +103,12 @@ function PurchaseView() {
 
         <Box mt={4} textAlign="right">
           <Typography variant="body1">GST: ${purchase.cost/10}</Typography>
-          <Typography variant="body1" fontWeight="bold">
+          <Typography variant="body1">
             Together with GST: ${purchase.cost}
+          </Typography>
+          <Typography variant="body1">Amount Invoiced: $0.00</Typography>
+          <Typography variant="body1" fontWeight="bold">
+            Balance Due: ${purchase.cost}
           </Typography>
         </Box>
 
