@@ -744,7 +744,7 @@ const PurchaseComp: React.FC = () => {
             {paginatedPurchases.map((purchase) => (
               <tr key={purchase.code}>
                 <Td>
-                  <button onClick={() => handleViewPDF(purchase)} className="text-blue-500 underline">
+                  <button onClick={() => handleViewPDF(purchase)} className="text-blue-500">
                     {purchase.code}
                   </button>
                 </Td>
