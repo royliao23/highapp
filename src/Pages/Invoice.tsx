@@ -210,7 +210,11 @@ const InvoiceComp: React.FC = () => {
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
   const [isContractorModalOpen, setIsContractorModalOpen] = useState<boolean>(false);
   const [searchTerm, setSearchTerm] = useState<string>("");
-
+  const [currentPage, setCurrentPage] = useState<number>(1);
+  const [itemsPerPage] = useState<number>(10); 
+  const handlePageChange = (newPage: number) => {
+    setCurrentPage(newPage);
+  };
   //new
   const [isJobModalOpen, setIsJobModalOpen] = useState<boolean>(false);
   const [formJobData, setFormJobData] = useState({
@@ -298,7 +302,7 @@ const InvoiceComp: React.FC = () => {
 
   const fetchInvoices = async () => {
     try {
-      const { data, error } = await supabase.from("jobby").select("*");
+      const { data, error } = await supabase.from("jobby").select("*").order("code", { ascending: false });;
       if (error) throw error;
       setInvoices(data || []);
     } catch (error) {
@@ -608,6 +612,13 @@ const InvoiceComp: React.FC = () => {
       }
     };
 
+    const paginatedInvoices = filteredInvoices.slice(
+      (currentPage - 1) * itemsPerPage,
+      currentPage * itemsPerPage
+    );
+
+    const totalPages = Math.ceil(filteredInvoices.length / itemsPerPage);
+
   return (
     <Container>
       <Title>Invoice Management</Title>
@@ -616,9 +627,25 @@ const InvoiceComp: React.FC = () => {
         <Button onClick={() => handleOpenModal()}>Add Invoice</Button>
       </ButtonRow>
 
+      {/* Pagination Controls */}
+    <div>
+      {Array.from({ length: totalPages }, (_, index) => (
+        <Button
+          key={index}
+          onClick={() => handlePageChange(index + 1)}
+          style={{ 
+            margin: "0 5px", 
+            backgroundColor: currentPage === index + 1 ? "#007bff" : "#ddd" 
+          }}
+        >
+          {index + 1}
+        </Button>
+      ))}
+    </div>
+
       {isMobileView ? (
         <List>
-          {filteredInvoices.map((Invoice) => (
+          {paginatedInvoices.map((Invoice) => (
             <ListItem key={Invoice.code}>
               <strong>Code:</strong> {Invoice.code} <br />
               <strong>Contact Person:</strong> {Invoice.contact} <br />
@@ -649,7 +676,7 @@ const InvoiceComp: React.FC = () => {
             </tr>
           </thead>
           <tbody>
-            {filteredInvoices.map((Invoice) => (
+            {paginatedInvoices.map((Invoice) => (
               <tr key={Invoice.code}>
                 <Td>{Invoice.code}</Td>
                 <Td>{Invoice.contact}</Td>

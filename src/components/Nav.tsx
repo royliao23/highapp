@@ -17,7 +17,7 @@ const Nav: React.FC<NavProps> = ({ onLogout }) => {
   return (
     <nav className="navbar">
       <div className="navbar-container">
-        <Link to="/home" className="navbar-logo" onClick={() => setIsDropdownOpen(false)} >
+        <Link to="/home" className="navbar-logo logo" onClick={() => setIsDropdownOpen(false)} >
           <img src="/bm/logo192.png" alt="High App"  />
          
         </Link>

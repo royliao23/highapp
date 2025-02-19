@@ -5,6 +5,7 @@ import SearchBox from "../components/SearchBox";
 import Dropdown from "../components/Dropdown";
 import JobModalComp from "../components/JobModal";
 import ContractorModal from "../components/Modal";
+import { useNavigate } from "react-router-dom";
 // import PurchaseOrderForm from "../components/CreateInvoiceForm";
 // Define the purchase type based on the table schema
 interface InvoiceShort { code: number;ref?:string;cost?:number;}
@@ -639,9 +640,11 @@ const PurchaseComp: React.FC = () => {
           const { error } = await supabase.from("jobby").insert([invoicePayload]);
           if (error) throw error;
         // Refresh the list and reset the form
-        fetchPurchases();
-        handleCloseModal();
-        alert("Invoice created successfully!");
+        setTimeout(() => {
+          fetchPurchases();
+          handleCloseModal();
+        }, 1000); // Delay of 100ms to allow the database to update  
+        
       } catch (error) {
         console.error("Error creating invoice:", error);
       }
@@ -673,6 +676,11 @@ const PurchaseComp: React.FC = () => {
   );
   
   const totalPages = Math.ceil(filteredPurchases.length / itemsPerPage);
+  const navigate = useNavigate();
+  const handleViewPDF = (purchase: Purchase) => {
+    navigate(`/purchase/${purchase.code}`, { state: { purchase } });
+  };
+  
   return (
     <Container>
       <Title>Order Management</Title>
@@ -699,7 +707,9 @@ const PurchaseComp: React.FC = () => {
         <List>
           {paginatedPurchases.map((purchase) => (
             <ListItem key={purchase.code}>
-              <strong>Code:</strong> {purchase.code} <br />
+              <button onClick={() => handleViewPDF(purchase)} className="text-blue-500 underline">
+                    {purchase.code}
+              </button><br />
               <strong>Contact Person:</strong> {purchase.contact} <br />
               <strong>Project:</strong> {projectOptions.find((option) => option.value === purchase.project_id)?.label || "Unknown"} <br />
               <strong>Supplier Name:</strong> {contractorOptions.find((option) => option.value === purchase.by_id)?.label || "Unknown"} <br />
@@ -708,8 +718,9 @@ const PurchaseComp: React.FC = () => {
               <strong>Invoices:</strong>{purchase.invoice?.map((inv, index) => (
                     <span className="invoiceList" key={index}>Inv#{inv.code}: ${inv.cost}</span>
                   ))}
-              <Button onClick={() => handleOpenModal(purchase)}>Edit</Button>
+              <p><Button onClick={() => handleOpenModal(purchase)}>Edit</Button>
               <DeleteButton onClick={() => handleDelete(purchase.code)}>Delete</DeleteButton>
+              </p>
             </ListItem>
           ))}
         </List>
@@ -732,7 +743,11 @@ const PurchaseComp: React.FC = () => {
           <tbody>
             {paginatedPurchases.map((purchase) => (
               <tr key={purchase.code}>
-                <Td>{purchase.code}</Td>
+                <Td>
+                  <button onClick={() => handleViewPDF(purchase)} className="text-blue-500 underline">
+                    {purchase.code}
+                  </button>
+                </Td>
                 <Td>{purchase.contact}</Td>
                 <Td>{projectOptions.find((option) => option.value === purchase.project_id)?.label || "Unknown"}</Td>
                 <Td>{jobOptions.find((option) => option.value === purchase.job_id)?.label || "Unknown"}</Td>
@@ -1005,8 +1020,9 @@ const PurchaseComp: React.FC = () => {
 
             <Button type="submit">Save Contractor</Button>
           </Form>
-
       </ContractorModal>
+
+      
     </Container>
   );
 };
