@@ -6,6 +6,7 @@ import Dropdown from "../components/Dropdown";
 import JobModalComp from "../components/JobModal";
 import ContractorModal from "../components/Modal";
 import { useNavigate } from "react-router-dom";
+import { fetchJobService } from "../services/SupaEndPoints";
 // import PurchaseOrderForm from "../components/CreateInvoiceForm";
 // Define the purchase type based on the table schema
 interface InvoiceShort { code: number;ref?:string;cost?:number;}
@@ -379,11 +380,9 @@ const PurchaseComp: React.FC = () => {
 
   const fetchJobs = async () => {
     try {
-      const { data, error } = await supabase.from("job").select("*");
-      if (error) throw error;
-
+      const jobData = await fetchJobService();
       // Transform data into { value, label } format
-      const transformedData = data.map((item) => ({
+      const transformedData = jobData?.map((item) => ({
         value: item.code,
         label: item.name,
       }));
@@ -391,7 +390,7 @@ const PurchaseComp: React.FC = () => {
       console.log("Fetched jobs:", transformedData);
 
       // Update the state with fetched categories
-      setJobOptions(transformedData);
+      setJobOptions(transformedData || []);
     } catch (error) {
       console.error("Error fetching jobs:", error);
     }

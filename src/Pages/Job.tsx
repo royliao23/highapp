@@ -3,7 +3,7 @@ import { supabase } from "../supabaseClient";
 import styled from "styled-components";
 import SearchBox from "../components/SearchBox";
 import JobModal from "../components/JobModal";
-
+import { fetchJobService } from "../services/SupaEndPoints";
 // Define the job type based on the table schema
 interface Job {
   code: number;
@@ -135,13 +135,8 @@ const JobComp: React.FC = () => {
   }, []);
 
   const fetchJobs = async () => {
-    try {
-      const { data, error } = await supabase.from("job").select("*");
-      if (error) throw error;
-      setJobs(data || []);
-    } catch (error) {
-      console.error("Error fetching jobs:", error);
-    }
+    const jobData = await fetchJobService();
+    if (jobData) setJobs(jobData);
   };
 
   const fetchCategories = async () => {

@@ -1,6 +1,5 @@
 import { useLocation, useNavigate } from 'react-router-dom';
 import emailjs from '@emailjs/browser';
-import { supabase } from '../supabaseClient';
 import { styled } from '@mui/material/styles';
 import {
   Typography,
@@ -14,7 +13,11 @@ import {
   Paper,
   Button,
 } from '@mui/material';
+
 import { useEffect, useState } from 'react';
+
+import { fetchJobDetails, fetchContractorDetails, fetchProjectDetails } from '../services/SupaEndPoints';
+
 interface InvoiceShort { code: number; ref?: string; cost?: number; }
 interface Purchase {
   code: number;
@@ -34,17 +37,37 @@ export interface Option {
   label: string;
 }
 
+interface Project {
+  code: number;
+  project_name: string;
+  manager: string;
+  description: string;
+  status: string;
+}
+
 interface Job {
   code: number;
   job_category_id: number;
   name: string;
   description: string;
 }
+
+interface Contractor {
+  code: number;
+  contact_person: string;
+  company_name: string;
+  phone_number: string;
+  email: string;
+  bsb: string;
+  account_no: string;
+  account_name: string;
+  address: string;
+}
 const PrintHideBox = styled(Box)(({ theme }) => ({
   display: 'flex',
   justifyContent: 'center',
-  gap: '16px', // Or your preferred gap value
-  marginTop: '64px', // Or your preferred margin-top value
+  gap: '16px', 
+  marginTop: '64px', 
   '@media print': {
     display: 'none',
   },
@@ -56,6 +79,27 @@ function PurchaseView() {
     name: "",
     description: "",
   });
+
+  const [projectDetails, setProjectDetails] = useState<Project>({
+    code: 0,
+    project_name: "",
+    manager: "",
+    description: "",
+    status: "",
+  });
+
+  const [contractorDetails, setContractorDetails] = useState<Contractor>({
+    code: 0,
+    contact_person: "",
+    company_name: "",
+    phone_number: "",
+    email: "",
+    bsb: "",
+    account_no: "",
+    account_name: "",
+    address: "",
+  });
+  
   const location = useLocation();
   const { purchase } = location.state as { purchase: Purchase };
   const navigate = useNavigate();
@@ -71,28 +115,23 @@ function PurchaseView() {
   };
 
   const fetchJobs = async () => {
-      try {
-        const { data, error } = await supabase.from("job").select("*").eq("code", purchase.job_id);
-        if (error) throw error;
-  
-        // Transform data into { value, label } format
-        const transformedData = data.map((item) => ({
-          code: item.code,
-          job_category_id: item.job_category_id,
-          name: item.name,
-          description: item.description,
-        }));
-  
-        console.log("Fetched job details:", transformedData);
-  
-        // Update the state with fetched categories
-        setJobDetails(transformedData[0]);
-      } catch (error) {
-        console.error("Error fetching jobs:", error);
-      }
-    };
+    const jobData = await fetchJobDetails(purchase.job_id);
+    if (jobData) setJobDetails(jobData);
+  };
+
+  const fetchContractors = async () => {
+    const contractorData = await fetchContractorDetails(purchase.by_id);
+    if (contractorData) setContractorDetails(contractorData);
+  };
+
+  const fetchProjects = async () => {
+    const projectData = await fetchProjectDetails(purchase.project_id);
+    if (projectData) setProjectDetails(projectData);
+  };
   useEffect(() => {
     fetchJobs();
+    fetchContractors();
+    fetchProjects();
     }, []);
 
   return (
@@ -100,14 +139,21 @@ function PurchaseView() {
       <Typography variant="h4" fontWeight="bold" sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', mb: 4 }}>
         PURCHASE ORDER
       </Typography>
+      <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', mb: 4 ,gap: '16px',}}>
+            <Typography variant="body2">Green Real Pty Ltd</Typography>
+            <Typography variant="body2">ABN: 344 555 3445</Typography>
+            <Typography variant="body2">Level 3 109 Gladstone St</Typography>
+            <Typography variant="body2">Kogarah NSW 2217</Typography>
+            <Typography variant="body2">Phone: (02) 9555-5588</Typography>
+      </Box>
       <Paper elevation={3} sx={{ p: 8, bgcolor: 'white' }}> {/* Invoice container */}
         <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 4 }}>
           <Box>
-            <Typography variant="body2">Green Real Pty Ltd</Typography>
-            <Typography variant="body2">ABN: 344 555 3445</Typography>
-            <Typography variant="body2">level 3 109 Gladstone St</Typography>
-            <Typography variant="body2">Kogarah NSW 2217</Typography>
-            <Typography variant="body2">Phone: (02) 9555-5588</Typography>
+            <Typography variant="body2">{ contractorDetails.company_name}</Typography>
+            <Typography variant="body2">Account:{ contractorDetails.account_no}</Typography>
+            <Typography variant="body2">{ contractorDetails.address}</Typography>
+            <Typography variant="body2">Contact:{ contractorDetails.contact_person}</Typography>
+            <Typography variant="body2">Phone: { contractorDetails.phone_number}</Typography>
           </Box>
           <Box sx={{ textAlign: 'right' }}>
             <Typography variant="body1">Purchase #: {purchase.code}</Typography>
@@ -130,7 +176,7 @@ function PurchaseView() {
             <TableBody>
               {/* Map over your purchase items here */}
               <TableRow>
-                <TableCell>{purchase.project_id}</TableCell>
+                <TableCell>{projectDetails.project_name}</TableCell>
                 <TableCell>Job:{jobDetails.name}, {jobDetails.description}, Ref:{purchase.ref}</TableCell>
                 <TableCell align="right">{purchase.cost}</TableCell>
                 <TableCell align="right">1</TableCell>
