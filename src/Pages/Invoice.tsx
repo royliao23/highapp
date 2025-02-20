@@ -658,7 +658,7 @@ const InvoiceComp: React.FC = () => {
               <strong>Contact Person:</strong> {Invoice.contact} <br />
               <strong>Project:</strong> {projectOptions.find((option) => option.value === Invoice.project_id)?.label || "Unknown"} <br />
               <strong>Supplier Name:</strong> {contractorOptions.find((option) => option.value === Invoice.by_id)?.label || "Unknown"} <br />
-              <strong>Price:</strong> {Invoice.cost} <br />
+              <strong>Price:</strong> {(Invoice.cost).toFixed(2)} <br />
               <strong>Job:</strong> {jobOptions.find((option) => option.value === Invoice.job_id)?.label || "Unknown"} <br />
               <strong>PO:</strong> {Invoice.po_id} <br />
               <Button onClick={() => handleOpenModal(Invoice)}>Edit</Button>
@@ -692,7 +692,7 @@ const InvoiceComp: React.FC = () => {
                 <Td>{Invoice.contact}</Td>
                 <Td>{projectOptions.find((option) => option.value === Invoice.project_id)?.label || "Unknown"}</Td>
                 <Td>{jobOptions.find((option) => option.value === Invoice.job_id)?.label || "Unknown"}</Td>
-                <Td>{Invoice.cost}</Td>
+                <Td>{(Invoice.cost).toFixed(2)}</Td>
                 <Td>{contractorOptions.find((option) => option.value === Invoice.by_id)?.label || "Unknown"}</Td>
                 <Td>{Invoice.ref}</Td>
                 <Td>{Invoice.po_id}</Td>

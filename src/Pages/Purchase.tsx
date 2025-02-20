@@ -712,10 +712,10 @@ const PurchaseComp: React.FC = () => {
               <strong>Contact Person:</strong> {purchase.contact} <br />
               <strong>Project:</strong> {projectOptions.find((option) => option.value === purchase.project_id)?.label || "Unknown"} <br />
               <strong>Supplier Name:</strong> {contractorOptions.find((option) => option.value === purchase.by_id)?.label || "Unknown"} <br />
-              <strong>Price:</strong> {purchase.cost} <br />
+              <strong>Price:</strong> {(purchase.cost).toFixed(2)} <br />
               <strong>Job:</strong> {jobOptions.find((option) => option.value === purchase.job_id)?.label || "Unknown"} <br />
               <strong>Invoices:</strong>{purchase.invoice?.map((inv, index) => (
-                    <span className="invoiceList" key={index}>Inv#{inv.code}: ${inv.cost}</span>
+                    <span className="invoiceList" key={index}>Inv#{inv.code}: ${(inv.cost)?.toFixed(2)}</span>
                   ))}
               <p><Button onClick={() => handleOpenModal(purchase)}>Edit</Button>
               <DeleteButton onClick={() => handleDelete(purchase.code)}>Delete</DeleteButton>
@@ -750,7 +750,7 @@ const PurchaseComp: React.FC = () => {
                 <Td>{purchase.contact}</Td>
                 <Td>{projectOptions.find((option) => option.value === purchase.project_id)?.label || "Unknown"}</Td>
                 <Td>{jobOptions.find((option) => option.value === purchase.job_id)?.label || "Unknown"}</Td>
-                <Td>{purchase.cost}</Td>
+                <Td>{(purchase.cost).toFixed(2)}</Td>
                 <Td>{contractorOptions.find((option) => option.value === purchase.by_id)?.label || "Unknown"}</Td>
                 <Td>{purchase.ref}</Td>
                 <Td>

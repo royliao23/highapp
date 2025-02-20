@@ -157,7 +157,7 @@ function InvoiceView() {
             <Typography variant="body1">Invoice #: {invoice.code}</Typography>
             <Typography variant="body1">Create Date: {createDate.toLocaleDateString()}</Typography>
             <Typography variant="body1">Due Date: {dueDate ? new Date(dueDate).toLocaleDateString() : ''}</Typography>
-            <Typography variant="body1">Amount: ${invoice.cost}</Typography>
+            <Typography variant="body1">Amount: ${(invoice.cost).toFixed(2)}</Typography>
           </Box>
         </Box>
 
@@ -177,22 +177,22 @@ function InvoiceView() {
               <TableRow>
                 <TableCell>{projectDetails.project_name}</TableCell>
                 <TableCell>Job:{jobDetails.name}, {jobDetails.description}, Ref:{invoice.ref}</TableCell>
-                <TableCell align="right">{invoice.cost}</TableCell>
+                <TableCell align="right">{(invoice.cost).toFixed(2)}</TableCell>
                 <TableCell align="right">1</TableCell>
-                <TableCell align="right">{invoice.cost}</TableCell>
+                <TableCell align="right">{(invoice.cost).toFixed(2)}</TableCell>
               </TableRow>
             </TableBody>
           </Table>
         </TableContainer>
 
         <Box mt={4} textAlign="right">
-          <Typography variant="body1">GST: ${invoice.cost/10}</Typography>
+          <Typography variant="body1">GST: ${(invoice.cost/10).toFixed(2)}</Typography>
           <Typography variant="body1">
-            Together with GST: ${invoice.cost}
+            Together with GST: ${invoice.cost.toFixed(2)}
           </Typography>
           <Typography variant="body1">Amount Paid: $0.00</Typography>
           <Typography variant="body1" fontWeight="bold">
-            Balance Due: ${invoice.cost}
+            Balance Due: ${(invoice.cost).toFixed(2)}
           </Typography>
         </Box>
 
