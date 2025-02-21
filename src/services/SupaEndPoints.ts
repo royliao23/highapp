@@ -64,6 +64,59 @@ export const fetchContractorDetails = async (contractorId: number) => {
   }
 };
 
+export const fetchPurchaseDetails = async (purchaseId: number) => {
+  try {
+    const { data, error } = await supabase.from("purchase_order").select("*").eq("code", purchaseId);
+    if (error) throw error;
+
+    return data.length > 0
+      ? {
+          code: data[0].code,
+          job_id: data,
+          by_id: data[0].by_id,
+          project_id: data,
+          ref: data[0].ref,
+          cost: data[0].cost,
+          contact: data[0].contact,
+          create_at:  data[0].create_at,
+          updated_at: data[0].updated_at,
+          due_at: data[0].due_at,
+          description: data[0].description,
+        }
+      : null;
+  } catch (error) {
+    console.error("Error fetching the purchase details:", error);
+    return null;
+  }
+};
+
+export const fetchInvoiceDetails = async (invoiceId: number) => {
+  try {
+    const { data, error } = await supabase.from("jobby").select("*").eq("code", invoiceId);
+    if (error) throw error;
+
+    return data.length > 0
+      ? {
+        code: data[0].code,
+        job_id: data,
+        by_id: data[0].by_id,
+        project_id: data,
+        ref: data[0].ref,
+        cost: data[0].cost,
+        contact: data[0].contact,
+        create_at:  data[0].create_at,
+        updated_at: data[0].updated_at,
+        due_at: data[0].due_at,
+        description: data[0].description,
+        po_id: data[0].po_id,
+        }
+      : null;
+  } catch (error) {
+    console.error("Error fetching the purchase details:", error);
+    return null;
+  }
+};
+
 
 
 export const fetchJobService = async () => {

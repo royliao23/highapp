@@ -6,36 +6,9 @@ import Dropdown from "../components/Dropdown";
 import JobModalComp from "../components/JobModal";
 import ContractorModal from "../components/Modal";
 import { useNavigate } from "react-router-dom";
-import { fetchJobService } from "../services/SupaEndPoints";
-// import PurchaseOrderForm from "../components/CreateInvoiceForm";
-// Define the purchase type based on the table schema
-interface InvoiceShort { code: number;ref?:string;cost?:number;}
-interface Purchase {
-  code: number;
-  job_id: number;
-  by_id: number;
-  project_id: number;
-  cost: number;
-  ref: string;
-  contact: string;
-  create_at: Date;
-  updated_at: Date;
-  due_at: Date
-  invoice?:InvoiceShort[]
-}
-
-interface Contractor {
-  code: number;
-  contact_person: string;
-  company_name: string;
-  phone_number: string;
-  email: string;
-  bsb: string;
-  account_no: string;
-  account_name: string;
-  address: string;
-}
-
+import { fetchInvoiceDetails, fetchJobService } from "../services/SupaEndPoints";
+import { Purchase, Contractor } from "../models";
+import { useNavigationService } from "../services/SharedServices";
 // Styled Components for Styling
 const Container = styled.div`
   max-width: 1500px;
@@ -194,7 +167,7 @@ const PurchaseComp: React.FC = () => {
     create_at: new Date(),
     updated_at: new Date(),
     due_at: new Date(),
-    invoice:[]
+    invoice: []
   });
   const [formContractorData, setFormContractorData] = useState<Omit<Contractor, "code">>({
     contact_person: "",
@@ -208,7 +181,7 @@ const PurchaseComp: React.FC = () => {
   });
   const [editingCode, setEditingCode] = useState<number | null>(null); // Track which purchase is being edited
   const [contractoreditingCode, setContractorEditingCode] = useState<number | null>(null); // Track which purchase is being edited
-  
+
   const [isMobileView, setIsMobileView] = useState<boolean>(window.innerWidth < 1000);
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
   const [isContractorModalOpen, setIsContractorModalOpen] = useState<boolean>(false);
@@ -218,7 +191,7 @@ const PurchaseComp: React.FC = () => {
   const [formJobData, setFormJobData] = useState({
     name: "",
     job_category_id: 0, // Or whatever your data structure requires
-    description:"",
+    description: "",
   });
   const [editingJobCode, setEditingJobCode] = useState<number | null>(null);
   const [jobCategoryOptions, setJobCategoryOptions] = useState([
@@ -229,7 +202,7 @@ const PurchaseComp: React.FC = () => {
   const handlePageChange = (newPage: number) => {
     setCurrentPage(newPage);
   };
-  
+
   const fetchJobCategories = async () => {
     try {
       const { data, error } = await supabase.from("categ").select("*");
@@ -259,7 +232,7 @@ const PurchaseComp: React.FC = () => {
     setFormJobData({
       name: "",
       job_category_id: 0,
-      description:"",
+      description: "",
     });
     setEditingJobCode(null);
     setIsJobModalOpen(false);
@@ -306,8 +279,8 @@ const PurchaseComp: React.FC = () => {
   const fetchPurchases = async () => {
     try {
       const { data, error } = await supabase
-      .from("purchase_order")
-      .select(`
+        .from("purchase_order")
+        .select(`
         *,
         invoice:jobby (code, cost, ref),
         job_name:job (code, name)
@@ -465,21 +438,21 @@ const PurchaseComp: React.FC = () => {
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
-  
+
     try {
       // Create a new object without the `invoice` field
       const payload = { ...formData };
       delete payload.invoice; // Remove the `invoice` field
-  
+
       if (editingCode !== null) {
         // Update an existing purchase
         const { error } = await supabase
           .from("purchase_order")
           .update(payload) // Use the payload without `invoice`
           .eq("code", editingCode);
-  
+
         if (error) throw error;
-  
+
         // Clear editing state after updating
         setEditingCode(null);
       } else {
@@ -487,10 +460,10 @@ const PurchaseComp: React.FC = () => {
         const { error } = await supabase
           .from("purchase_order")
           .insert([payload]); // Use the payload without `invoice`
-  
+
         if (error) throw error;
       }
-  
+
       // Refresh the list and reset the form
       fetchPurchases();
       handleCloseModal();
@@ -500,37 +473,37 @@ const PurchaseComp: React.FC = () => {
   };
 
   const handleContractorSubmit = async (e: FormEvent) => {
-      e.preventDefault();
-  
-      try {
-        if (editingCode !== null) {
-          // Update an existing contractor
-          const { error } = await supabase
-            .from("contractor")
-            .update(formContractorData)
-            .eq("code", editingCode);
-  
-          if (error) throw error;
-  
-          // Clear editing state after updating
-          setContractorEditingCode(null);
-        } else {
-          // Add a new contractor
-          const { error } = await supabase.from("contractor").insert([formContractorData]);
-  
-          if (error) throw error;
-        }
-  
-        // Refresh the list and reset the form
-        fetchContractors();
-        handleContractorCloseModal();
-      } catch (error) {
-        console.error("Error saving contractor:", error);
+    e.preventDefault();
+
+    try {
+      if (editingCode !== null) {
+        // Update an existing contractor
+        const { error } = await supabase
+          .from("contractor")
+          .update(formContractorData)
+          .eq("code", editingCode);
+
+        if (error) throw error;
+
+        // Clear editing state after updating
+        setContractorEditingCode(null);
+      } else {
+        // Add a new contractor
+        const { error } = await supabase.from("contractor").insert([formContractorData]);
+
+        if (error) throw error;
       }
-    };
-    const handleContractorOpenModal = () => {
-      setIsContractorModalOpen(true);
-    };
+
+      // Refresh the list and reset the form
+      fetchContractors();
+      handleContractorCloseModal();
+    } catch (error) {
+      console.error("Error saving contractor:", error);
+    }
+  };
+  const handleContractorOpenModal = () => {
+    setIsContractorModalOpen(true);
+  };
 
   const handleEdit = (purchase: Purchase) => {
     setEditingCode(purchase.code);
@@ -544,9 +517,9 @@ const PurchaseComp: React.FC = () => {
       create_at: purchase.create_at,
       updated_at: purchase.updated_at,
       due_at: purchase.due_at,
-      invoice:purchase.invoice
+      invoice: purchase.invoice
     });
-  setOriginalCost(purchase.cost);
+    setOriginalCost(purchase.cost);
   };
 
   const handleDelete = async (code: number) => {
@@ -573,8 +546,8 @@ const PurchaseComp: React.FC = () => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
   const handleContractorInputChange = (e: ChangeEvent<HTMLInputElement>) => {
-      setFormContractorData({ ...formContractorData, [e.target.name]: e.target.value });
-    };
+    setFormContractorData({ ...formContractorData, [e.target.name]: e.target.value });
+  };
 
   const handleDropChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
     const { name, value } = event.target;
@@ -585,73 +558,74 @@ const PurchaseComp: React.FC = () => {
   };
 
   const fetchCategories = async () => {
-      try {
-        const { data, error } = await supabase.from("categ").select("*");
-        if (error) throw error;
-  
-        const transformedData = data.map((item) => ({
-          value: item.code,
-          label: item.name,
-        }));
-  
-        setJobCategoryOptions(transformedData);
-      } catch (error) {
-        console.error("Error fetching categories:", error);
-      }
-    };
+    try {
+      const { data, error } = await supabase.from("categ").select("*");
+      if (error) throw error;
+
+      const transformedData = data.map((item) => ({
+        value: item.code,
+        label: item.name,
+      }));
+
+      setJobCategoryOptions(transformedData);
+    } catch (error) {
+      console.error("Error fetching categories:", error);
+    }
+  };
 
   // Function to handle adding a new category
-    const handleAddCategory = async (newCategory: { value: number; label: string }) => {
-      try {
-        // Save the new category to the database
-        const { data, error } = await supabase
-          .from("categ")
-          .insert([{ name: newCategory.label }])
-          .select();
-  
-        if (error) throw error;
-  
-        // Update the jobCategoryOptions state with the new category
-        if (data && data.length > 0) {
-          const addedCategory = data[0];
-          setJobCategoryOptions((prevOptions) => [
-            ...prevOptions,
-            { value: addedCategory.code, label: addedCategory.name },
-          ]);
-        }
-  
-        // Refresh the categories list
-        fetchCategories();
-      } catch (error) {
-        console.error("Error adding category:", error);
+  const handleAddCategory = async (newCategory: { value: number; label: string }) => {
+    try {
+      // Save the new category to the database
+      const { data, error } = await supabase
+        .from("categ")
+        .insert([{ name: newCategory.label }])
+        .select();
+
+      if (error) throw error;
+
+      // Update the jobCategoryOptions state with the new category
+      if (data && data.length > 0) {
+        const addedCategory = data[0];
+        setJobCategoryOptions((prevOptions) => [
+          ...prevOptions,
+          { value: addedCategory.code, label: addedCategory.name },
+        ]);
       }
-    };
-    const onCreateInvoice = async (invoicePayload:any) => {
-      if (!invoicePayload.po_id) {
-        alert("Please select a purchase order to create an invoice.");
-        return;
-      }
-      if (invoicePayload.cost > originalCost) {
-        alert("Invoice amount cannot exceed the total cost of the purchase order.");
-        return;
-      }
-      try {
-          const { error } = await supabase.from("jobby").insert([invoicePayload]);
-          if (error) throw error;
-        // Refresh the list and reset the form
-        setTimeout(() => {
-          fetchPurchases();
-          handleCloseModal();
-        }, 1000); // Delay of 100ms to allow the database to update  
-        
-      } catch (error) {
-        console.error("Error creating invoice:", error);
-      }
-    };
-  const handleCreateInvoice = (balance:number) => {
-    if (formData.cost>balance)
-      {alert("Invoice amount cannot exceed the balance amount.");
-      return;}
+
+      // Refresh the categories list
+      fetchCategories();
+    } catch (error) {
+      console.error("Error adding category:", error);
+    }
+  };
+  const onCreateInvoice = async (invoicePayload: any) => {
+    if (!invoicePayload.po_id) {
+      alert("Please select a purchase order to create an invoice.");
+      return;
+    }
+    if (invoicePayload.cost > originalCost) {
+      alert("Invoice amount cannot exceed the total cost of the purchase order.");
+      return;
+    }
+    try {
+      const { error } = await supabase.from("jobby").insert([invoicePayload]);
+      if (error) throw error;
+      // Refresh the list and reset the form
+      setTimeout(() => {
+        fetchPurchases();
+        handleCloseModal();
+      }, 1000); // Delay of 100ms to allow the database to update  
+
+    } catch (error) {
+      console.error("Error creating invoice:", error);
+    }
+  };
+  const handleCreateInvoice = (balance: number) => {
+    if (formData.cost > balance) {
+      alert("Invoice amount cannot exceed the balance amount.");
+      return;
+    }
 
     const invoicePayload = {
       po_id: editingCode, // Ensure purchase order code exists
@@ -660,12 +634,12 @@ const PurchaseComp: React.FC = () => {
       project_id: formData.project_id,
       paid: 0,
       note: "test note",
-      discription:"test",
+      discription: "test",
       ref: formData.ref,
       cost: formData.cost,
       contact: formData.contact,
       due_at: formData.due_at,
-      create_at:new Date(),
+      create_at: new Date(),
     };
     onCreateInvoice(invoicePayload);
   };
@@ -673,13 +647,14 @@ const PurchaseComp: React.FC = () => {
     (currentPage - 1) * itemsPerPage,
     currentPage * itemsPerPage
   );
-  
+
   const totalPages = Math.ceil(filteredPurchases.length / itemsPerPage);
-  const navigate = useNavigate();
-  const handleViewPDF = (purchase: Purchase) => {
-    navigate(`/purchase/${purchase.code}`, { state: { purchase } });
-  };
-  
+  // const navigate = useNavigate();
+  // const handleViewPDF = (purchase: Purchase) => {
+  //   navigate(`/purchase/${purchase.code}`, { state: { purchase } });
+  // };
+  const { handleViewPurchase } = useNavigationService();
+  const { handleViewInvoice } = useNavigationService();
   return (
     <Container>
       <Title>Order Management</Title>
@@ -693,9 +668,9 @@ const PurchaseComp: React.FC = () => {
           <Button
             key={index}
             onClick={() => handlePageChange(index + 1)}
-            style={{ 
-              margin: "0 5px", 
-              backgroundColor: currentPage === index + 1 ? "#007bff" : "#ddd" 
+            style={{
+              margin: "0 5px",
+              backgroundColor: currentPage === index + 1 ? "#007bff" : "#ddd"
             }}
           >
             {index + 1}
@@ -706,8 +681,8 @@ const PurchaseComp: React.FC = () => {
         <List>
           {paginatedPurchases.map((purchase) => (
             <ListItem key={purchase.code}>
-              <button onClick={() => handleViewPDF(purchase)} className="text-blue-500 underline">
-                    {purchase.code}
+              <button onClick={() => handleViewPurchase(purchase)} className="text-blue-500 underline">
+                {purchase.code}
               </button><br />
               <strong>Contact Person:</strong> {purchase.contact} <br />
               <strong>Project:</strong> {projectOptions.find((option) => option.value === purchase.project_id)?.label || "Unknown"} <br />
@@ -715,10 +690,18 @@ const PurchaseComp: React.FC = () => {
               <strong>Price:</strong> {(purchase.cost).toFixed(2)} <br />
               <strong>Job:</strong> {jobOptions.find((option) => option.value === purchase.job_id)?.label || "Unknown"} <br />
               <strong>Invoices:</strong>{purchase.invoice?.map((inv, index) => (
-                    <span className="invoiceList" key={index}>Inv#{inv.code}: ${(inv.cost)?.toFixed(2)}</span>
-                  ))}
+                <span className="invoiceList text-blue-500" key={index} onClick={async () => {
+                  try {
+                    const invoice: any = await fetchInvoiceDetails(inv.code || 0); // Await the Promise
+                    handleViewInvoice(invoice);
+                  } catch (error) {
+                    console.error("Error fetching purchase details:", error);
+                    // Handle the error (e.g., show an error message)
+                  }
+                }}>Inv#{inv.code}: ${(inv.cost)?.toFixed(2)}</span>
+              ))}
               <p><Button onClick={() => handleOpenModal(purchase)}>Edit</Button>
-              <DeleteButton onClick={() => handleDelete(purchase.code)}>Delete</DeleteButton>
+                <DeleteButton onClick={() => handleDelete(purchase.code)}>Delete</DeleteButton>
               </p>
             </ListItem>
           ))}
@@ -743,7 +726,7 @@ const PurchaseComp: React.FC = () => {
             {paginatedPurchases.map((purchase) => (
               <tr key={purchase.code}>
                 <Td>
-                  <button onClick={() => handleViewPDF(purchase)} className="text-blue-500">
+                  <button onClick={() => handleViewPurchase(purchase)} className="text-blue-500">
                     {purchase.code}
                   </button>
                 </Td>
@@ -753,9 +736,17 @@ const PurchaseComp: React.FC = () => {
                 <Td>{(purchase.cost).toFixed(2)}</Td>
                 <Td>{contractorOptions.find((option) => option.value === purchase.by_id)?.label || "Unknown"}</Td>
                 <Td>{purchase.ref}</Td>
-                <Td>
+                <Td className="text-blue-500">
                   {purchase.invoice?.map((inv, index) => (
-                    <span className="invoiceList" key={index}>Inv#{inv.code}: ${inv.cost}</span>
+                    <span className="invoiceList" key={index} onClick={async () => {
+                      try {
+                        const invoice: any = await fetchInvoiceDetails(inv.code || 0); // Await the Promise
+                        handleViewInvoice(invoice);
+                      } catch (error) {
+                        console.error("Error fetching purchase details:", error);
+                        // Handle the error (e.g., show an error message)
+                      }
+                    }}>Inv#{inv.code}: ${inv.cost}</span>
                   ))}
                 </Td>
                 <Td>
@@ -839,7 +830,7 @@ const PurchaseComp: React.FC = () => {
               />
             </div>
 
-            
+
 
             <div>
               <label htmlFor="ref">Reference</label>
@@ -856,7 +847,7 @@ const PurchaseComp: React.FC = () => {
             </div>
 
             {/* Display the total cost of all invoices */}
-            
+
             <div>
               <strong>Total Already Invoiced Amount:</strong>{" "}
               {(formData.invoice || []).reduce((total, inv) => total + (inv.cost || 0), 0).toFixed(2)}
@@ -869,7 +860,7 @@ const PurchaseComp: React.FC = () => {
                 (formData.invoice || []).reduce((total, inv) => total + (inv.cost || 0), 0)
               ).toFixed(2)}
             </div>
-            
+
             <Button onClick={handleSubmit}>Save purchase</Button>
 
             {(formData.invoice || []).reduce((total, inv) => total + (inv.cost || 0), 0) < originalCost && (
@@ -891,7 +882,7 @@ const PurchaseComp: React.FC = () => {
 
         </ModalContent>
       </Modal>
-      
+
       <JobModalComp
         show={isJobModalOpen}
         onClose={handleJobCloseModal}
@@ -905,123 +896,123 @@ const PurchaseComp: React.FC = () => {
       />
       <ContractorModal show={isContractorModalOpen} onClose={handleContractorCloseModal}>
         <Form onSubmit={handleContractorSubmit}>
-            <div>
-              <label htmlFor="contact_person">Contact Person</label>
-              <Input
-                id="contact_person"
-                type="text"
-                name="contact_person"
-                value={formContractorData.contact_person}
-                onChange={handleContractorInputChange}
-                placeholder="Contact Person"
-                autoComplete="off"
-                required
-              />
-            </div>
+          <div>
+            <label htmlFor="contact_person">Contact Person</label>
+            <Input
+              id="contact_person"
+              type="text"
+              name="contact_person"
+              value={formContractorData.contact_person}
+              onChange={handleContractorInputChange}
+              placeholder="Contact Person"
+              autoComplete="off"
+              required
+            />
+          </div>
 
-            <div>
-              <label htmlFor="company_name">Company Name</label>
-              <Input
-                id="company_name"
-                type="text"
-                name="company_name"
-                value={formContractorData.company_name}
-                onChange={handleContractorInputChange}
-                placeholder="Company Name"
-                autoComplete="off"
-                required
-              />
-            </div>
+          <div>
+            <label htmlFor="company_name">Company Name</label>
+            <Input
+              id="company_name"
+              type="text"
+              name="company_name"
+              value={formContractorData.company_name}
+              onChange={handleContractorInputChange}
+              placeholder="Company Name"
+              autoComplete="off"
+              required
+            />
+          </div>
 
-            <div>
-              <label htmlFor="phone_number">Phone Number</label>
-              <Input
-                id="phone_number"
-                type="text"
-                name="phone_number"
-                value={formContractorData.phone_number}
-                onChange={handleContractorInputChange}
-                placeholder="Phone Number"
-                autoComplete="off"
-                required
-              />
-            </div>
+          <div>
+            <label htmlFor="phone_number">Phone Number</label>
+            <Input
+              id="phone_number"
+              type="text"
+              name="phone_number"
+              value={formContractorData.phone_number}
+              onChange={handleContractorInputChange}
+              placeholder="Phone Number"
+              autoComplete="off"
+              required
+            />
+          </div>
 
-            <div>
-              <label htmlFor="email">Email</label>
-              <Input
-                id="email"
-                type="email"
-                name="email"
-                value={formContractorData.email}
-                onChange={handleContractorInputChange}
-                placeholder="Email"
-                autoComplete="off"
-                required
-              />
-            </div>
+          <div>
+            <label htmlFor="email">Email</label>
+            <Input
+              id="email"
+              type="email"
+              name="email"
+              value={formContractorData.email}
+              onChange={handleContractorInputChange}
+              placeholder="Email"
+              autoComplete="off"
+              required
+            />
+          </div>
 
-            <div>
-              <label htmlFor="bsb">BSB</label>
-              <Input
-                id="bsb"
-                type="text"
-                name="bsb"
-                value={formContractorData.bsb}
-                onChange={handleContractorInputChange}
-                placeholder="BSB"
-                autoComplete="off"
-                required
-              />
-            </div>
+          <div>
+            <label htmlFor="bsb">BSB</label>
+            <Input
+              id="bsb"
+              type="text"
+              name="bsb"
+              value={formContractorData.bsb}
+              onChange={handleContractorInputChange}
+              placeholder="BSB"
+              autoComplete="off"
+              required
+            />
+          </div>
 
-            <div>
-              <label htmlFor="account_no">Account Number</label>
-              <Input
-                id="account_no"
-                type="text"
-                name="account_no"
-                value={formContractorData.account_no}
-                onChange={handleContractorInputChange}
-                placeholder="Account Number"
-                autoComplete="off"
-                required
-              />
-            </div>
+          <div>
+            <label htmlFor="account_no">Account Number</label>
+            <Input
+              id="account_no"
+              type="text"
+              name="account_no"
+              value={formContractorData.account_no}
+              onChange={handleContractorInputChange}
+              placeholder="Account Number"
+              autoComplete="off"
+              required
+            />
+          </div>
 
-            <div>
-              <label htmlFor="account_name">Account Name</label>
-              <Input
-                id="account_name"
-                type="text"
-                name="account_name"
-                value={formContractorData.account_name}
-                onChange={handleContractorInputChange}
-                placeholder="Account Name"
-                autoComplete="off"
-                required
-              />
-            </div>
+          <div>
+            <label htmlFor="account_name">Account Name</label>
+            <Input
+              id="account_name"
+              type="text"
+              name="account_name"
+              value={formContractorData.account_name}
+              onChange={handleContractorInputChange}
+              placeholder="Account Name"
+              autoComplete="off"
+              required
+            />
+          </div>
 
-            <div>
-              <label htmlFor="address">Address</label>
-              <Input
-                id="address"
-                type="text"
-                name="address"
-                value={formContractorData.address}
-                onChange={handleContractorInputChange}
-                placeholder="Address"
-                autoComplete="off"
-                required
-              />
-            </div>
+          <div>
+            <label htmlFor="address">Address</label>
+            <Input
+              id="address"
+              type="text"
+              name="address"
+              value={formContractorData.address}
+              onChange={handleContractorInputChange}
+              placeholder="Address"
+              autoComplete="off"
+              required
+            />
+          </div>
 
-            <Button type="submit">Save Contractor</Button>
-          </Form>
+          <Button type="submit">Save Contractor</Button>
+        </Form>
       </ContractorModal>
 
-      
+
     </Container>
   );
 };

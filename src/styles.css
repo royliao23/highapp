@@ -454,5 +454,5 @@ label {
         margin: 0mm;  /* this affects the margin in the printer settings */
     }
 }
-.text-blue-500 { border: none;padding: 10px;background: #0d6efd; color: white;}
+.text-blue-500 { border: none;padding: 1px; color: #0d6efd; margin: 5px; cursor: pointer;}
 

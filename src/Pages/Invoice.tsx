@@ -5,36 +5,9 @@ import SearchBox from "../components/SearchBox";
 import Dropdown from "../components/Dropdown";
 import JobModalComp from "../components/JobModal";
 import ContractorModal from "../components/Modal";
-import { useNavigate } from "react-router-dom";
-// Define the Invoice type based on the table schema
-interface InvoiceFull { code: number; po_id: number; job_id: number; by_id: number; project_id: number; paid: number; note: string; discription: string; ref: string; cost: number; contact: string; due_at: Date; create_at: Date; updated_at: Date; }
-
-interface Invoice {
-  code: number;
-  po_id?: number;
-  job_id: number;
-  by_id: number;
-  project_id: number;
-  invoice_id?: number;
-  cost: number;
-  ref: string;
-  contact: string;
-  create_at: Date;
-  updated_at: Date;
-  due_at: Date
-}
-
-interface Contractor {
-  code: number;
-  contact_person: string;
-  company_name: string;
-  phone_number: string;
-  email: string;
-  bsb: string;
-  account_no: string;
-  account_name: string;
-  address: string;
-}
+import { Invoice, Contractor, Purchase } from "../models";
+import { useNavigationService } from "../services/SharedServices";
+import { fetchProjectDetails, fetchPurchaseDetails } from "../services/SupaEndPoints";
 
 // Styled Components for Styling
 const Container = styled.div`
@@ -206,13 +179,13 @@ const InvoiceComp: React.FC = () => {
   });
   const [editingCode, setEditingCode] = useState<number | null>(null); // Track which Invoice is being edited
   const [contractoreditingCode, setContractorEditingCode] = useState<number | null>(null); // Track which Invoice is being edited
-  
+
   const [isMobileView, setIsMobileView] = useState<boolean>(window.innerWidth < 1000);
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
   const [isContractorModalOpen, setIsContractorModalOpen] = useState<boolean>(false);
   const [searchTerm, setSearchTerm] = useState<string>("");
   const [currentPage, setCurrentPage] = useState<number>(1);
-  const [itemsPerPage] = useState<number>(10); 
+  const [itemsPerPage] = useState<number>(10);
   const handlePageChange = (newPage: number) => {
     setCurrentPage(newPage);
   };
@@ -221,7 +194,7 @@ const InvoiceComp: React.FC = () => {
   const [formJobData, setFormJobData] = useState({
     name: "",
     job_category_id: 0, // Or whatever your data structure requires
-    description:"",
+    description: "",
   });
   const [editingJobCode, setEditingJobCode] = useState<number | null>(null);
   const [jobCategoryOptions, setJobCategoryOptions] = useState([
@@ -257,7 +230,7 @@ const InvoiceComp: React.FC = () => {
     setFormJobData({
       name: "",
       job_category_id: 0,
-      description:"",
+      description: "",
     });
     setEditingJobCode(null);
     setIsJobModalOpen(false);
@@ -488,37 +461,37 @@ const InvoiceComp: React.FC = () => {
   };
 
   const handleContractorSubmit = async (e: FormEvent) => {
-      e.preventDefault();
-  
-      try {
-        if (editingCode !== null) {
-          // Update an existing contractor
-          const { error } = await supabase
-            .from("contractor")
-            .update(formContractorData)
-            .eq("code", editingCode);
-  
-          if (error) throw error;
-  
-          // Clear editing state after updating
-          setContractorEditingCode(null);
-        } else {
-          // Add a new contractor
-          const { error } = await supabase.from("contractor").insert([formContractorData]);
-  
-          if (error) throw error;
-        }
-  
-        // Refresh the list and reset the form
-        fetchContractors();
-        handleContractorCloseModal();
-      } catch (error) {
-        console.error("Error saving contractor:", error);
+    e.preventDefault();
+
+    try {
+      if (editingCode !== null) {
+        // Update an existing contractor
+        const { error } = await supabase
+          .from("contractor")
+          .update(formContractorData)
+          .eq("code", editingCode);
+
+        if (error) throw error;
+
+        // Clear editing state after updating
+        setContractorEditingCode(null);
+      } else {
+        // Add a new contractor
+        const { error } = await supabase.from("contractor").insert([formContractorData]);
+
+        if (error) throw error;
       }
-    };
-    const handleContractorOpenModal = () => {
-      setIsContractorModalOpen(true);
-    };
+
+      // Refresh the list and reset the form
+      fetchContractors();
+      handleContractorCloseModal();
+    } catch (error) {
+      console.error("Error saving contractor:", error);
+    }
+  };
+  const handleContractorOpenModal = () => {
+    setIsContractorModalOpen(true);
+  };
 
   const handleEdit = (Invoice: Invoice) => {
     setEditingCode(Invoice.code);
@@ -559,8 +532,8 @@ const InvoiceComp: React.FC = () => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
   const handleContractorInputChange = (e: ChangeEvent<HTMLInputElement>) => {
-      setFormContractorData({ ...formContractorData, [e.target.name]: e.target.value });
-    };
+    setFormContractorData({ ...formContractorData, [e.target.name]: e.target.value });
+  };
 
   const handleDropChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
     const { name, value } = event.target;
@@ -571,59 +544,56 @@ const InvoiceComp: React.FC = () => {
   };
 
   const fetchCategories = async () => {
-      try {
-        const { data, error } = await supabase.from("categ").select("*");
-        if (error) throw error;
-  
-        const transformedData = data.map((item) => ({
-          value: item.code,
-          label: item.name,
-        }));
-  
-        setJobCategoryOptions(transformedData);
-      } catch (error) {
-        console.error("Error fetching categories:", error);
-      }
-    };
+    try {
+      const { data, error } = await supabase.from("categ").select("*");
+      if (error) throw error;
+
+      const transformedData = data.map((item) => ({
+        value: item.code,
+        label: item.name,
+      }));
+
+      setJobCategoryOptions(transformedData);
+    } catch (error) {
+      console.error("Error fetching categories:", error);
+    }
+  };
 
   // Function to handle adding a new category
-    const handleAddCategory = async (newCategory: { value: number; label: string }) => {
-      try {
-        // Save the new category to the database
-        const { data, error } = await supabase
-          .from("categ")
-          .insert([{ name: newCategory.label }])
-          .select();
-  
-        if (error) throw error;
-  
-        // Update the jobCategoryOptions state with the new category
-        if (data && data.length > 0) {
-          const addedCategory = data[0];
-          setJobCategoryOptions((prevOptions) => [
-            ...prevOptions,
-            { value: addedCategory.code, label: addedCategory.name },
-          ]);
-        }
-  
-        // Refresh the categories list
-        fetchCategories();
-      } catch (error) {
-        console.error("Error adding category:", error);
+  const handleAddCategory = async (newCategory: { value: number; label: string }) => {
+    try {
+      // Save the new category to the database
+      const { data, error } = await supabase
+        .from("categ")
+        .insert([{ name: newCategory.label }])
+        .select();
+
+      if (error) throw error;
+
+      // Update the jobCategoryOptions state with the new category
+      if (data && data.length > 0) {
+        const addedCategory = data[0];
+        setJobCategoryOptions((prevOptions) => [
+          ...prevOptions,
+          { value: addedCategory.code, label: addedCategory.name },
+        ]);
       }
-    };
 
-    const paginatedInvoices = filteredInvoices.slice(
-      (currentPage - 1) * itemsPerPage,
-      currentPage * itemsPerPage
-    );
+      // Refresh the categories list
+      fetchCategories();
+    } catch (error) {
+      console.error("Error adding category:", error);
+    }
+  };
 
-    const totalPages = Math.ceil(filteredInvoices.length / itemsPerPage);
-    const navigate = useNavigate();
-    const handleViewPDF = (invoice: Invoice) => {
-      console.log(invoice);
-      navigate(`/invoice/${invoice.code}`, { state: { invoice } });
-    };
+  const paginatedInvoices = filteredInvoices.slice(
+    (currentPage - 1) * itemsPerPage,
+    currentPage * itemsPerPage
+  );
+
+  const totalPages = Math.ceil(filteredInvoices.length / itemsPerPage);
+  const { handleViewPurchase } = useNavigationService();
+  const { handleViewInvoice } = useNavigationService();
   return (
     <Container>
       <Title>Invoice Management</Title>
@@ -633,34 +603,42 @@ const InvoiceComp: React.FC = () => {
       </ButtonRow>
 
       {/* Pagination Controls */}
-    <div>
-      {Array.from({ length: totalPages }, (_, index) => (
-        <Button
-          key={index}
-          onClick={() => handlePageChange(index + 1)}
-          style={{ 
-            margin: "0 5px", 
-            backgroundColor: currentPage === index + 1 ? "#007bff" : "#ddd" 
-          }}
-        >
-          {index + 1}
-        </Button>
-      ))}
-    </div>
+      <div>
+        {Array.from({ length: totalPages }, (_, index) => (
+          <Button
+            key={index}
+            onClick={() => handlePageChange(index + 1)}
+            style={{
+              margin: "0 5px",
+              backgroundColor: currentPage === index + 1 ? "#007bff" : "#ddd"
+            }}
+          >
+            {index + 1}
+          </Button>
+        ))}
+      </div>
 
       {isMobileView ? (
         <List>
           {paginatedInvoices.map((Invoice) => (
             <ListItem key={Invoice.code}>
-              <button onClick={() => handleViewPDF(Invoice)} className="text-blue-500 underline">
-                    {Invoice.code}
+              <button onClick={() => handleViewInvoice(Invoice)} className="text-blue-500">
+                {Invoice.code}
               </button><br />
               <strong>Contact Person:</strong> {Invoice.contact} <br />
               <strong>Project:</strong> {projectOptions.find((option) => option.value === Invoice.project_id)?.label || "Unknown"} <br />
               <strong>Supplier Name:</strong> {contractorOptions.find((option) => option.value === Invoice.by_id)?.label || "Unknown"} <br />
               <strong>Price:</strong> {(Invoice.cost).toFixed(2)} <br />
               <strong>Job:</strong> {jobOptions.find((option) => option.value === Invoice.job_id)?.label || "Unknown"} <br />
-              <strong>PO:</strong> {Invoice.po_id} <br />
+              <strong>PO:</strong> <span className="text-blue-500" onClick={async () => {
+                try {
+                  const purchase: any = await fetchPurchaseDetails(Invoice.po_id || 0); // Await the Promise
+                  handleViewPurchase(purchase);
+                } catch (error) {
+                  console.error("Error fetching purchase details:", error);
+                  // Handle the error (e.g., show an error message)
+                }
+              }}> {Invoice.po_id} </span> <br />
               <Button onClick={() => handleOpenModal(Invoice)}>Edit</Button>
               <DeleteButton onClick={() => handleDelete(Invoice.code)}>Delete</DeleteButton>
             </ListItem>
@@ -685,9 +663,9 @@ const InvoiceComp: React.FC = () => {
           <tbody>
             {paginatedInvoices.map((Invoice) => (
               <tr key={Invoice.code}>
-                <Td><button onClick={() => handleViewPDF(Invoice)} className="text-blue-500 underline">
-                    {Invoice.code}
-                  </button>
+                <Td><button onClick={() => handleViewInvoice(Invoice)} className="text-blue-500">
+                  {Invoice.code}
+                </button>
                 </Td>
                 <Td>{Invoice.contact}</Td>
                 <Td>{projectOptions.find((option) => option.value === Invoice.project_id)?.label || "Unknown"}</Td>
@@ -695,7 +673,15 @@ const InvoiceComp: React.FC = () => {
                 <Td>{(Invoice.cost).toFixed(2)}</Td>
                 <Td>{contractorOptions.find((option) => option.value === Invoice.by_id)?.label || "Unknown"}</Td>
                 <Td>{Invoice.ref}</Td>
-                <Td>{Invoice.po_id}</Td>
+                <Td><span className="text-blue-500" onClick={async () => {
+                  try {
+                    const purchase: any = await fetchPurchaseDetails(Invoice.po_id || 0); // Await the Promise
+                    handleViewPurchase(purchase);
+                  } catch (error) {
+                    console.error("Error fetching purchase details:", error);
+                    // Handle the error (e.g., show an error message)
+                  }
+                }}>{Invoice.po_id}</span></Td>
                 <Td>
                   <Button onClick={() => handleOpenModal(Invoice)}>Edit</Button>
                 </Td>
@@ -804,7 +790,7 @@ const InvoiceComp: React.FC = () => {
               />
             </div>
 
-            
+
 
 
             <Button type="submit">Save Invoice</Button>
@@ -826,120 +812,120 @@ const InvoiceComp: React.FC = () => {
       />
       <ContractorModal show={isContractorModalOpen} onClose={handleContractorCloseModal}>
         <Form onSubmit={handleContractorSubmit}>
-            <div>
-              <label htmlFor="contact_person">Contact Person</label>
-              <Input
-                id="contact_person"
-                type="text"
-                name="contact_person"
-                value={formContractorData.contact_person}
-                onChange={handleContractorInputChange}
-                placeholder="Contact Person"
-                autoComplete="off"
-                required
-              />
-            </div>
+          <div>
+            <label htmlFor="contact_person">Contact Person</label>
+            <Input
+              id="contact_person"
+              type="text"
+              name="contact_person"
+              value={formContractorData.contact_person}
+              onChange={handleContractorInputChange}
+              placeholder="Contact Person"
+              autoComplete="off"
+              required
+            />
+          </div>
 
-            <div>
-              <label htmlFor="company_name">Company Name</label>
-              <Input
-                id="company_name"
-                type="text"
-                name="company_name"
-                value={formContractorData.company_name}
-                onChange={handleContractorInputChange}
-                placeholder="Company Name"
-                autoComplete="off"
-                required
-              />
-            </div>
+          <div>
+            <label htmlFor="company_name">Company Name</label>
+            <Input
+              id="company_name"
+              type="text"
+              name="company_name"
+              value={formContractorData.company_name}
+              onChange={handleContractorInputChange}
+              placeholder="Company Name"
+              autoComplete="off"
+              required
+            />
+          </div>
 
-            <div>
-              <label htmlFor="phone_number">Phone Number</label>
-              <Input
-                id="phone_number"
-                type="text"
-                name="phone_number"
-                value={formContractorData.phone_number}
-                onChange={handleContractorInputChange}
-                placeholder="Phone Number"
-                autoComplete="off"
-                required
-              />
-            </div>
+          <div>
+            <label htmlFor="phone_number">Phone Number</label>
+            <Input
+              id="phone_number"
+              type="text"
+              name="phone_number"
+              value={formContractorData.phone_number}
+              onChange={handleContractorInputChange}
+              placeholder="Phone Number"
+              autoComplete="off"
+              required
+            />
+          </div>
 
-            <div>
-              <label htmlFor="email">Email</label>
-              <Input
-                id="email"
-                type="email"
-                name="email"
-                value={formContractorData.email}
-                onChange={handleContractorInputChange}
-                placeholder="Email"
-                autoComplete="off"
-                required
-              />
-            </div>
+          <div>
+            <label htmlFor="email">Email</label>
+            <Input
+              id="email"
+              type="email"
+              name="email"
+              value={formContractorData.email}
+              onChange={handleContractorInputChange}
+              placeholder="Email"
+              autoComplete="off"
+              required
+            />
+          </div>
 
-            <div>
-              <label htmlFor="bsb">BSB</label>
-              <Input
-                id="bsb"
-                type="text"
-                name="bsb"
-                value={formContractorData.bsb}
-                onChange={handleContractorInputChange}
-                placeholder="BSB"
-                autoComplete="off"
-                required
-              />
-            </div>
+          <div>
+            <label htmlFor="bsb">BSB</label>
+            <Input
+              id="bsb"
+              type="text"
+              name="bsb"
+              value={formContractorData.bsb}
+              onChange={handleContractorInputChange}
+              placeholder="BSB"
+              autoComplete="off"
+              required
+            />
+          </div>
 
-            <div>
-              <label htmlFor="account_no">Account Number</label>
-              <Input
-                id="account_no"
-                type="text"
-                name="account_no"
-                value={formContractorData.account_no}
-                onChange={handleContractorInputChange}
-                placeholder="Account Number"
-                autoComplete="off"
-                required
-              />
-            </div>
+          <div>
+            <label htmlFor="account_no">Account Number</label>
+            <Input
+              id="account_no"
+              type="text"
+              name="account_no"
+              value={formContractorData.account_no}
+              onChange={handleContractorInputChange}
+              placeholder="Account Number"
+              autoComplete="off"
+              required
+            />
+          </div>
 
-            <div>
-              <label htmlFor="account_name">Account Name</label>
-              <Input
-                id="account_name"
-                type="text"
-                name="account_name"
-                value={formContractorData.account_name}
-                onChange={handleContractorInputChange}
-                placeholder="Account Name"
-                autoComplete="off"
-                required
-              />
-            </div>
+          <div>
+            <label htmlFor="account_name">Account Name</label>
+            <Input
+              id="account_name"
+              type="text"
+              name="account_name"
+              value={formContractorData.account_name}
+              onChange={handleContractorInputChange}
+              placeholder="Account Name"
+              autoComplete="off"
+              required
+            />
+          </div>
 
-            <div>
-              <label htmlFor="address">Address</label>
-              <Input
-                id="address"
-                type="text"
-                name="address"
-                value={formContractorData.address}
-                onChange={handleContractorInputChange}
-                placeholder="Address"
-                autoComplete="off"
-                required
-              />
-            </div>
+          <div>
+            <label htmlFor="address">Address</label>
+            <Input
+              id="address"
+              type="text"
+              name="address"
+              value={formContractorData.address}
+              onChange={handleContractorInputChange}
+              placeholder="Address"
+              autoComplete="off"
+              required
+            />
+          </div>
 
-            <Button type="submit">Save Contractor</Button>
-          </Form>
+          <Button type="submit">Save Contractor</Button>
+        </Form>
 
       </ContractorModal>
     </Container>
