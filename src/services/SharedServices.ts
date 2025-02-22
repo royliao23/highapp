@@ -1,6 +1,6 @@
 // navigationService.ts
 import { useNavigate } from 'react-router-dom';
-import { Purchase, Invoice } from '../models';// Assuming your Purchase interface is in types.ts
+import { Purchase, Invoice, Pay } from '../models';// Assuming your Purchase interface is in types.ts
 
 export const useNavigationService = () => {
   const navigate = useNavigate();
@@ -11,8 +11,13 @@ export const useNavigationService = () => {
   const handleViewInvoice = (invoice: Invoice) => {
     navigate(`/invoice/${invoice.code}`, { state: { invoice } });
   };
+
+  const handleViewPay = (pay: Pay) => {
+    navigate(`/pay/${pay.code}`, { state: { pay } });
+  };
   return {
     handleViewPurchase,
     handleViewInvoice,
+    handleViewPay
   };
 };

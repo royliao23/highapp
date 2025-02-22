@@ -65,3 +65,15 @@ export interface Contractor {
   account_name: string;
   address: string;
 }
+
+export interface Pay {
+  code: number;
+  invoice_id: number;
+  pay_via: string;
+  amount: number;
+  supply_invoice: string;
+  note: string;
+  approved_by: string;
+  create_at: Date;
+  updated_at: Date;
+}
