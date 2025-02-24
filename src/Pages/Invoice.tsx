@@ -5,10 +5,10 @@ import SearchBox from "../components/SearchBox";
 import Dropdown from "../components/Dropdown";
 import JobModalComp from "../components/JobModal";
 import ContractorModal from "../components/Modal";
-import { Invoice, Contractor, Purchase } from "../models";
+import { Invoice, Contractor, Pay,  } from "../models";
 import { useNavigationService } from "../services/SharedServices";
-import { fetchProjectDetails, fetchPurchaseDetails } from "../services/SupaEndPoints";
-
+import { fetchInvoiceDetails, fetchPayDetails, fetchPurchaseDetails } from "../services/SupaEndPoints";
+import {  } from "../services/SupaEndPoints";
 // Styled Components for Styling
 const Container = styled.div`
   max-width: 1500px;
@@ -609,6 +609,10 @@ const InvoiceComp: React.FC = () => {
   const totalPages = Math.ceil(filteredInvoices.length / itemsPerPage);
   const { handleViewPurchase } = useNavigationService();
   const { handleViewInvoice } = useNavigationService();
+  const { handleViewPay } = useNavigationService();
+
+ 
+
   return (
     <Container>
       <Title>Invoice Management</Title>
@@ -654,23 +658,34 @@ const InvoiceComp: React.FC = () => {
                     // Handle the error (e.g., show an error message)
                   }
                 }} > {Invoice.po_id} </span> <br />
-              <strong>Paid:</strong>{Invoice.pay && Invoice.pay.length > 0
-                    ? Invoice.pay.map((p: any) => (
-                        <span key={p.code}>
-                          ${p.amount.toFixed(2)}{" "}
-                          (<a
-                            href="#"
-                            onClick={(e) => {
-                              e.preventDefault();
-                              alert(p.code);
-                            }}
-                            className="text-blue-500"
-                          >
-                            pay#{p.code}
-                          </a>)
-                        </span>
-                      ))
-                    : ""}<br />
+
+
+              <strong>Paid:</strong>
+              {Invoice.pay && Invoice.pay.length > 0
+                ? Invoice.pay.map((p: any) => (
+                    <span key={p.code}>
+                      ${p.amount.toFixed(2)}{" "}
+                      (<button
+                        onClick={async () => {
+                          try {
+                            const pay:any = await fetchPayDetails(p.code); // Await the Promise
+                            console.log("Pay before view:", pay.pay);
+                            if (pay) {
+                              handleViewPay(pay.pay);
+                            } else {
+                              console.error(`Pay record not found for pay code: ${p.code}`);
+                            }
+                          } catch (error) {
+                            console.error("Error fetching invoice details:", error);
+                          }
+                        }}
+                        className="text-blue-500 cursor-pointer"
+                      >
+                        pay#{p.code}
+                      </button>)
+                    </span>
+                  ))
+                : ""}<br />
               <Button onClick={() => handleOpenModal(Invoice)}>Edit</Button>
               <DeleteButton onClick={() => handleDelete(Invoice.code)}>Delete</DeleteButton>
             </ListItem>
@@ -716,23 +731,31 @@ const InvoiceComp: React.FC = () => {
                   }
                 }}>{Invoice.po_id}</span></Td>
                 <Td>
-                  {Invoice.pay && Invoice.pay.length > 0
-                    ? Invoice.pay.map((p: any) => (
-                        <span key={p.code}>
-                          ${p.amount.toFixed(2)}{" "}
-                          (<a
-                            href="#"
-                            onClick={(e) => {
-                              e.preventDefault();
-                              alert(p.code);
-                            }}
-                            className="text-blue-500"
-                          >
-                            pay#{p.code}
-                          </a>)
-                        </span>
-                      ))
-                    : ""}
+                {Invoice.pay && Invoice.pay.length > 0
+                ? Invoice.pay.map((p: any) => (
+                    <span key={p.code}>
+                      ${p.amount.toFixed(2)}{" "}
+                      (<button
+                        onClick={async () => {
+                          try {
+                            const pay:any = await fetchPayDetails(p.code); // Await the Promise
+                            console.log("Pay before view:", pay.pay);
+                            if (pay) {
+                              handleViewPay(pay.pay);
+                            } else {
+                              console.error(`Pay record not found for pay code: ${p.code}`);
+                            }
+                          } catch (error) {
+                            console.error("Error fetching invoice details:", error);
+                          }
+                        }}
+                        className="text-blue-500 cursor-pointer"
+                      >
+                        pay#{p.code}
+                      </button>)
+                    </span>
+                  ))
+                : ""}
                 </Td>
 
                 

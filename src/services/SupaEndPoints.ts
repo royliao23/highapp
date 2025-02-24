@@ -113,6 +113,25 @@ export const fetchInvoiceDetails = async (invoiceId: number) => {
   }
 };
 
+export const fetchPayDetails = async (payId: number) => {
+  try {
+    const { data, error } = await supabase
+      .from("pay")
+      .select("*, jobby(*)")
+      .eq("code", payId);
+
+    if (error) throw error;
+    if (data.length === 0) return null;
+    const pay = data[0];
+    return {
+      pay
+    };
+  } catch (error) {
+    console.error("Error fetching invoice details:", error);
+    return null;
+  }
+};
+
 
 
 

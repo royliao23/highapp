@@ -86,7 +86,9 @@ function PayView() {
     });
   const location = useLocation();
   const { pay } = location.state as { pay: Pay };
-  console.log(pay);
+  console.log("pay state received:", location.state);
+  console.log("pay received:", pay);
+  console.log("jobby:", pay.jobby);
   const navigate = useNavigate();
 
   const handlePrint = () => {
