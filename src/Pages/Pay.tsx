@@ -392,7 +392,7 @@ const PayComp: React.FC = () => {
           {paginatedPays.map((Pay) => (
             <ListItem key={Pay.code}>
               <button onClick={() => handleViewPay(Pay)} className="text-blue-500">
-                {Pay.code}
+                Pay #: {Pay.code}
               </button><br />
               <strong>Invoice ID:</strong> <span onClick={() => handleViewInvoice(Pay.jobby)} className="text-blue-500">{Pay.invoice_id} </span><br />
               <strong>Pay Via:</strong> {Pay.pay_via} <br />
@@ -409,7 +409,7 @@ const PayComp: React.FC = () => {
         <Table>
           <thead>
             <tr>
-              <Th>Code</Th>
+              <Th>Pay #</Th>
               <Th>Invoice ID</Th>
               <Th>Pay Via</Th>
               <Th>Supplier Invoice</Th>

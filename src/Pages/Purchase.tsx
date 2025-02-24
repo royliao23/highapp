@@ -682,7 +682,7 @@ const PurchaseComp: React.FC = () => {
           {paginatedPurchases.map((purchase) => (
             <ListItem key={purchase.code}>
               <button onClick={() => handleViewPurchase(purchase)} className="text-blue-500 underline">
-                {purchase.code}
+                PO#:{purchase.code}
               </button><br />
               <strong>Contact Person:</strong> {purchase.contact} <br />
               <strong>Project:</strong> {projectOptions.find((option) => option.value === purchase.project_id)?.label || "Unknown"} <br />
@@ -710,7 +710,7 @@ const PurchaseComp: React.FC = () => {
         <Table>
           <thead>
             <tr>
-              <Th>Code</Th>
+              <Th>PO #</Th>
               <Th>Contact Person</Th>
               <Th>Project</Th>
               <Th>Job</Th>

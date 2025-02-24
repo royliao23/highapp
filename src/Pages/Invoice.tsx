@@ -623,7 +623,7 @@ const InvoiceComp: React.FC = () => {
           {paginatedInvoices.map((Invoice) => (
             <ListItem key={Invoice.code}>
               <button onClick={() => handleViewInvoice(Invoice)} className="text-blue-500">
-                {Invoice.code}
+                Inv#:{Invoice.code}
               </button><br />
               <strong>Contact Person:</strong> {Invoice.contact} <br />
               <strong>Project:</strong> {projectOptions.find((option) => option.value === Invoice.project_id)?.label || "Unknown"} <br />
@@ -648,7 +648,7 @@ const InvoiceComp: React.FC = () => {
         <Table>
           <thead>
             <tr>
-              <Th>Code</Th>
+              <Th>Inv#</Th>
               <Th>Contact Person</Th>
               <Th>Project</Th>
               <Th>Job</Th>
