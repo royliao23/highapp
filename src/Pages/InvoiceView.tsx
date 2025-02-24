@@ -17,6 +17,7 @@ import {
 
 import { fetchJobDetails, fetchContractorDetails, fetchProjectDetails } from '../services/SupaEndPoints';
 import { useEffect, useState } from 'react';
+import { Pay } from '../models';
 interface Project {
     code: number;
     project_name: string;
@@ -55,7 +56,9 @@ interface Invoice {
     contact: string;
     create_at: Date;
     updated_at: Date;
-    due_at: Date
+    due_at: Date;
+    pay: Pay[];
+    paid: number;
   }
 
 export interface Option {
@@ -98,8 +101,11 @@ function InvoiceView() {
         address: "",
     });
   const location = useLocation();
+  console.log("invoice state:", location.state);
   const { invoice } = location.state as { invoice: Invoice };
-  console.log(invoice);
+
+  console.log("invoice received:",invoice);
+  invoice.paid = invoice.pay?.reduce((sum, payment) => sum + payment.amount, 0);
   const navigate = useNavigate();
 
   const handlePrint = () => {
@@ -190,9 +196,9 @@ function InvoiceView() {
           <Typography variant="body1">
             Together with GST: ${invoice.cost.toFixed(2)}
           </Typography>
-          <Typography variant="body1">Amount Paid: $0.00</Typography>
+          <Typography variant="body1">Amount Paid: ${invoice.paid?.toFixed(2)}</Typography>
           <Typography variant="body1" fontWeight="bold">
-            Balance Due: ${(invoice.cost).toFixed(2)}
+            Outstanding: ${(invoice.cost - invoice.paid).toFixed(2)}
           </Typography>
         </Box>
 

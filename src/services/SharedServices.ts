@@ -9,6 +9,7 @@ export const useNavigationService = () => {
     navigate(`/purchase/${purchase.code}`, { state: { purchase } });
   };
   const handleViewInvoice = (invoice: Invoice) => {
+    console.log("invoice passed:",invoice);
     navigate(`/invoice/${invoice.code}`, { state: { invoice } });
   };
 

@@ -5,7 +5,7 @@ import SearchBox from "../components/SearchBox";
 import Dropdown from "../components/Dropdown";
 import { Pay, Contractor, } from "../models";
 import { useNavigationService } from "../services/SharedServices";
-
+import { fetchInvoiceDetails } from "../services/SupaEndPoints";
 // Styled Components for Styling
 const Container = styled.div`
   max-width: 1500px;
@@ -162,6 +162,7 @@ const PayComp: React.FC = () => {
     approved_by: '',
     create_at: new Date(),
     updated_at: new Date(), // Fix `time` type issue
+
   });
 
     
@@ -394,7 +395,13 @@ const PayComp: React.FC = () => {
               <button onClick={() => handleViewPay(Pay)} className="text-blue-500">
                 Pay #: {Pay.code}
               </button><br />
-              <strong>Invoice ID:</strong> <span onClick={() => handleViewInvoice(Pay.jobby)} className="text-blue-500">{Pay.invoice_id} </span><br />
+              <strong>Invoice ID:</strong> <span onClick={async () => {try {
+                                  const invoice: any = await fetchInvoiceDetails(Pay.jobby.code || 0); // Await the Promise
+                                  handleViewInvoice(invoice);
+                                } catch (error) {
+                                  console.error("Error fetching purchase details:", error);
+                                  // Handle the error (e.g., show an error message)
+                                }}} className="text-blue-500">{Pay.invoice_id} </span><br />
               <strong>Pay Via:</strong> {Pay.pay_via} <br />
               <strong>Supplier Invoice:</strong> {Pay.supply_invoice} <br />
               <strong>Price:</strong> {(Pay.amount)?.toFixed(2)} <br />
@@ -428,7 +435,13 @@ const PayComp: React.FC = () => {
                   {Pay.code}
                 </button>
                 </Td>
-                <Td onClick={() => handleViewInvoice(Pay.jobby)} className="text-blue-500">{Pay.invoice_id}</Td>
+                <Td onClick={async () => {try {
+                                  const invoice: any = await fetchInvoiceDetails(Pay.jobby.code || 0); // Await the Promise
+                                  handleViewInvoice(invoice);
+                                } catch (error) {
+                                  console.error("Error fetching purchase details:", error);
+                                  // Handle the error (e.g., show an error message)
+                                }}} className="text-blue-500">{Pay.invoice_id}</Td>
                 <Td>{Pay.pay_via}</Td>
                 <Td>{Pay.supply_invoice}</Td>
                 <Td>{(Pay.amount)?.toFixed(2)}</Td>
@@ -483,7 +496,7 @@ const PayComp: React.FC = () => {
                 id="amount"
                 type="number"
                 name="amount"
-                value={formData.amount.toFixed(2)}
+                value={formData.amount}
                 onChange={handleInputChange}
                 placeholder="Amount"
                 autoComplete="off"

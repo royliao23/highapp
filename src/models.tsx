@@ -48,10 +48,13 @@ export interface Invoice {
   invoice_id?: number;
   cost: number;
   ref: string;
+  pay?: Pay[];
+  paid?: number;
   contact: string;
   create_at: Date;
   updated_at: Date;
-  due_at: Date
+  due_at: Date;
+  pay_codes?: string;
 }
 
 export interface Contractor {

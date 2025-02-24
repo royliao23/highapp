@@ -92,30 +92,27 @@ export const fetchPurchaseDetails = async (purchaseId: number) => {
 
 export const fetchInvoiceDetails = async (invoiceId: number) => {
   try {
-    const { data, error } = await supabase.from("jobby").select("*").eq("code", invoiceId);
-    if (error) throw error;
+    const { data, error } = await supabase
+      .from("jobby")
+      .select("*, pay(*)")
+      .eq("code", invoiceId);
 
-    return data.length > 0
-      ? {
-        code: data[0].code,
-        job_id: data,
-        by_id: data[0].by_id,
-        project_id: data,
-        ref: data[0].ref,
-        cost: data[0].cost,
-        contact: data[0].contact,
-        create_at:  data[0].create_at,
-        updated_at: data[0].updated_at,
-        due_at: data[0].due_at,
-        description: data[0].description,
-        po_id: data[0].po_id,
-        }
-      : null;
+    if (error) throw error;
+    if (data.length === 0) return null;
+
+    const invoice = data[0];
+    const paid = invoice.pay?.reduce((sum:number, payment:any) => sum + payment.amount, 0) || 0;
+
+    return {
+      ...invoice,
+      paid,  // Ensure 'paid' is part of the returned object
+    };
   } catch (error) {
-    console.error("Error fetching the purchase details:", error);
+    console.error("Error fetching invoice details:", error);
     return null;
   }
 };
+
 
 
 

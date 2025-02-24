@@ -276,13 +276,26 @@ const InvoiceComp: React.FC = () => {
 
   const fetchInvoices = async () => {
     try {
-      const { data, error } = await supabase.from("jobby").select("*").order("code", { ascending: false });;
+      const { data, error } = await supabase
+        .from("jobby")
+        .select("*, pay(*)")
+        .order("code", { ascending: false });
+  
       if (error) throw error;
-      setInvoices(data || []);
+  
+      const invoicesWithPaid = data.map((invoice) => ({
+        ...invoice,
+        paid: invoice.pay?.reduce((sum:number, payment:any) => sum + payment.amount, 0) || 0,
+        pay_codes: invoice.pay?.map((p:any) =>"$" + p.amount.toFixed(2) +"("+ `pay#${p.code.toString()}`+")").join(" + ") || "N/A", // Joining pay codes into a string
+        pay_created_at: invoice.pay?.map((p:any) => p.created_at).join(", ") || "N/A", // Joining creation dates into a string
+      }));
+  
+      setInvoices(invoicesWithPaid);
     } catch (error) {
       console.error("Error fetching Invoices:", error);
     }
   };
+  
   const [projectOptions, setProjectOptions] = useState([
     { value: 0, label: "" },
   ]);
@@ -398,6 +411,8 @@ const InvoiceComp: React.FC = () => {
     }
     setIsModalOpen(true);
   };
+
+
 
   const handleCloseModal = () => {
     setFormData({
@@ -631,14 +646,31 @@ const InvoiceComp: React.FC = () => {
               <strong>Price:</strong> {(Invoice.cost).toFixed(2)} <br />
               <strong>Job:</strong> {jobOptions.find((option) => option.value === Invoice.job_id)?.label || "Unknown"} <br />
               <strong>PO:</strong> <span className="text-blue-500" onClick={async () => {
-                try {
-                  const purchase: any = await fetchPurchaseDetails(Invoice.po_id || 0); // Await the Promise
-                  handleViewPurchase(purchase);
-                } catch (error) {
-                  console.error("Error fetching purchase details:", error);
-                  // Handle the error (e.g., show an error message)
-                }
-              }}> {Invoice.po_id} </span> <br />
+                  try {
+                    const purchase: any = await fetchPurchaseDetails(Invoice.po_id || 0); // Await the Promise
+                    handleViewPurchase(purchase);
+                  } catch (error) {
+                    console.error("Error fetching purchase details:", error);
+                    // Handle the error (e.g., show an error message)
+                  }
+                }} > {Invoice.po_id} </span> <br />
+              <strong>Paid:</strong>{Invoice.pay && Invoice.pay.length > 0
+                    ? Invoice.pay.map((p: any) => (
+                        <span key={p.code}>
+                          ${p.amount.toFixed(2)}{" "}
+                          (<a
+                            href="#"
+                            onClick={(e) => {
+                              e.preventDefault();
+                              alert(p.code);
+                            }}
+                            className="text-blue-500"
+                          >
+                            pay#{p.code}
+                          </a>)
+                        </span>
+                      ))
+                    : ""}<br />
               <Button onClick={() => handleOpenModal(Invoice)}>Edit</Button>
               <DeleteButton onClick={() => handleDelete(Invoice.code)}>Delete</DeleteButton>
             </ListItem>
@@ -656,6 +688,7 @@ const InvoiceComp: React.FC = () => {
               <Th>Supplier</Th>
               <Th>Ref</Th>
               <Th>PO</Th>
+              <Th>Paid</Th>
               <Th>Edit</Th>
               <Th>Delete</Th>
             </tr>
@@ -682,6 +715,27 @@ const InvoiceComp: React.FC = () => {
                     // Handle the error (e.g., show an error message)
                   }
                 }}>{Invoice.po_id}</span></Td>
+                <Td>
+                  {Invoice.pay && Invoice.pay.length > 0
+                    ? Invoice.pay.map((p: any) => (
+                        <span key={p.code}>
+                          ${p.amount.toFixed(2)}{" "}
+                          (<a
+                            href="#"
+                            onClick={(e) => {
+                              e.preventDefault();
+                              alert(p.code);
+                            }}
+                            className="text-blue-500"
+                          >
+                            pay#{p.code}
+                          </a>)
+                        </span>
+                      ))
+                    : ""}
+                </Td>
+
+                
                 <Td>
                   <Button onClick={() => handleOpenModal(Invoice)}>Edit</Button>
                 </Td>
