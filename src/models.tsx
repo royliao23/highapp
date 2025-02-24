@@ -76,4 +76,5 @@ export interface Pay {
   approved_by: string;
   create_at: Date;
   updated_at: Date;
-}
+  jobby: Invoice }
+

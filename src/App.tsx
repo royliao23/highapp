@@ -20,6 +20,7 @@ import InvoiceComp from "./Pages/Invoice";
 import PurchaseView from "./Pages/PurchaseView";
 import InvoiceView from "./Pages/InvoiceView";
 import PayComp from "./Pages/Pay";
+import PayView from "./Pages/PayView";
 const App: React.FC = () => {
   const [isLoggedIn, setIsLoggedIn] = useState(
     localStorage.getItem("isLoggedIn") === "true"
@@ -99,6 +100,7 @@ const MainApp: React.FC<MainAppProps> = ({
         {isLoggedIn && <Route path="/pay" element={<PayComp />} />}
         <Route path="/purchase/:code" element={<PurchaseView />} />
         <Route path="/invoice/:code" element={<InvoiceView />} />
+        <Route path="/pay/:code" element={<PayView />} />
         <Route path="*" element={<Login onLoginSuccess={onLoginSuccess} />} />
       </Routes>
     </>

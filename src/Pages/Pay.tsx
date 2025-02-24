@@ -3,11 +3,8 @@ import { supabase } from "../supabaseClient";
 import styled from "styled-components";
 import SearchBox from "../components/SearchBox";
 import Dropdown from "../components/Dropdown";
-import JobModalComp from "../components/JobModal";
-import ContractorModal from "../components/Modal";
 import { Pay, Contractor, } from "../models";
 import { useNavigationService } from "../services/SharedServices";
-import { fetchPurchaseDetails } from "../services/SupaEndPoints";
 
 // Styled Components for Styling
 const Container = styled.div`
@@ -156,15 +153,15 @@ const CloseButton = styled.button`
 
 const PayComp: React.FC = () => {
   const [Pays, setPays] = useState<Pay[]>([]);
-  const [formData, setFormData] = useState<Omit<Pay, "code">>({
+  const [formData, setFormData] = useState<Omit<Pay, "code" | "jobby">>({
     invoice_id: 0,
     pay_via: '',
     amount: 0,
-    supply_invoice: '',
+    supply_invoice: '', // Fix the typo if it's supposed to match Pay interface
     note: '',
     approved_by: '',
     create_at: new Date(),
-    updated_at: new Date(),
+    updated_at: new Date(), // Fix `time` type issue
   });
 
     
@@ -179,138 +176,28 @@ const PayComp: React.FC = () => {
     address: "",
   });
   const [editingCode, setEditingCode] = useState<number | null>(null); // Track which Pay is being edited
-  const [contractoreditingCode, setContractorEditingCode] = useState<number | null>(null); // Track which Pay is being edited
-
   const [isMobileView, setIsMobileView] = useState<boolean>(window.innerWidth < 1000);
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
-  const [isContractorModalOpen, setIsContractorModalOpen] = useState<boolean>(false);
   const [searchTerm, setSearchTerm] = useState<string>("");
   const [currentPage, setCurrentPage] = useState<number>(1);
   const [itemsPerPage] = useState<number>(10);
   const handlePageChange = (newPage: number) => {
     setCurrentPage(newPage);
   };
-  //new
-  const [isJobModalOpen, setIsJobModalOpen] = useState<boolean>(false);
-  const [formJobData, setFormJobData] = useState({
-    name: "",
-    job_category_id: 0, // Or whatever your data structure requires
-    description: "",
-  });
-  const [editingJobCode, setEditingJobCode] = useState<number | null>(null);
-  const [jobCategoryOptions, setJobCategoryOptions] = useState([
-    { value: 0, label: "" },
-  ]);  // For the dropdown in the job modal
-
-  const fetchJobCategories = async () => {
-    try {
-      const { data, error } = await supabase.from("categ").select("*");
-      if (error) throw error;
-
-      const transformedData = data.map((item) => ({
-        value: item.code,
-        label: item.name,
-      }));
-
-      setJobCategoryOptions(transformedData);
-    } catch (error) {
-      console.error("Error fetching job categories:", error);
-    }
-  };
-
-  useEffect(() => {
-    fetchJobCategories();
-  }, []);
-
-
-  const handleJobOpenModal = () => {
-    setIsJobModalOpen(true);
-  };
-
-  const handleJobCloseModal = () => {
-    setFormJobData({
-      name: "",
-      job_category_id: 0,
-      description: "",
-    });
-    setEditingJobCode(null);
-    setIsJobModalOpen(false);
-  };
-
-  const handleJobInputChange = (e: ChangeEvent<HTMLInputElement>) => {
-    setFormJobData({ ...formJobData, [e.target.name]: e.target.value });
-  };
-
-  const handleJobDropChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
-    const { name, value } = event.target;
-    setFormJobData((prevData) => ({
-      ...prevData,
-      [name]: value,
-    }));
-  };
-
-  const handleJobSubmit = async (e: FormEvent) => {
-    e.preventDefault();
-
-    try {
-      if (editingJobCode !== null) {
-        // Update existing job
-        const { error } = await supabase
-          .from("job")
-          .update(formJobData)
-          .eq("code", editingJobCode); // Assuming 'code' is the ID field
-
-        if (error) throw error;
-      } else {
-        // Insert new job
-        const { error } = await supabase.from("job").insert([formJobData]);
-        if (error) throw error;
-      }
-
-      // Close the modal and refresh job list
-      handleJobCloseModal();
-      fetchJobs(); // Assuming you have this function to refresh job data
-    } catch (error) {
-      console.error("Error saving job:", error);
-    }
-  };
-
+  
   const fetchPays = async () => {
     try {
-      const { data, error } = await supabase.from("pay").select("*").order("code", { ascending: false });;
+        const { data, error } = await supabase
+        .from("pay")
+        .select("*, jobby(*)") // Fetch all columns from pay and related invoice details
+        .order("code", { ascending: false });
       if (error) throw error;
       setPays(data || []);
     } catch (error) {
       console.error("Error fetching Pays:", error);
     }
   };
-  const [projectOptions, setProjectOptions] = useState([
-    { value: 0, label: "" },
-  ]);
 
-  const fetchProjects = async () => {
-    try {
-      const { data, error } = await supabase.from("project").select("*");
-      if (error) throw error;
-
-      // Transform data into { value, label } format
-      const transformedData = data.map((item) => ({
-        value: item.code, // Assuming `id` is the unique identifier
-        label: item.project_name, // Assuming `name` is the category name
-      }));
-
-      console.log("Fetched projects:", transformedData);
-
-      // Update the state with fetched categories
-      setProjectOptions(transformedData);
-    } catch (error) {
-      console.error("Error fetching projects:", error);
-    }
-  };
-
-  useEffect(() => {
-    fetchProjects();
-  }, []);
 
   const [contractorOptions, setContractorOptions] = useState([
     { value: 0, label: "" },
@@ -324,7 +211,7 @@ const PayComp: React.FC = () => {
       // Transform data into { value, label } format
       const transformedData = data.map((item) => ({
         value: item.code, // Assuming `id` is the unique identifier
-        label:  item.code.toString() + ' -> $' + item.cost, // Assuming `name` is the category name
+        label: "inv#" + item.code.toString() + ' ➡ $' + item.cost.toFixed(2), // Assuming `name` is the category name
       }));
 
       console.log("Fetched contractors:", transformedData);
@@ -340,33 +227,6 @@ const PayComp: React.FC = () => {
     fetchContractors();
   }, []);
 
-  const [jobOptions, setJobOptions] = useState([
-    { value: 0, label: "" },
-  ]);
-
-  const fetchJobs = async () => {
-    try {
-      const { data, error } = await supabase.from("job").select("*");
-      if (error) throw error;
-
-      // Transform data into { value, label } format
-      const transformedData = data.map((item) => ({
-        value: item.code,
-        label: item.name,
-      }));
-
-      console.log("Fetched jobs:", transformedData);
-
-      // Update the state with fetched categories
-      setJobOptions(transformedData);
-    } catch (error) {
-      console.error("Error fetching jobs:", error);
-    }
-  };
-
-  useEffect(() => {
-    fetchJobs();
-  }, []);
 
   useEffect(() => {
     fetchPays();
@@ -410,25 +270,13 @@ const PayComp: React.FC = () => {
         approved_by: '',
         create_at: new Date(),
         updated_at: new Date(),
+        
     });
     setEditingCode(null);
     setIsModalOpen(false);
   };
 
-  const handleContractorCloseModal = () => {
-    setFormContractorData({
-      contact_person: "",
-      company_name: "",
-      phone_number: "",
-      email: "",
-      bsb: "",
-      account_no: "",
-      account_name: "",
-      address: "",
-    });
-    setContractorEditingCode(null);
-    setIsContractorModalOpen(false);
-  };
+
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
@@ -458,39 +306,6 @@ const PayComp: React.FC = () => {
     } catch (error) {
       console.error("Error saving Pay:", error);
     }
-  };
-
-  const handleContractorSubmit = async (e: FormEvent) => {
-    e.preventDefault();
-
-    try {
-      if (editingCode !== null) {
-        // Update an existing contractor
-        const { error } = await supabase
-          .from("contractor")
-          .update(formContractorData)
-          .eq("code", editingCode);
-
-        if (error) throw error;
-
-        // Clear editing state after updating
-        setContractorEditingCode(null);
-      } else {
-        // Add a new contractor
-        const { error } = await supabase.from("contractor").insert([formContractorData]);
-
-        if (error) throw error;
-      }
-
-      // Refresh the list and reset the form
-      fetchContractors();
-      handleContractorCloseModal();
-    } catch (error) {
-      console.error("Error saving contractor:", error);
-    }
-  };
-  const handleContractorOpenModal = () => {
-    setIsContractorModalOpen(true);
   };
 
   const handleEdit = (Pay: Pay) => {
@@ -530,9 +345,7 @@ const PayComp: React.FC = () => {
   const handleInputChange = (e: ChangeEvent<HTMLInputElement>) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
-  const handleContractorInputChange = (e: ChangeEvent<HTMLInputElement>) => {
-    setFormContractorData({ ...formContractorData, [e.target.name]: e.target.value });
-  };
+  
 
   const handleDropChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
     const { name, value } = event.target;
@@ -542,57 +355,14 @@ const PayComp: React.FC = () => {
     }));
   };
 
-  const fetchCategories = async () => {
-    try {
-      const { data, error } = await supabase.from("categ").select("*");
-      if (error) throw error;
-
-      const transformedData = data.map((item) => ({
-        value: item.code,
-        label: item.name,
-      }));
-
-      setJobCategoryOptions(transformedData);
-    } catch (error) {
-      console.error("Error fetching categories:", error);
-    }
-  };
-
-  // Function to handle adding a new category
-  const handleAddCategory = async (newCategory: { value: number; label: string }) => {
-    try {
-      // Save the new category to the database
-      const { data, error } = await supabase
-        .from("categ")
-        .insert([{ name: newCategory.label }])
-        .select();
-
-      if (error) throw error;
-
-      // Update the jobCategoryOptions state with the new category
-      if (data && data.length > 0) {
-        const addedCategory = data[0];
-        setJobCategoryOptions((prevOptions) => [
-          ...prevOptions,
-          { value: addedCategory.code, label: addedCategory.name },
-        ]);
-      }
-
-      // Refresh the categories list
-      fetchCategories();
-    } catch (error) {
-      console.error("Error adding category:", error);
-    }
-  };
-
   const paginatedPays = filteredPays.slice(
     (currentPage - 1) * itemsPerPage,
     currentPage * itemsPerPage
   );
 
   const totalPages = Math.ceil(filteredPays.length / itemsPerPage);
-  const { handleViewPurchase } = useNavigationService();
   const { handleViewPay } = useNavigationService();
+  const { handleViewInvoice } = useNavigationService();
   return (
     <Container>
       <Title>Pay Management</Title>
@@ -624,7 +394,7 @@ const PayComp: React.FC = () => {
               <button onClick={() => handleViewPay(Pay)} className="text-blue-500">
                 {Pay.code}
               </button><br />
-              <strong>Invoice ID:</strong> {Pay.invoice_id} <br />
+              <strong>Invoice ID:</strong> <span onClick={() => handleViewInvoice(Pay.jobby)} className="text-blue-500">{Pay.invoice_id} </span><br />
               <strong>Pay Via:</strong> {Pay.pay_via} <br />
               <strong>Supplier Invoice:</strong> {Pay.supply_invoice} <br />
               <strong>Price:</strong> {(Pay.amount)?.toFixed(2)} <br />
@@ -658,7 +428,7 @@ const PayComp: React.FC = () => {
                   {Pay.code}
                 </button>
                 </Td>
-                <Td>{Pay.invoice_id}</Td>
+                <Td onClick={() => handleViewInvoice(Pay.jobby)} className="text-blue-500">{Pay.invoice_id}</Td>
                 <Td>{Pay.pay_via}</Td>
                 <Td>{Pay.supply_invoice}</Td>
                 <Td>{(Pay.amount)?.toFixed(2)}</Td>
@@ -705,7 +475,6 @@ const PayComp: React.FC = () => {
                 placeholder="Select Invoice"
                 required
               />
-              <span onClick={handleContractorOpenModal} className="addModal"> +</span>
             </div>
 
             <div>
@@ -714,7 +483,7 @@ const PayComp: React.FC = () => {
                 id="amount"
                 type="number"
                 name="amount"
-                value={formData.amount}
+                value={formData.amount.toFixed(2)}
                 onChange={handleInputChange}
                 placeholder="Amount"
                 autoComplete="off"
@@ -769,135 +538,7 @@ const PayComp: React.FC = () => {
 
         </ModalContent>
       </Modal>
-      <JobModalComp
-        show={isJobModalOpen}
-        onClose={handleJobCloseModal}
-        onSubmit={handleJobSubmit}
-        formData={formJobData}
-        onInputChange={handleJobInputChange}
-        onDropChange={handleJobDropChange}
-        jobCategoryOptions={jobCategoryOptions}
-        isEditing={editingJobCode !== null}
-        onAddCategory={handleAddCategory}
-      />
-      <ContractorModal show={isContractorModalOpen} onClose={handleContractorCloseModal}>
-        <Form onSubmit={handleContractorSubmit}>
-          <div>
-            <label htmlFor="contact_person">Contact Person</label>
-            <Input
-              id="contact_person"
-              type="text"
-              name="contact_person"
-              value={formContractorData.contact_person}
-              onChange={handleContractorInputChange}
-              placeholder="Contact Person"
-              autoComplete="off"
-              required
-            />
-          </div>
-
-          <div>
-            <label htmlFor="company_name">Company Name</label>
-            <Input
-              id="company_name"
-              type="text"
-              name="company_name"
-              value={formContractorData.company_name}
-              onChange={handleContractorInputChange}
-              placeholder="Company Name"
-              autoComplete="off"
-              required
-            />
-          </div>
-
-          <div>
-            <label htmlFor="phone_number">Phone Number</label>
-            <Input
-              id="phone_number"
-              type="text"
-              name="phone_number"
-              value={formContractorData.phone_number}
-              onChange={handleContractorInputChange}
-              placeholder="Phone Number"
-              autoComplete="off"
-              required
-            />
-          </div>
-
-          <div>
-            <label htmlFor="email">Email</label>
-            <Input
-              id="email"
-              type="email"
-              name="email"
-              value={formContractorData.email}
-              onChange={handleContractorInputChange}
-              placeholder="Email"
-              autoComplete="off"
-              required
-            />
-          </div>
-
-          <div>
-            <label htmlFor="bsb">BSB</label>
-            <Input
-              id="bsb"
-              type="text"
-              name="bsb"
-              value={formContractorData.bsb}
-              onChange={handleContractorInputChange}
-              placeholder="BSB"
-              autoComplete="off"
-              required
-            />
-          </div>
-
-          <div>
-            <label htmlFor="account_no">Account Number</label>
-            <Input
-              id="account_no"
-              type="text"
-              name="account_no"
-              value={formContractorData.account_no}
-              onChange={handleContractorInputChange}
-              placeholder="Account Number"
-              autoComplete="off"
-              required
-            />
-          </div>
-
-          <div>
-            <label htmlFor="account_name">Account Name</label>
-            <Input
-              id="account_name"
-              type="text"
-              name="account_name"
-              value={formContractorData.account_name}
-              onChange={handleContractorInputChange}
-              placeholder="Account Name"
-              autoComplete="off"
-              required
-            />
-          </div>
-
-          <div>
-            <label htmlFor="address">Address</label>
-            <Input
-              id="address"
-              type="text"
-              name="address"
-              value={formContractorData.address}
-              onChange={handleContractorInputChange}
-              placeholder="Address"
-              autoComplete="off"
-              required
-            />
-          </div>
-
-          <Button type="submit">Save Contractor</Button>
-        </Form>
-
-      </ContractorModal>
+      
     </Container>
   );
 };

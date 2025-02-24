@@ -755,7 +755,7 @@ const InvoiceComp: React.FC = () => {
                 id="cost"
                 type="number"
                 name="cost"
-                value={formData.cost}
+                value={formData.cost.toFixed(2)}
                 onChange={handleInputChange}
                 placeholder="Cost"
                 autoComplete="off"
