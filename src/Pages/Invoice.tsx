@@ -179,7 +179,7 @@ const InvoiceComp: React.FC = () => {
   });
   const [editingCode, setEditingCode] = useState<number | null>(null); // Track which Invoice is being edited
   const [contractoreditingCode, setContractorEditingCode] = useState<number | null>(null); // Track which Invoice is being edited
-
+  const [showOutstanding, setShowOutstanding] = useState(false);
   const [isMobileView, setIsMobileView] = useState<boolean>(window.innerWidth < 1000);
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
   const [isContractorModalOpen, setIsContractorModalOpen] = useState<boolean>(false);
@@ -189,7 +189,9 @@ const InvoiceComp: React.FC = () => {
   const handlePageChange = (newPage: number) => {
     setCurrentPage(newPage);
   };
-  //new
+  const handleToggleOutstanding = () => {
+    setShowOutstanding((prev) => !prev);
+  };
   const [isJobModalOpen, setIsJobModalOpen] = useState<boolean>(false);
   const [formJobData, setFormJobData] = useState({
     name: "",
@@ -286,8 +288,7 @@ const InvoiceComp: React.FC = () => {
       const invoicesWithPaid = data.map((invoice) => ({
         ...invoice,
         paid: invoice.pay?.reduce((sum:number, payment:any) => sum + payment.amount, 0) || 0,
-        pay_codes: invoice.pay?.map((p:any) =>"$" + p.amount.toFixed(2) +"("+ `pay#${p.code.toString()}`+")").join(" + ") || "N/A", // Joining pay codes into a string
-        pay_created_at: invoice.pay?.map((p:any) => p.created_at).join(", ") || "N/A", // Joining creation dates into a string
+        outstanding: (invoice.cost || 0) - (invoice.pay?.reduce((sum:number, p:any) => sum + p.amount, 0) || 0),
       }));
   
       setInvoices(invoicesWithPaid);
@@ -541,7 +542,9 @@ const InvoiceComp: React.FC = () => {
     );
   });
 
-
+  const displayedInvoices = showOutstanding
+  ? filteredInvoices.filter((filteredInvoice) => (filteredInvoice.outstanding ?? 0) > 0)
+  : filteredInvoices;
   // Handle Form Input
   const handleInputChange = (e: ChangeEvent<HTMLInputElement>) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -601,12 +604,14 @@ const InvoiceComp: React.FC = () => {
     }
   };
 
-  const paginatedInvoices = filteredInvoices.slice(
+  const paginatedInvoices = displayedInvoices.slice(
     (currentPage - 1) * itemsPerPage,
     currentPage * itemsPerPage
   );
 
-  const totalPages = Math.ceil(filteredInvoices.length / itemsPerPage);
+
+
+  const totalPages = Math.ceil(displayedInvoices.length / itemsPerPage);
   const { handleViewPurchase } = useNavigationService();
   const { handleViewInvoice } = useNavigationService();
   const { handleViewPay } = useNavigationService();
@@ -617,8 +622,11 @@ const InvoiceComp: React.FC = () => {
     <Container>
       <Title>Invoice Management</Title>
       <ButtonRow>
+        
         <SearchBox searchTerm={searchTerm} onSearchChange={handleSearchChange} />
+        
         <Button onClick={() => handleOpenModal()}>Add Invoice</Button>
+
       </ButtonRow>
 
       {/* Pagination Controls */}
@@ -634,7 +642,15 @@ const InvoiceComp: React.FC = () => {
           >
             {index + 1}
           </Button>
-        ))}
+          
+        ))
+        
+        }
+        <Button 
+              onClick={handleToggleOutstanding} 
+              className="bg-blue-500 text-white px-4 py-2 rounded-md">
+              {showOutstanding ? "Show All Invoices" : "Show Outstanding"}
+        </Button>
       </div>
 
       {isMobileView ? (
@@ -686,6 +702,11 @@ const InvoiceComp: React.FC = () => {
                     </span>
                   ))
                 : ""}<br />
+                <strong>Outstanding:</strong> $ {Invoice.outstanding?.toFixed(2)} <br />
+                  {/* {(
+                    Invoice.cost -
+                    (Invoice.pay?.reduce((sum: number, p: any) => sum + p.amount, 0) || 0)
+                  ).toFixed(2)}<br /> */}
               <Button onClick={() => handleOpenModal(Invoice)}>Edit</Button>
               <DeleteButton onClick={() => handleDelete(Invoice.code)}>Delete</DeleteButton>
             </ListItem>
@@ -704,6 +725,7 @@ const InvoiceComp: React.FC = () => {
               <Th>Ref</Th>
               <Th>PO</Th>
               <Th>Paid</Th>
+              <Th>Outstanding</Th>
               <Th>Edit</Th>
               <Th>Delete</Th>
             </tr>
@@ -756,6 +778,9 @@ const InvoiceComp: React.FC = () => {
                     </span>
                   ))
                 : ""}
+                </Td>
+                <Td>
+                $ {Invoice.outstanding?.toFixed(2)}
                 </Td>
 
                 
@@ -832,7 +857,7 @@ const InvoiceComp: React.FC = () => {
                 id="cost"
                 type="number"
                 name="cost"
-                value={formData.cost.toFixed(2)}
+                value={formData.cost}
                 onChange={handleInputChange}
                 placeholder="Cost"
                 autoComplete="off"

@@ -54,7 +54,7 @@ export interface Invoice {
   create_at: Date;
   updated_at: Date;
   due_at: Date;
-  pay_codes?: string;
+  outstanding?: number;
 }
 
 export interface Contractor {
