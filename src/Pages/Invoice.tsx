@@ -5,10 +5,10 @@ import SearchBox from "../components/SearchBox";
 import Dropdown from "../components/Dropdown";
 import JobModalComp from "../components/JobModal";
 import ContractorModal from "../components/Modal";
-import { Invoice, Contractor, Pay,  } from "../models";
+import { Invoice, Contractor } from "../models";
 import { useNavigationService } from "../services/SharedServices";
-import { fetchInvoiceDetails, fetchPayDetails, fetchPurchaseDetails } from "../services/SupaEndPoints";
-import {  } from "../services/SupaEndPoints";
+import { fetchPayDetails, fetchPurchaseDetails } from "../services/SupaEndPoints";
+import * as XLSX from 'xlsx';
 // Styled Components for Styling
 const Container = styled.div`
   max-width: 1500px;
@@ -39,6 +39,7 @@ const Input = styled.input`
 
 const Button = styled.button`
   padding: 0.8rem;
+  margin-right: 1rem;
   border: none;
   border-radius: 4px;
   background-color: #007bff;
@@ -55,6 +56,25 @@ const ButtonRow = styled.div`
   justify-content: space-between;
   align-items: center;
   margin-bottom: 1rem;
+  flex-wrap: wrap; /* Allows wrapping on smaller screens */
+
+  @media (max-width: 768px) {
+    flex-direction: column; /* Stack items on small screens */
+    align-items: stretch;
+  }
+`;
+
+const ButtonRowFlex = styled.div`
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  gap: 0.5rem; /* Adds space between buttons */
+
+  @media (max-width: 768px) {
+    justify-content: center; /* Center buttons on mobile */
+    flex-wrap: wrap;
+    width: 100%;
+  }
 `;
 
 const Table = styled.table`
@@ -609,6 +629,57 @@ const InvoiceComp: React.FC = () => {
     currentPage * itemsPerPage
   );
 
+const exportToCSV = () => {
+    const headers = ["Inv#", "Contact Person", "Project", "Job", "Price", "Supplier", "Ref", "PO", "Paid Total", "Outstanding","Paid"];
+    
+    const csvRows = [
+        headers.join(","), // Add headers
+        ...displayedInvoices.map(invoice => [
+            invoice.code,
+            invoice.contact,
+            projectOptions.find(option => option.value === invoice.project_id)?.label || "Unknown",
+            jobOptions.find(option => option.value === invoice.job_id)?.label || "Unknown",
+            invoice.cost.toFixed(2),
+            contractorOptions.find(option => option.value === invoice.by_id)?.label || "Unknown",
+            invoice.ref,
+            invoice.po_id,
+            invoice.pay?.reduce((sum, p) => sum + p.amount, 0) ?? 0, 
+            invoice.outstanding?.toFixed(2) || "0.00",
+            invoice.pay?.map(p => `$${p.amount.toFixed(2)} (pay#${p.code})`).join(" | ") || "N/A",
+            
+        ].join(","))
+    ].join("\n");
+
+    const blob = new Blob([csvRows], { type: "text/csv" });
+    const link = document.createElement("a");
+    link.href = URL.createObjectURL(blob);
+    link.download = "Invoices.csv";
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+};
+
+const exportToExcel = () => {
+    const ws = XLSX.utils.json_to_sheet(
+        displayedInvoices.map(invoice => ({
+            "Inv#": invoice.code,
+            "Contact Person": invoice.contact,
+            "Project": projectOptions.find(option => option.value === invoice.project_id)?.label || "Unknown",
+            "Job": jobOptions.find(option => option.value === invoice.job_id)?.label || "Unknown",
+            "Price": invoice.cost.toFixed(2),
+            "Supplier": contractorOptions.find(option => option.value === invoice.by_id)?.label || "Unknown",
+            "Ref": invoice.ref,
+            "PO": invoice.po_id,
+            "Paid Total": invoice.pay?.reduce((sum, p) => sum + p.amount, 0) ?? 0,   
+            "Outstanding": invoice.outstanding?.toFixed(2) || "0.00",
+            "Paid": invoice.pay?.map(p => `$${p.amount.toFixed(2)} (pay#${p.code})`).join(" | ") || "N/A",
+        }))
+    );
+
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, "Invoices");
+    XLSX.writeFile(wb, "Invoices.xlsx");
+};
 
 
   const totalPages = Math.ceil(displayedInvoices.length / itemsPerPage);
@@ -622,12 +693,16 @@ const InvoiceComp: React.FC = () => {
     <Container>
       <Title>Invoice Management</Title>
       <ButtonRow>
-        
         <SearchBox searchTerm={searchTerm} onSearchChange={handleSearchChange} />
         
-        <Button onClick={() => handleOpenModal()}>Add Invoice</Button>
-
+        <ButtonRowFlex>
+          <Button onClick={() => handleOpenModal()}>Add Invoice</Button>
+          <Button onClick={exportToCSV}>Export to CSV</Button>
+          <Button onClick={exportToExcel}>Export to Excel</Button>
+        </ButtonRowFlex>
       </ButtonRow>
+
+      
 
       {/* Pagination Controls */}
       <div>
@@ -678,10 +753,10 @@ const InvoiceComp: React.FC = () => {
 
               <strong>Paid:</strong>
               {Invoice.pay && Invoice.pay.length > 0
-                ? Invoice.pay.map((p: any) => (
+                ? Invoice.pay.map((p: any, index: number) => 
                     <span key={p.code}>
-                      ${p.amount.toFixed(2)}{" "}
-                      (<button
+                      ${p.amount.toFixed(2)}
+                      <button
                         onClick={async () => {
                           try {
                             const pay:any = await fetchPayDetails(p.code); // Await the Promise
@@ -698,9 +773,10 @@ const InvoiceComp: React.FC = () => {
                         className="text-blue-500 cursor-pointer"
                       >
                         pay#{p.code}
-                      </button>)
+                      </button>
+                      {Invoice.pay && index !== Invoice.pay.length - 1 ? " | " : ""}
                     </span>
-                  ))
+                  )
                 : ""}<br />
                 <strong>Outstanding:</strong> $ {Invoice.outstanding?.toFixed(2)} <br />
                   {/* {(
@@ -754,10 +830,10 @@ const InvoiceComp: React.FC = () => {
                 }}>{Invoice.po_id}</span></Td>
                 <Td>
                 {Invoice.pay && Invoice.pay.length > 0
-                ? Invoice.pay.map((p: any) => (
+                ? Invoice.pay.map((p: any, index: number) => 
                     <span key={p.code}>
-                      ${p.amount.toFixed(2)}{" "}
-                      (<button
+                      ${p.amount.toFixed(2)}
+                      <button
                         onClick={async () => {
                           try {
                             const pay:any = await fetchPayDetails(p.code); // Await the Promise
@@ -774,9 +850,10 @@ const InvoiceComp: React.FC = () => {
                         className="text-blue-500 cursor-pointer"
                       >
                         pay#{p.code}
-                      </button>)
+                      </button>
+                      {Invoice.pay && index !== Invoice.pay.length - 1 ? " | " : ""}
                     </span>
-                  ))
+                  )
                 : ""}
                 </Td>
                 <Td>
