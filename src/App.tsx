@@ -21,6 +21,7 @@ import PurchaseView from "./Pages/PurchaseView";
 import InvoiceView from "./Pages/InvoiceView";
 import PayComp from "./Pages/Pay";
 import PayView from "./Pages/PayView";
+import CreditorAging from "./Pages/CreditorAging";
 const App: React.FC = () => {
   const [isLoggedIn, setIsLoggedIn] = useState(
     localStorage.getItem("isLoggedIn") === "true"
@@ -98,6 +99,7 @@ const MainApp: React.FC<MainAppProps> = ({
         {isLoggedIn && <Route path="/contractor" element={<Contractor />} />}
         {isLoggedIn && <Route path="/invoice" element={<InvoiceComp />} />}
         {isLoggedIn && <Route path="/pay" element={<PayComp />} />}
+        {isLoggedIn && <Route path="/creditor-aging" element={<CreditorAging />} />}
         <Route path="/purchase/:code" element={<PurchaseView />} />
         <Route path="/invoice/:code" element={<InvoiceView />} />
         <Route path="/pay/:code" element={<PayView />} />
