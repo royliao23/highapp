@@ -58,7 +58,7 @@ const ButtonRow = styled.div`
   margin-bottom: 1rem;
   flex-wrap: wrap; /* Allows wrapping on smaller screens */
 
-  @media (max-width: 768px) {
+  @media (max-width: 1000px) {
     flex-direction: column; /* Stack items on small screens */
     align-items: stretch;
   }
@@ -70,7 +70,7 @@ const ButtonRowFlex = styled.div`
   align-items: center;
   gap: 0.5rem; /* Adds space between buttons */
 
-  @media (max-width: 768px) {
+  @media (max-width: 1000px) {
     justify-content: center; /* Center buttons on mobile */
     flex-wrap: wrap;
     width: 100%;
