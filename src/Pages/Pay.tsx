@@ -164,18 +164,7 @@ const PayComp: React.FC = () => {
     updated_at: new Date(), // Fix `time` type issue
 
   });
-
-    
-  const [formContractorData, setFormContractorData] = useState<Omit<Contractor, "code">>({
-    contact_person: "",
-    company_name: "",
-    phone_number: "",
-    email: "",
-    bsb: "",
-    account_no: "",
-    account_name: "",
-    address: "",
-  });
+  
   const [editingCode, setEditingCode] = useState<number | null>(null); // Track which Pay is being edited
   const [isMobileView, setIsMobileView] = useState<boolean>(window.innerWidth < 1000);
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
@@ -200,32 +189,45 @@ const PayComp: React.FC = () => {
   };
 
 
-  const [contractorOptions, setContractorOptions] = useState([
+  const [invoiceOptions, setInvoiceOptions] = useState([
     { value: 0, label: "" },
   ]);
 
-  const fetchContractors = async () => {
+  const fetchInvoiceOptions = async () => {
     try {
-      const { data, error } = await supabase.from("jobby").select("*");
-      if (error) throw error;
+        const { data, error } = await supabase
+            .from("jobby")
+            .select("*, pay(*)") // Fetch invoices with payments
+            .order("code", { ascending: false });
 
-      // Transform data into { value, label } format
-      const transformedData = data.map((item) => ({
-        value: item.code, // Assuming `id` is the unique identifier
-        label: "inv#" + item.code.toString() + ' ➡ $' + item.cost.toFixed(2), // Assuming `name` is the category name
-      }));
+        if (error) throw error;
 
-      console.log("Fetched contractors:", transformedData);
+        // Transform data into { value, label } format
+        const transformedData = data.map((item) => {
+            // Calculate total paid amount
+            const totalPaid = item.pay?.reduce((sum:number, p:any) => sum + p.amount, 0) || 0;
+            
+            // Calculate balance (cost - totalPaid)
+            const balance = Math.max(0, item.cost - totalPaid); // Ensure balance is not negative
 
-      // Update the state with fetched categories
-      setContractorOptions(transformedData);
+            return {
+                value: item.code, 
+                label: `inv#${item.code} ➡ $${item.cost.toFixed(2)} | Paid: $${totalPaid.toFixed(2)} | Balance: $${balance.toFixed(2)}`
+            };
+        });
+
+        console.log("Fetched invoices:", transformedData);
+
+        // Update the state with fetched invoices
+        setInvoiceOptions(transformedData);
     } catch (error) {
-      console.error("Error fetching contractors:", error);
+        console.error("Error fetching invoices:", error);
     }
-  };
+};
+
 
   useEffect(() => {
-    fetchContractors();
+    fetchInvoiceOptions();
   }, []);
 
 
@@ -283,31 +285,60 @@ const PayComp: React.FC = () => {
     e.preventDefault();
 
     try {
-      if (editingCode !== null) {
-        // Update an existing Pay
-        const { error } = await supabase
-          .from("pay")
-          .update(formData)
-          .eq("code", editingCode);
+        // Fetch the invoice details to get the total cost and total paid amount
+        const { data: invoiceData, error: invoiceError } = await supabase
+            .from("jobby")
+            .select("cost, pay(*)")
+            .eq("code", formData.invoice_id)
+            .single(); // Fetch only one record
 
-        if (error) throw error;
+        if (invoiceError) throw invoiceError;
+        if (!invoiceData) throw new Error("Invoice not found.");
 
-        // Clear editing state after updating
-        setEditingCode(null);
-      } else {
-        // Add a new Pay
-        const { error } = await supabase.from("pay").insert([formData]);
-
-        if (error) throw error;
+        // Calculate total paid amount
+        let totalPaid = invoiceData.pay?.reduce((sum, p) => sum + p.amount, 0) || 0;
+        if (editingCode !== null) {
+          // If editing, subtract the current payment from totalPaid
+          const currentPay = invoiceData.pay?.find(p => p.code === editingCode);
+          if (currentPay) {
+              totalPaid -= currentPay.amount; // Exclude the existing amount from balance calculation
+          }
       }
+        // Calculate the remaining balance
+        const balance = Math.max(0, invoiceData.cost - totalPaid);
 
-      // Refresh the list and reset the form
-      fetchPays();
-      handleCloseModal();
+        // Check if the new payment exceeds the balance
+        if (formData.amount > balance) {
+            alert(`Payment exceeds balance! Remaining balance: $${balance.toFixed(2)}`);
+            return; // Stop execution
+        }
+
+        if (editingCode !== null) {
+            // Update an existing Pay
+            const { error } = await supabase
+                .from("pay")
+                .update(formData)
+                .eq("code", editingCode);
+
+            if (error) throw error;
+
+            setEditingCode(null);
+        } else {
+            // Add a new Pay
+            const { error } = await supabase.from("pay").insert([formData]);
+
+            if (error) throw error;
+        }
+
+        // Refresh the list and reset the form
+        fetchPays();
+        handleCloseModal();
+        fetchInvoiceOptions(); // Refresh the invoice options
     } catch (error) {
-      console.error("Error saving Pay:", error);
+        console.error("Error saving Pay:", error);
     }
-  };
+};
+
 
   const handleEdit = (Pay: Pay) => {
     setEditingCode(Pay.code);
@@ -484,7 +515,7 @@ const PayComp: React.FC = () => {
                 name="invoice_id"
                 value={formData.invoice_id}
                 onChange={handleDropChange}
-                options={contractorOptions}
+                options={invoiceOptions}
                 placeholder="Select Invoice"
                 required
               />
