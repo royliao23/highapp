@@ -9,6 +9,7 @@ import { useNavigate } from "react-router-dom";
 import { fetchInvoiceDetails, fetchJobService } from "../services/SupaEndPoints";
 import { Purchase, Contractor } from "../models";
 import { useNavigationService } from "../services/SharedServices";
+import { PaginationContainer } from "../StyledComponent";
 // Styled Components for Styling
 const Container = styled.div`
   max-width: 1500px;
@@ -20,7 +21,7 @@ const Container = styled.div`
 `;
 
 const Title = styled.h2`
-  text-align: center;
+  text-align: left;
   color: #333;
 `;
 
@@ -534,7 +535,10 @@ const PurchaseComp: React.FC = () => {
 
   // Filter purchases dynamically based on the search term
   const filteredPurchases = purchases.filter((purchase) => {
+    const contractor = contractorOptions.find((c) => c.value === purchase.by_id);
+
     return (
+      (contractor?.label?.toLowerCase() || "").includes(searchTerm.toLowerCase()) ||
       (purchase.ref?.toLowerCase() || "").includes(searchTerm.toLowerCase()) ||
       (purchase.contact?.toLowerCase() || "").includes(searchTerm.toLowerCase())
     );
@@ -649,10 +653,7 @@ const PurchaseComp: React.FC = () => {
   );
 
   const totalPages = Math.ceil(filteredPurchases.length / itemsPerPage);
-  // const navigate = useNavigate();
-  // const handleViewPDF = (purchase: Purchase) => {
-  //   navigate(`/purchase/${purchase.code}`, { state: { purchase } });
-  // };
+ 
   const { handleViewPurchase } = useNavigationService();
   const { handleViewInvoice } = useNavigationService();
   return (
@@ -663,20 +664,20 @@ const PurchaseComp: React.FC = () => {
         <Button onClick={() => handleOpenModal()}>Add purchase</Button>
       </ButtonRow>
       {/* Pagination Controls */}
-      <div>
+      <PaginationContainer>
         {Array.from({ length: totalPages }, (_, index) => (
           <Button
             key={index}
             onClick={() => handlePageChange(index + 1)}
-            style={{
-              margin: "0 5px",
-              backgroundColor: currentPage === index + 1 ? "#007bff" : "#ddd"
+            style={{ 
+              margin: "0 5px", 
+              backgroundColor: currentPage === index + 1 ? "#007bff" : "#ddd" 
             }}
           >
             {index + 1}
           </Button>
         ))}
-      </div>
+      </PaginationContainer>
       {isMobileView ? (
         <List>
           {paginatedPurchases.map((purchase) => (

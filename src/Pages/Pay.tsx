@@ -6,6 +6,7 @@ import Dropdown from "../components/Dropdown";
 import { Pay, Contractor, } from "../models";
 import { useNavigationService } from "../services/SharedServices";
 import { fetchInvoiceDetails } from "../services/SupaEndPoints";
+import { PaginationContainer } from "../StyledComponent";
 // Styled Components for Styling
 const Container = styled.div`
   max-width: 1500px;
@@ -17,7 +18,7 @@ const Container = styled.div`
 `;
 
 const Title = styled.h2`
-  text-align: center;
+  text-align: left;
   color: #333;
 `;
 
@@ -367,7 +368,9 @@ const PayComp: React.FC = () => {
   // Filter Pays dynamically based on the search term
   const filteredPays = Pays.filter((Pay) => {
     return (
+      (Pay.jobby?.contact?.toString() || "").includes(searchTerm.toLowerCase()) ||
       (Pay.invoice_id?.toString() || "").includes(searchTerm.toLowerCase()) ||
+      (Pay.approved_by).includes(searchTerm.toLowerCase()) ||
       (Pay.supply_invoice?.toLowerCase() || "").includes(searchTerm.toLowerCase())
     );
   });
@@ -404,20 +407,20 @@ const PayComp: React.FC = () => {
       </ButtonRow>
 
       {/* Pagination Controls */}
-      <div>
+      <PaginationContainer>
         {Array.from({ length: totalPages }, (_, index) => (
           <Button
             key={index}
             onClick={() => handlePageChange(index + 1)}
-            style={{
-              margin: "0 5px",
-              backgroundColor: currentPage === index + 1 ? "#007bff" : "#ddd"
+            style={{ 
+              margin: "0 5px", 
+              backgroundColor: currentPage === index + 1 ? "#007bff" : "#ddd" 
             }}
           >
             {index + 1}
           </Button>
         ))}
-      </div>
+      </PaginationContainer>
 
       {isMobileView ? (
         <List>
@@ -452,7 +455,6 @@ const PayComp: React.FC = () => {
               <Th>Pay Via</Th>
               <Th>Supplier Invoice</Th>
               <Th>Price</Th>
-              <Th>Supplier Invoice</Th>
               <Th>Note</Th>
               <Th>Approved By</Th>
               <Th>Edit</Th>
@@ -476,7 +478,6 @@ const PayComp: React.FC = () => {
                 <Td>{Pay.pay_via}</Td>
                 <Td>{Pay.supply_invoice}</Td>
                 <Td>{(Pay.amount)?.toFixed(2)}</Td>
-                <Td>{Pay.supply_invoice}</Td>
                 <Td>{ Pay.note }</Td>
                 <Td>{ Pay.approved_by }</Td>
                 <Td>

@@ -4,7 +4,6 @@ import "./styles.css";
 import Home from "./Pages/Home";
 import Task from "./Pages/Task";
 import Contact from "./Pages/Contact";
-import Authors from "./Pages/Author";
 import Articles from "./Pages/Articles";
 import Login from "./Pages/Login";
 import Contractor from "./Pages/Contractor";
@@ -21,7 +20,6 @@ import PurchaseView from "./Pages/PurchaseView";
 import InvoiceView from "./Pages/InvoiceView";
 import PayComp from "./Pages/Pay";
 import PayView from "./Pages/PayView";
-import CreditorAging from "./Pages/CreditorAging";
 import AgingReport from "./Pages/AgingReport";
 const App: React.FC = () => {
   const [isLoggedIn, setIsLoggedIn] = useState(
@@ -64,12 +62,7 @@ const MainApp: React.FC<MainAppProps> = ({
   const navigate = useNavigate();
   const hideNavPages = ["/login", "/signup"];
 
-  // useEffect(() => {
-  //   if (!isLoggedIn && pathname !== "/login" && pathname !== "/signup" && pathname !== "/forgot-password" && pathname !== "/reset-password") {
-  //     navigate("/login");
-  //   }
-  // }, [isLoggedIn, pathname, navigate]);
-
+  
   useEffect(() => {
     const publicPaths = ["/login", "/signup", "/forgot-password", "/reset-password"];
     if (!isLoggedIn && !publicPaths.includes(pathname)) {

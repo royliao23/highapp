@@ -27,7 +27,7 @@ const Container = styled.div`
 `;
 
 const Title = styled.h2`
-  text-align: center;
+  text-align: left;
   color: #333;
 `;
 

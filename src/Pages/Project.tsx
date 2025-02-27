@@ -24,7 +24,7 @@ const Container = styled.div`
 `;
 
 const Title = styled.h2`
-  text-align: center;
+  text-align: left;
   color: #333;
 `;
 
@@ -152,7 +152,8 @@ const ProjectComp: React.FC = () => {
   }, []);
 
   const handleSearchChange = (e: ChangeEvent<HTMLInputElement>) => {
-    setSearchTerm(e.target.value.toLowerCase()); // Normalize search term for case-insensitive search
+    setSearchTerm(e.target.value.toLowerCase());
+    console.log("Search Term:", e.target.value);
   };
 
   const handleOpenModal = (project?: Project) => {
@@ -229,7 +230,7 @@ const ProjectComp: React.FC = () => {
       project.project_name.toLowerCase().includes(searchTerm) ||
       project.manager.toLowerCase().includes(searchTerm) ||
       project.description.toLowerCase().includes(searchTerm) ||
-      project.status.includes(searchTerm)
+      project.status.toLowerCase().includes(searchTerm)
     );
   });
 
@@ -242,7 +243,7 @@ const ProjectComp: React.FC = () => {
     <Container>
       <Title>Project Management</Title>
       <ButtonRow>
-        <SearchBox searchTerm={searchTerm} onSearchChange={handleSearchChange} />
+        <SearchBox searchTerm={searchTerm} onSearchChange={ handleSearchChange } />
         <Button onClick={() => handleOpenModal()}>Add Project</Button>
       </ButtonRow>
 

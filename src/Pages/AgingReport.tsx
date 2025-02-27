@@ -3,7 +3,7 @@ import { supabase } from "../supabaseClient";
 import styled from "styled-components";
 import SearchBox from "../components/SearchBox";
 import { AgeInvoice } from "../models";
-
+import Pagination from "../components/Pagination";
 // Styled Components for Styling
 const Container = styled.div`
   max-width: 1500px;
@@ -15,7 +15,7 @@ const Container = styled.div`
 `;
 
 const Title = styled.h2`
-  text-align: center;
+  text-align: left;
   color: #333;
 `;
 
@@ -51,19 +51,35 @@ const Table = styled.table`
   width: 100%;
   border-collapse: collapse;
   margin-top: 2rem;
+  font-size: 1rem; /* Default size */
+
+  @media (max-width: 1000px) {
+    font-size: 0.6rem; /* 40% smaller */
+  }
 `;
 
 const Th = styled.th`
   padding: 0.8rem;
   background-color: #007bff;
   color: #fff;
+
+  @media (max-width: 1000px) {
+    padding: 0.3rem; /* Reduce padding */
+    font-size: 0.6rem;
+  }
 `;
 
 const Td = styled.td`
   padding: 0.8rem;
   text-align: center;
   border: 1px solid #ddd;
+
+  @media (max-width: 1000px) {
+    padding: 0.3rem; /* Reduce padding */
+    font-size: 0.6rem; /* 40% smaller */
+  }
 `;
+
 
 // Main Component
 const AgingReport: React.FC = () => {
@@ -136,6 +152,19 @@ const AgingReport: React.FC = () => {
         }
     };
 
+    const [currentPage, setCurrentPage] = useState<number>(1);
+    const [itemsPerPage] = useState<number>(10); 
+    const handlePageChange = (newPage: number) => {
+        setCurrentPage(newPage);
+      };
+    const paginatedReport = displayedInvoices.slice(
+    (currentPage - 1) * itemsPerPage,
+    currentPage * itemsPerPage
+    );
+
+    const totalPages = Math.ceil(displayedInvoices.length / itemsPerPage);
+
+    
     if (loading) return <p>Loading...</p>;
 
     return (
@@ -145,6 +174,8 @@ const AgingReport: React.FC = () => {
                 <SearchBox searchTerm={searchTerm} onSearchChange={handleSearchChange} />
                 <Button onClick={handlePrint}>Print Report</Button>
             </ButtonRow>
+
+            <Pagination totalPages={totalPages} currentPage={currentPage} handlePageChange={handlePageChange} />
 
             {/* Printable Report Section */}
             <div ref={printRef}>
@@ -162,7 +193,7 @@ const AgingReport: React.FC = () => {
                         </tr>
                     </thead>
                     <tbody>
-                        {displayedInvoices.map((invoice) => (
+                        {paginatedReport.map((invoice) => (
                             <tr key={invoice.code}>
                                 <Td>{invoice.contractor.company_name}</Td>
                                 <Td>{new Date(invoice.due_at).toLocaleDateString()}</Td>

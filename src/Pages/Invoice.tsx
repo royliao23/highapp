@@ -9,6 +9,7 @@ import { Invoice, Contractor } from "../models";
 import { useNavigationService } from "../services/SharedServices";
 import { fetchPayDetails, fetchPurchaseDetails } from "../services/SupaEndPoints";
 import * as XLSX from 'xlsx';
+import { PaginationContainer } from "../StyledComponent";
 // Styled Components for Styling
 const Container = styled.div`
   max-width: 1500px;
@@ -20,7 +21,7 @@ const Container = styled.div`
 `;
 
 const Title = styled.h2`
-  text-align: center;
+  text-align: left;
   color: #333;
 `;
 
@@ -705,7 +706,7 @@ const exportToExcel = () => {
       
 
       {/* Pagination Controls */}
-      <div>
+      <PaginationContainer>
         {Array.from({ length: totalPages }, (_, index) => (
           <Button
             key={index}
@@ -726,7 +727,7 @@ const exportToExcel = () => {
               className="bg-blue-500 text-white px-4 py-2 rounded-md">
               {showOutstanding ? "Show All Invoices" : "Show Outstanding"}
         </Button>
-      </div>
+      </PaginationContainer>
 
       {isMobileView ? (
         <List>

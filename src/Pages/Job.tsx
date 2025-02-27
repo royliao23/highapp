@@ -4,6 +4,7 @@ import styled from "styled-components";
 import SearchBox from "../components/SearchBox";
 import JobModal from "../components/JobModal";
 import { fetchJobService } from "../services/SupaEndPoints";
+import { PaginationContainer } from "../StyledComponent";
 // Define the job type based on the table schema
 interface Job {
   code: number;
@@ -27,7 +28,7 @@ const Container = styled.div`
   background-color: #f9f9f9;
 `;
 const Title = styled.h2`
-  text-align: center;
+  text-align: left;
   color: #333;
 `;
 
@@ -267,7 +268,7 @@ const JobComp: React.FC = () => {
         <Button onClick={() => handleOpenModal()}>Add Job</Button>
       </ButtonRow>
       {/* Pagination Controls */}
-    <div>
+    <PaginationContainer>
       {Array.from({ length: totalPages }, (_, index) => (
         <Button
           key={index}
@@ -280,7 +281,7 @@ const JobComp: React.FC = () => {
           {index + 1}
         </Button>
       ))}
-    </div>
+    </PaginationContainer>
       {isMobileView ? (
         <List>
           {paginatedJobs.map((job) => (

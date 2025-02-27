@@ -3,6 +3,7 @@ import { supabase } from "../supabaseClient";
 import styled from "styled-components";
 import SearchBox from "../components/SearchBox";
 import Modal from "../components/Modal";
+import { PaginationContainer } from "../StyledComponent";
 // Define the Contractor type based on the table schema
 interface Contractor {
   code: number;
@@ -27,7 +28,7 @@ const Container = styled.div`
 `;
 
 const Title = styled.h2`
-  text-align: center;
+  text-align: left;
   color: #333;
 `;
 
@@ -253,7 +254,7 @@ const ContractorComp: React.FC = () => {
     );
   });
 
-  const paginatedContractors = contractors.slice(
+  const paginatedContractors = filteredContractors.slice(
     (currentPage - 1) * itemsPerPage,
     currentPage * itemsPerPage
   );
@@ -272,7 +273,7 @@ const ContractorComp: React.FC = () => {
         <Button onClick={() => handleOpenModal()}>Add Contractor</Button>
       </ButtonRow>
       {/* Pagination Controls */}
-      <div>
+      <PaginationContainer>
         {Array.from({ length: totalPages }, (_, index) => (
           <Button
             key={index}
@@ -285,7 +286,7 @@ const ContractorComp: React.FC = () => {
             {index + 1}
           </Button>
         ))}
-      </div>
+      </PaginationContainer>
       {isMobileView ? (
         <List>
           {paginatedContractors.map((contractor) => (
