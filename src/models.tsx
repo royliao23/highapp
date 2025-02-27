@@ -56,7 +56,6 @@ export interface Invoice {
   due_at: Date;
   outstanding?: number;
 }
-
 export interface Contractor {
   code: number;
   contact_person: string;
@@ -68,6 +67,18 @@ export interface Contractor {
   account_name: string;
   address: string;
 }
+export interface AgeInvoice  {
+  totalPaid: number;
+  amountDue: number;
+  agingBucket: string;
+  code: number;
+  due_at: Date;
+  cost: number;
+  ref: string;
+  contractor: any;
+  pay: { amount: number }[];
+};
+
 
 export interface Pay {
   code: number;
