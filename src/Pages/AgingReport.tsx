@@ -1,11 +1,12 @@
-import React, { useState, useEffect, ChangeEvent } from 'react';
-import { supabase } from '../supabaseClient';
+import React, { useState, useEffect, ChangeEvent, useRef } from "react";
+import { supabase } from "../supabaseClient";
 import styled from "styled-components";
 import SearchBox from "../components/SearchBox";
-import { AgeInvoice } from '../models';
+import { AgeInvoice } from "../models";
+
 // Styled Components for Styling
 const Container = styled.div`
-  max-widTh: 1500px;
+  max-width: 1500px;
   margin: 2rem auto;
   padding: 2rem;
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
@@ -29,6 +30,10 @@ const Button = styled.button`
   &:hover {
     background-color: #0056b3;
   }
+
+  @media print {
+    display: none; /* Hide the button when printing */
+  }
 `;
 
 const ButtonRow = styled.div`
@@ -36,10 +41,14 @@ const ButtonRow = styled.div`
   justify-content: space-between;
   align-items: center;
   margin-bottom: 1rem;
+
+  @media print {
+    display: none; /* Hide controls when printing */
+  }
 `;
 
 const Table = styled.table`
-  widTh: 100%;
+  width: 100%;
   border-collapse: collapse;
   margin-top: 2rem;
 `;
@@ -56,22 +65,18 @@ const Td = styled.td`
   border: 1px solid #ddd;
 `;
 
-
-// Inside The CreditorAging component...
-
+// Main Component
 const AgingReport: React.FC = () => {
     const [invoices, setInvoices] = useState<AgeInvoice[]>([]);
     const [loading, setLoading] = useState(true);
-    const [isMobileView, setIsMobileView] = useState<boolean>(window.innerWidth < 1000);
-    const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
     const [searchTerm, setSearchTerm] = useState<string>("");
+    const printRef = useRef<HTMLDivElement>(null);
 
     useEffect(() => {
         const fetchAgingReport = async () => {
             setLoading(true);
-
             let { data, error } = await supabase
-                .from('jobby') // Invoice table
+                .from("jobby") // Invoice table
                 .select(`
                     code,
                     due_at,
@@ -80,10 +85,10 @@ const AgingReport: React.FC = () => {
                     contractor(*),
                     pay(amount)
                 `)
-                .order('due_at', { ascending: true });
+                .order("due_at", { ascending: true });
 
             if (error) {
-                console.error('Error fetching data:', error);
+                console.error("Error fetching data:", error);
                 setLoading(false);
                 return;
             }
@@ -96,11 +101,11 @@ const AgingReport: React.FC = () => {
                 let agingBucket;
                 const daysPastDue = (new Date(invoice.due_at as string).getTime() - today.getTime()) / (1000 * 60 * 60 * 24);
 
-                if (daysPastDue >= 0) agingBucket = 'Current';
-                else if (daysPastDue >= -30) agingBucket = '1-30 Days';
-                else if (daysPastDue >= -60) agingBucket = '31-60 Days';
-                else if (daysPastDue >= -90) agingBucket = '60+ Days';
-                else agingBucket = '90+ Days';
+                if (daysPastDue >= 0) agingBucket = "Current";
+                else if (daysPastDue >= -30) agingBucket = "1-30 Days";
+                else if (daysPastDue >= -60) agingBucket = "31-60 Days";
+                else if (daysPastDue >= -90) agingBucket = "60+ Days";
+                else agingBucket = "90+ Days";
 
                 return {
                     ...invoice,
@@ -117,29 +122,20 @@ const AgingReport: React.FC = () => {
         fetchAgingReport();
     }, []);
 
-    // Ensure useEffect runs unconditionally
-    useEffect(() => {
-        if (isModalOpen) {
-            document.body.classList.add("no-scroll");
-        } else {
-            document.body.classList.remove("no-scroll");
-        }
-        return () => {
-            document.body.classList.remove("no-scroll");
-        };
-    }, [isModalOpen]);
-
-    useEffect(() => {
-        const handleResize = () => setIsMobileView(window.innerWidth < 1000);
-        window.addEventListener("resize", handleResize);
-        return () => window.removeEventListener("resize", handleResize);
-    }, []);
-
     const handleSearchChange = (e: ChangeEvent<HTMLInputElement>) => {
         setSearchTerm(e.target.value.toLowerCase());
     };
 
-    // **Now we check for loading AFTER all hooks are defined**
+    const displayedInvoices = invoices.filter((invoice) =>
+        invoice.contractor?.company_name.toLowerCase().includes(searchTerm)
+    );
+
+    const handlePrint = () => {
+        if (printRef.current) {
+            window.print();
+        }
+    };
+
     if (loading) return <p>Loading...</p>;
 
     return (
@@ -147,39 +143,42 @@ const AgingReport: React.FC = () => {
             <Title>Creditor Aging Report</Title>
             <ButtonRow>
                 <SearchBox searchTerm={searchTerm} onSearchChange={handleSearchChange} />
-                <Button>Print Report</Button>
+                <Button onClick={handlePrint}>Print Report</Button>
             </ButtonRow>
-            <Table>
-                <thead>
-                    <tr>
-                        <Th>Company</Th>
-                        <Th>Due Date</Th>
-                        <Th>Invoice Code</Th>
-                        <Th>Reference</Th>
-                        <Th>Amount</Th>
-                        <Th>Paid</Th>
-                        <Th>Due</Th>
-                        <Th>Aging Bucket</Th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {invoices.map((invoice) => (
-                        <tr key={invoice.code}>
-                            <Td>{invoice.contractor.company_name}</Td>
-                            <Td>{new Date(invoice.due_at).toLocaleString()}</Td>
-                            <Td>{invoice.code}</Td>
-                            <Td>{invoice.ref}</Td>
-                            <Td>${invoice.cost.toFixed(2)}</Td>
-                            <Td>${invoice.totalPaid.toFixed(2)}</Td>
-                            <Td>${invoice.amountDue.toFixed(2)}</Td>
-                            <Td>{invoice.agingBucket}</Td>
+
+            {/* Printable Report Section */}
+            <div ref={printRef}>
+                <Table>
+                    <thead>
+                        <tr>
+                            <Th>Company</Th>
+                            <Th>Due Date</Th>
+                            <Th>Invoice Code</Th>
+                            <Th>Reference</Th>
+                            <Th>Amount</Th>
+                            <Th>Paid</Th>
+                            <Th>Due</Th>
+                            <Th>Aging Bucket</Th>
                         </tr>
-                    ))}
-                </tbody>
-            </Table>
+                    </thead>
+                    <tbody>
+                        {displayedInvoices.map((invoice) => (
+                            <tr key={invoice.code}>
+                                <Td>{invoice.contractor.company_name}</Td>
+                                <Td>{new Date(invoice.due_at).toLocaleDateString()}</Td>
+                                <Td>{invoice.code}</Td>
+                                <Td>{invoice.ref}</Td>
+                                <Td>${invoice.cost.toFixed(2)}</Td>
+                                <Td>${invoice.totalPaid.toFixed(2)}</Td>
+                                <Td>${invoice.amountDue.toFixed(2)}</Td>
+                                <Td>{invoice.agingBucket}</Td>
+                            </tr>
+                        ))}
+                    </tbody>
+                </Table>
+            </div>
         </Container>
     );
 };
 
 export default AgingReport;
-

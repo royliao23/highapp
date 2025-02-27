@@ -101,6 +101,8 @@ const MainApp: React.FC<MainAppProps> = ({
         {isLoggedIn && <Route path="/invoice" element={<InvoiceComp />} />}
         {isLoggedIn && <Route path="/pay" element={<PayComp />} />}
         {isLoggedIn && <Route path="/creditor-aging" element={<AgingReport />} />}
+        {isLoggedIn && <Route path="/ledger" element={<AgingReport />} />}
+        {isLoggedIn && <Route path="/chart" element={<AgingReport />} />}
         <Route path="/purchase/:code" element={<PurchaseView />} />
         <Route path="/invoice/:code" element={<InvoiceView />} />
         <Route path="/pay/:code" element={<PayView />} />

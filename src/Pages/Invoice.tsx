@@ -754,7 +754,7 @@ const exportToExcel = () => {
               <strong>Paid:</strong>
               {Invoice.pay && Invoice.pay.length > 0
                 ? Invoice.pay.map((p: any, index: number) => 
-                    <span key={p.code}>
+                    <span key={p.code} className="invoiceList">
                       ${p.amount.toFixed(2)}
                       <button
                         onClick={async () => {
@@ -774,7 +774,6 @@ const exportToExcel = () => {
                       >
                         pay#{p.code}
                       </button>
-                      {Invoice.pay && index !== Invoice.pay.length - 1 ? " | " : ""}
                     </span>
                   )
                 : ""}<br />
@@ -831,9 +830,9 @@ const exportToExcel = () => {
                 <Td>
                 {Invoice.pay && Invoice.pay.length > 0
                 ? Invoice.pay.map((p: any, index: number) => 
-                    <span key={p.code}>
+                    <span key={p.code} className="invoiceList">
                       ${p.amount.toFixed(2)}
-                      <button
+                      <button 
                         onClick={async () => {
                           try {
                             const pay:any = await fetchPayDetails(p.code); // Await the Promise
@@ -849,9 +848,8 @@ const exportToExcel = () => {
                         }}
                         className="text-blue-500 cursor-pointer"
                       >
-                        pay#{p.code}
+                        pay#:{p.code}
                       </button>
-                      {Invoice.pay && index !== Invoice.pay.length - 1 ? " | " : ""}
                     </span>
                   )
                 : ""}
