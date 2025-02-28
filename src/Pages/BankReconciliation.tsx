@@ -18,8 +18,8 @@ interface Pay {
 
 // Dummy Bank Records (from bank statement)
 const bankRecords = [
-    { id: 1, date: "2024-02-20", amount: 100, description: "Bank Transfer ABC" },
-    { id: 2, date: "2024-02-18", amount: 20, description: "Bank Deposit XYZ" },
+    { id: 1, date: "2024-02-20", amount: 500, description: "Bank Transfer ABC" },
+    { id: 2, date: "2024-02-18", amount: 4303.80, description: "Bank Deposit XYZ" },
     { id: 3, date: "2024-02-18", amount: 49.3, description: "Bank Deposit XYZ" },
 ];
 
@@ -69,19 +69,17 @@ setInvoices(unpaidInvoices);
         // Insert into Supabase
         const { data, error } = await supabase.from("pay").insert([newPayRecord]);
 
-        
-            alert("start to update invoice");
-            // Update the invoice status to "paid"
-            const { error: updateError } = await supabase
-                .from("jobby")
-                .update({ status: "paid" })  // Corrected update syntax
-                .eq("code", invoice.code);
-    
-            if (updateError) {
-                console.error("Error updating invoice status:", updateError);
-                alert("Failed to update invoice status!");
-                return;
-            }
+        // Update the invoice status to "paid"
+        const { error: updateError } = await supabase
+            .from("jobby")
+            .update({ status: "paid" })  // Corrected update syntax
+            .eq("code", invoice.code);
+
+        if (updateError) {
+            console.error("Error updating invoice status:", updateError);
+            alert("Failed to update invoice status!");
+            return;
+        }
         
 
         if (error) {
@@ -141,7 +139,7 @@ setInvoices(unpaidInvoices);
                                 <TableCell>ID</TableCell>
                                 <TableCell>Amount</TableCell>
                                 <TableCell>Due Date</TableCell>
-                                <TableCell>Match</TableCell>
+                                <TableCell style={{"paddingLeft": "40px"}}>Action</TableCell>
                             </TableRow>
                         </TableHead>
                         <TableBody>
@@ -164,7 +162,7 @@ setInvoices(unpaidInvoices);
                                                 color: isMatched ? "gray" : "black",
                                             }}
                                         >${invoice.cost}</TableCell>
-                                        {/* <TableCell>{invoice.due_at}</TableCell> */}
+                                        <TableCell>{invoice.due_at.toString()}</TableCell>
                                         <TableCell>
                                             {bankRecords.map((record) =>
                                                 record.amount === invoice.cost && !isMatched ? (

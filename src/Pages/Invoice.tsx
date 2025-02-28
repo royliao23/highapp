@@ -479,7 +479,7 @@ const InvoiceComp: React.FC = () => {
           .eq("code", editingCode);
 
         if (error) throw error;
-
+        
         // Clear editing state after updating
         setEditingCode(null);
       } else {
@@ -487,6 +487,17 @@ const InvoiceComp: React.FC = () => {
         const { error } = await supabase.from("jobby").insert([formData]);
 
         if (error) throw error;
+        // Update the invoice status to "paid"
+        const { error: updateError } = await supabase
+            .from("jobby")
+            .update({ status: "paid" })  // Corrected update syntax
+            .eq("code", formData.invoice_id);
+
+        if (updateError) {
+            console.error("Error updating invoice status:", updateError);
+            alert("Failed to update invoice status!");
+            return;
+        }
       }
 
       // Refresh the list and reset the form

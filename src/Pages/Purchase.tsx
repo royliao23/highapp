@@ -823,7 +823,7 @@ const PurchaseComp: React.FC = () => {
                 id="cost"
                 type="number"
                 name="cost"
-                value={formData.cost.toFixed(2)}
+                value={formData.cost}
                 onChange={handleInputChange}
                 placeholder="Cost"
                 autoComplete="off"
