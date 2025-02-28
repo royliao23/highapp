@@ -327,8 +327,18 @@ const PayComp: React.FC = () => {
         } else {
             // Add a new Pay
             const { error } = await supabase.from("pay").insert([formData]);
-
             if (error) throw error;
+            // Update the invoice status to "paid"
+        const { error: updateError } = await supabase
+              .from("jobby")
+              .update({ status: "paid" })  // Corrected update syntax
+              .eq("code", formData.invoice_id);
+
+          if (updateError) {
+              console.error("Error updating invoice status:", updateError);
+              alert("Failed to update invoice status!");
+              return;
+          }
         }
 
         // Refresh the list and reset the form
