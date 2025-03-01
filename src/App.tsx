@@ -22,6 +22,7 @@ import PayComp from "./Pages/Pay";
 import PayView from "./Pages/PayView";
 import AgingReport from "./Pages/AgingReport";
 import BankReconciliation from "./Pages/BankReconciliation";
+import PayrollDashboard from "./Pages/PayrollDashboard";
 const App: React.FC = () => {
   const [isLoggedIn, setIsLoggedIn] = useState(
     localStorage.getItem("isLoggedIn") === "true"
@@ -98,6 +99,7 @@ const MainApp: React.FC<MainAppProps> = ({
         {isLoggedIn && <Route path="/ledger" element={<AgingReport />} />}
         {isLoggedIn && <Route path="/chart" element={<AgingReport />} />}
         {isLoggedIn && <Route path="/br" element={<BankReconciliation />} />}
+        {isLoggedIn && <Route path="/payroll" element={<PayrollDashboard />} />}
         <Route path="/purchase/:code" element={<PurchaseView />} />
         <Route path="/invoice/:code" element={<InvoiceView />} />
         <Route path="/pay/:code" element={<PayView />} />
