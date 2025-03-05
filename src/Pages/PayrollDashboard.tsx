@@ -23,6 +23,7 @@ import {
   Grid,
   Tabs,
   Tab,
+
 } from "@mui/material";
 import { supabase } from "../supabaseClient";
 
@@ -79,14 +80,35 @@ const PayrollDashboard: React.FC = () => {
     email: ""
   });
   const [payPeriod, setPayPeriod] = useState("");
+  const [basePay, setBasePay] = useState(0);
+  const [baseHour, setBaseHour] = useState(0);
+  const [overtime15, setOvertime15] = useState(0);
+  const [overtime20, setOvertime20] = useState(0);
+  const [bonus, setBonus] = useState(0);
+  const [holidayPay, setHolidayPay] = useState(0);
+  const [others, setOthers] = useState(0);
   const [grossPay, setGrossPay] = useState(0);
+  const [hours, setHours] = useState(0);
   const [tabValue, setTabValue] = useState(0); // State for tab value
 
   // Handle Tab Change
   const handleTabChange = (_event: React.SyntheticEvent, newValue: number) => {
     setTabValue(newValue);
   };
-
+  // Auto-update gross pay when any of the inputs change
+  useEffect(() => {
+    const computedBasePay = baseHour * (selectedEmployee.salary ? selectedEmployee.salary / 38 : 23);
+    const computedOvertime15 = overtime15 * (selectedEmployee.salary ? selectedEmployee.salary / 38 * 1.5: 34.5);
+    const computedOvertime20 = overtime20 * (selectedEmployee.salary ? selectedEmployee.salary / 38 * 2: 46);
+    const computedHours = baseHour + overtime15 + overtime20;
+    const computedGrossPay = parseFloat((computedBasePay + computedOvertime15 + computedOvertime20 + bonus + holidayPay + others).toFixed(2));
+  
+    setBasePay(computedBasePay);
+    setHours(computedHours);
+    setGrossPay(computedGrossPay);
+    console.log(computedBasePay,'overtime 1.5:',computedOvertime15,computedOvertime20)
+  }, [selectedEmployee, baseHour, overtime15, overtime20, bonus, holidayPay, others]);
+  
   // Handle Sorting
   const handleSort = (property: keyof Payroll) => {
     const isAsc = orderBy === property && order === "asc";
@@ -96,7 +118,7 @@ const PayrollDashboard: React.FC = () => {
 
   // Handle Search
   const filteredData = payrollData.filter(
-    (payroll:Payroll) =>
+    (payroll: Payroll) =>
       payroll.employee?.name?.toLowerCase().includes(search.toLowerCase()) ||
       payroll.period.includes(search)
   );
@@ -121,7 +143,10 @@ const PayrollDashboard: React.FC = () => {
     link.download = "payroll_report.csv";
     link.click();
   };
-
+  const fetchpayRolls1 = async () => {
+    let { data, error } = await supabase.from("payroll").select("*, employee(*)");
+    if (!error) setPayrollData(data || []);
+  };
   useEffect(() => {
     const fetchpayRolls = async () => {
       let { data, error } = await supabase.from("payroll").select("*, employee(*)");
@@ -166,24 +191,30 @@ const PayrollDashboard: React.FC = () => {
       setSelectedEmployee({ id: 0, name: "", email: "" });
       setPayPeriod("");
       setGrossPay(0);
+      setBonus(0);
+      setOvertime15(0);
+      setOvertime20(0);
+      setOthers(0);
+      setBaseHour(0);
+      setHolidayPay(0);
     }
   };
 
   return (
     <Container>
       {/* Header */}
-      <Typography variant="h4" sx={{ my: 3, fontWeight: 'bold', color: 'primary.main'}}>
+      <Typography variant="h4" sx={{ my: 3, fontWeight: 'bold', color: 'primary.main' }}>
         Payroll Management
       </Typography>
 
       {/* Tabs */}
       <Tabs value={tabValue} onChange={handleTabChange} sx={{ mb: 3 }}>
         <Tab label="Payroll Summary" sx={{
-          marginLeft: '0px', marginright: '0px',paddingLeft: '1px', paddingRight: '2px',
-        }} />
+          marginLeft: '0px', marginright: '0px', paddingLeft: '1px', paddingRight: '2px',
+        }} onClick={fetchpayRolls1} />
         <Tab label="Add Payroll" sx={{
-            marginLeft: '17px',paddingLeft: '2px', paddingRight: '2px', 
-          }} />
+          marginLeft: '17px', paddingLeft: '2px', paddingRight: '2px',
+        }} />
       </Tabs>
 
       {/* Tab Content */}
@@ -282,8 +313,10 @@ const PayrollDashboard: React.FC = () => {
       {tabValue === 1 && (
         <Card sx={{ mt: 3 }}>
           <CardContent>
-            <Typography variant="h6" sx={{ mb:2 , fontWeight: 'bold' }} >Add Payroll</Typography>
+            <Typography variant="h6" sx={{ mb: 2, fontWeight: 'bold' }}>Add Payroll</Typography>
             <Grid container spacing={2}>
+
+              {/* Select Employee */}
               <Grid item xs={12} sm={6}>
                 <FormControl fullWidth>
                   <InputLabel>Select Employee</InputLabel>
@@ -295,12 +328,14 @@ const PayrollDashboard: React.FC = () => {
                     <MenuItem value="">-- Select Employee --</MenuItem>
                     {employees?.map((emp) => (
                       <MenuItem key={emp.id} value={emp.id}>
-                        {emp.name} ({emp.position})
+                        {emp.name} ({emp.position}) ({emp.salary})
                       </MenuItem>
                     ))}
                   </Select>
                 </FormControl>
               </Grid>
+
+              {/* Pay Period */}
               <Grid item xs={12} sm={6}>
                 <TextField
                   fullWidth
@@ -310,23 +345,107 @@ const PayrollDashboard: React.FC = () => {
                   onChange={(e) => setPayPeriod(e.target.value)}
                 />
               </Grid>
+
+              {/* Base Pay */}
               <Grid item xs={12} sm={6}>
                 <TextField
                   fullWidth
-                  label="Gross Pay"
+                  label="Base Hour"
                   type="number"
                   variant="outlined"
-                  value={grossPay}
-                  onChange={(e) => setGrossPay(parseFloat(e.target.value))}
+                  value={baseHour}
+                  onChange={(e) => setBaseHour(parseFloat(e.target.value) || 0)}
                 />
               </Grid>
-              <Grid item xs={12}>
-                <Button variant="contained" color="primary" onClick={handleAddPayroll}>
-                  Add Payroll
-                </Button>
+
+              {/* Overtime1.5 */}
+              <Grid item xs={12} sm={6}>
+                <TextField
+                  fullWidth
+                  label="Overtime 1.5"
+                  type="number"
+                  variant="outlined"
+                  value={overtime15}
+                  onChange={(e) => setOvertime15(parseFloat(e.target.value) || 0)}
+                />
               </Grid>
+              {/* Overtime2.0 */}
+              <Grid item xs={12} sm={6}>
+                <TextField
+                  fullWidth
+                  label="Overtime2.0"
+                  type="number"
+                  variant="outlined"
+                  value={overtime20}
+                  onChange={(e) => setOvertime20(parseFloat(e.target.value) || 0)}
+                />
+              </Grid>
+
+
+              {/* Bonus */}
+              <Grid item xs={12} sm={6}>
+                <TextField
+                  fullWidth
+                  label="Bonus"
+                  type="number"
+                  variant="outlined"
+                  value={bonus}
+                  onChange={(e) => setBonus(parseFloat(e.target.value) || 0)}
+                />
+              </Grid>
+
+              {/* Holiday Pay */}
+              <Grid item xs={12} sm={6}>
+                <TextField
+                  fullWidth
+                  label="Holiday Pay"
+                  type="number"
+                  variant="outlined"
+                  value={holidayPay}
+                  onChange={(e) => setHolidayPay(parseFloat(e.target.value) || 0)}
+                />
+              </Grid>
+
+              {/* others */}
+              <Grid item xs={12} sm={6}>
+                <TextField
+                  fullWidth
+                  label="others"
+                  type="number"
+                  variant="outlined"
+                  value={others}
+                  onChange={(e) => setOthers(parseFloat(e.target.value) || 0)}
+                />
+              </Grid>
+              {/* Total Hours and Gross Pay Summary */}
+              <Grid item xs={12} sm={6}>
+                <Typography variant="body1">
+                  Total Hours: {hours.toFixed(2)}
+                </Typography>
+              </Grid>
+              <Grid item xs={12} sm={6}>
+                <Typography variant="body1">
+                  Total Gross Pay: ${grossPay.toFixed(2)}
+                </Typography>
+              </Grid>
+
+           
+              {/* Blue Horizontal Line */}
+            <Grid item xs={12} sx={{ display: "flex", justifyContent: "center", mt: 5 }}>
+              <Box sx={{ width: "100%", borderBottom: "2px solid lightgrey" }} />
+            </Grid>
+
+            {/* Add Payroll Button */}
+            <Grid item xs={12} sx={{ display: "flex", justifyContent: "center", mt: 5 }}>
+              <Button variant="contained" color="primary" onClick={handleAddPayroll}>
+                Add Payroll
+              </Button>
+            </Grid>
+           
+
             </Grid>
           </CardContent>
+
         </Card>
       )}
     </Container>
