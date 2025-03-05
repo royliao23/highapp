@@ -464,8 +464,11 @@ const PayrollDashboard: React.FC = () => {
 
               {/* Add Payroll Button */}
               <Grid item xs={12} sx={{ display: "flex", justifyContent: "center", mt: 1 }}>
-                <Button variant="contained" color="primary" onClick={handleAddPayroll}>
+                <Button variant="contained" color="primary" sx={{ marginRight: "35px" }} onClick={handleAddPayroll}>
                   Add Payroll
+                </Button>
+                <Button variant="contained" color="primary" onClick={handleAddPayroll}>
+                  Preview Pay
                 </Button>
               </Grid>
 
