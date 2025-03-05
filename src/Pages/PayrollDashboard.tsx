@@ -23,8 +23,10 @@ import {
   Grid,
   Tabs,
   Tab,
+  Modal,
 
 } from "@mui/material";
+
 import { supabase } from "../supabaseClient";
 
 interface Employee {
@@ -90,6 +92,9 @@ const PayrollDashboard: React.FC = () => {
   const [grossPay, setGrossPay] = useState(0);
   const [hours, setHours] = useState(0);
   const [tabValue, setTabValue] = useState(0); // State for tab value
+  const [selectedPayroll, setSelectedPayroll] = useState<Payroll | null>(null);
+  const [openDialog, setOpenDialog] = useState(false);
+
 
   // Handle Tab Change
   const handleTabChange = (_event: React.SyntheticEvent, newValue: number) => {
@@ -122,6 +127,8 @@ const PayrollDashboard: React.FC = () => {
       payroll.employee?.name?.toLowerCase().includes(search.toLowerCase()) ||
       payroll.period.includes(search)
   );
+
+  
 
   // Handle Pagination
   const handleChangePage = (_event: unknown, newPage: number) => setPage(newPage);
@@ -208,6 +215,19 @@ const PayrollDashboard: React.FC = () => {
     }
   };
 
+  const handleViewPayroll = (payroll: Payroll) => {
+    setSelectedPayroll(payroll);
+    setOpenDialog(true);
+  };
+  const handleClose = () => {
+    setSelectedPayroll(null);
+    document.body.style.backgroundColor = "white"; // Reset background color
+  };
+
+  const handlePrint = () => {
+    window.print();
+  };
+
   return (
     <Container>
       {/* Header */}
@@ -258,13 +278,7 @@ const PayrollDashboard: React.FC = () => {
                         </TableSortLabel>
                       </TableCell>
                       <TableCell>
-                        <TableSortLabel
-                          active={orderBy === "employee"}
-                          direction={orderBy === "employee" ? order : "asc"}
-                          onClick={() => handleSort("employee")}
-                        >
                           Employee
-                        </TableSortLabel>
                       </TableCell>
                       <TableCell>Period</TableCell>
                       <TableCell>
@@ -291,12 +305,18 @@ const PayrollDashboard: React.FC = () => {
                           <TableCell>{payroll.id}</TableCell>
                           <TableCell>{payroll.employee?.name}</TableCell>
                           <TableCell>{payroll.period}</TableCell>
-                          <TableCell>${payroll.gross_pay}</TableCell>
-                          <TableCell>${payroll.tax}</TableCell>
-                          <TableCell>${payroll.super}</TableCell>
-                          <TableCell>${payroll.net_pay}</TableCell>
+                          <TableCell>${payroll.gross_pay.toFixed(2)}</TableCell>
+                          <TableCell>${payroll.tax.toFixed(2)}</TableCell>
+                          <TableCell>${payroll.super.toFixed(2)}</TableCell>
+                          <TableCell>${payroll.net_pay.toFixed(2)}</TableCell>
                           <TableCell>
-                            <Button variant="outlined" size="small">View</Button>
+                            <Button 
+                              variant="outlined" 
+                              size="small" 
+                              onClick={() => handleViewPayroll(payroll)}
+                            >
+                              View
+                            </Button>
                           </TableCell>
                         </TableRow>
                       ))}
@@ -467,9 +487,6 @@ const PayrollDashboard: React.FC = () => {
                 <Button variant="contained" color="primary" sx={{ marginRight: "35px" }} onClick={handleAddPayroll}>
                   Add Payroll
                 </Button>
-                <Button variant="contained" color="primary" onClick={handleAddPayroll}>
-                  Preview Pay
-                </Button>
               </Grid>
 
 
@@ -478,6 +495,56 @@ const PayrollDashboard: React.FC = () => {
 
         </Card>
       )}
+
+        {/* Modal for Payslip */}
+      <Modal open={!!selectedPayroll} onClose={() => setSelectedPayroll(null)}>
+        <Box sx={{ position: "absolute", top: "10%", left: "10%", width: "80%", bgcolor: "white", p: 4 }}>
+          {selectedPayroll && (
+            <div id="payslip">
+              <Typography variant="h5" align="center">Clear Water Pty Ltd</Typography>
+              <Typography variant="subtitle2" align="right">ABN: 80 000 000 001</Typography>
+              <Typography variant="body1"><strong>Pay Slip For:</strong> {selectedPayroll.employee.name}</Typography>
+              {/* <Typography variant="body1"><strong>Annual Salary:</strong> ${selectedPayroll.annualSalary.toFixed(2)}</Typography> */}
+              <Typography variant="body1"><strong>Hourly Rate:</strong> {selectedPayroll.employee.salary ? (selectedPayroll.employee.salary / 38).toFixed(2) : 'no entry'}</Typography>
+              <Typography variant="body1"><strong>Pay Period:</strong>{selectedPayroll.period}</Typography>
+              <Typography variant="h6" align="center" color="primary">Don't worry, be happy!</Typography>
+
+              <TableContainer component={Paper} sx={{ mt: 2 }}>
+                <Table>
+                  <TableHead>
+                    <TableRow>
+                      <TableCell>Description</TableCell>
+                      <TableCell>Gross Pay</TableCell>
+                      <TableCell>Net Pay to Bank</TableCell>
+                      <TableCell>Super</TableCell>
+                      <TableCell>PYAG withholding:</TableCell>
+                    </TableRow>
+                  </TableHead>
+                  <TableBody>
+                      <TableRow>
+                        <TableCell>This Pay</TableCell>
+                        <TableCell>${selectedPayroll.gross_pay || "-"}</TableCell>
+                        <TableCell>${selectedPayroll.net_pay || "-"}</TableCell>
+                        <TableCell>${selectedPayroll.super || "-"}</TableCell>
+                        <TableCell>${`${selectedPayroll.tax || "-"}` }</TableCell>
+                      </TableRow>
+                    
+                  </TableBody>
+                </Table>
+              </TableContainer>
+
+              <Typography variant="h6" align="right">Gross Pay: ${selectedPayroll.gross_pay.toFixed(2)}</Typography>
+              <Typography variant="h6" align="right">Net Pay: ${selectedPayroll.net_pay.toFixed(2)}</Typography>
+
+              {/* Buttons (Hidden When Printing) */}
+            <Box mt={2} display="flex" justifyContent="space-between" className="no-print">
+              <Button variant="contained" color="secondary" onClick={handleClose}>Close</Button>
+              <Button variant="contained" color="primary" onClick={handlePrint}>Print</Button>
+            </Box>
+            </div>
+          )}
+        </Box>
+      </Modal>
     </Container>
   );
 };

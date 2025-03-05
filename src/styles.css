@@ -513,7 +513,15 @@ label {
     }
   
 }
+
+
 .text-blue-500 { border: none;padding: 1px; color: #0d6efd; margin: 5px; cursor: pointer;}
 
 .px-4 {  margin-left: 2%; margin-top: 3px;}
 .cursor-pointer { margin: -2px;}
+
+@media print {
+  .no-print {
+    display: none !important;
+  }
+}
