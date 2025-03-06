@@ -103,7 +103,7 @@ const PayrollDashboard: React.FC = () => {
   const [tabValue, setTabValue] = useState(0); // State for tab value
   const [selectedPayroll, setSelectedPayroll] = useState<Payroll | null>(null);
   const [openDialog, setOpenDialog] = useState(false);
-
+  const [ytd,setYtd] = useState({ gross_total: 0, tax_total: 0, super_total: 0, net_total: 0 })
 
   // Handle Tab Change
   const handleTabChange = (_event: React.SyntheticEvent, newValue: number) => {
@@ -229,10 +229,38 @@ const PayrollDashboard: React.FC = () => {
       setTo_date("");
     }
   };
+  
+  const calculateAnnualSalary = (employee: Employee, payrollData: Payroll[]) => {
+    // Filter payroll records for the given employee
+    const employeePayrolls = payrollData.filter(
+      (payroll) => payroll.employee.id === employee.id
+    );
+  
+    // Sum up the required fields
+    const totals = employeePayrolls.reduce(
+      (acc, payroll) => {
+        acc.gross_total += payroll.gross_pay;
+        acc.tax_total += payroll.tax;
+        acc.super_total += payroll.super;
+        acc.net_total += payroll.net_pay;
+        
+        return acc;
+      },
+      { gross_total: 0, tax_total: 0, super_total: 0, net_total: 0 }
+    );
+    
+    return totals;
+  };
+  
+ 
+  
 
   const handleViewPayroll = (payroll: Payroll) => {
     setSelectedPayroll(payroll);
     setOpenDialog(true);
+    const annualSalary = calculateAnnualSalary(payroll.employee, payrollData);
+    setYtd(annualSalary);
+    console.log(annualSalary);
   };
   const handleClose = () => {
     setSelectedPayroll(null);
@@ -583,10 +611,17 @@ const PayrollDashboard: React.FC = () => {
                   <TableBody>
                       <TableRow>
                         <TableCell>This Pay</TableCell>
-                        <TableCell>${selectedPayroll.gross_pay || "-"}</TableCell>
-                        <TableCell>${selectedPayroll.net_pay || "-"}</TableCell>
-                        <TableCell>${selectedPayroll.super || "-"}</TableCell>
-                        <TableCell>${`${selectedPayroll.tax || "-"}` }</TableCell>
+                        <TableCell>${selectedPayroll.gross_pay.toFixed(2) || "-"}</TableCell>
+                        <TableCell>${selectedPayroll.net_pay.toFixed(2) || "-"}</TableCell>
+                        <TableCell>${selectedPayroll.super.toFixed(2) || "-"}</TableCell>
+                        <TableCell>${`${selectedPayroll.tax.toFixed(2) || "-"}` }</TableCell>
+                      </TableRow>
+                      <TableRow>
+                        <TableCell>Ytd </TableCell>
+                        <TableCell>${ytd.gross_total.toFixed(2) || "-"}</TableCell>
+                        <TableCell>${ytd.net_total.toFixed(2) || "-"}</TableCell>
+                        <TableCell>${ytd.super_total.toFixed(2) || "-"}</TableCell>
+                        <TableCell>${`${ytd.tax_total.toFixed(2) || "-"}` }</TableCell>
                       </TableRow>
                     
                   </TableBody>
