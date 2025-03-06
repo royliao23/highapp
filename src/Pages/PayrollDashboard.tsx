@@ -47,6 +47,12 @@ interface Payroll {
   tax: number;
   super: number;
   net_pay: number;
+  base_hour:number;
+  overtime_15:number;
+  overtime_20:number;
+  bonus:number;
+  other_pay:number;
+  note:string;
 }
 
 
@@ -299,9 +305,15 @@ const PayrollDashboard: React.FC = () => {
                           Gross Pay ($)
                         </TableSortLabel>
                       </TableCell>
+                      <TableCell>Base Hour</TableCell>
+                      <TableCell>Overtime 1.5</TableCell>
+                      <TableCell>Overtime 2.0</TableCell>
+                      <TableCell>Bonus ($)</TableCell>
+                      <TableCell>Other Pay ($)</TableCell>
                       <TableCell>Tax ($)</TableCell>
                       <TableCell>Super ($)</TableCell>
                       <TableCell>Net Pay ($)</TableCell>
+                      <TableCell>Note</TableCell>
                       <TableCell>Action</TableCell>
                     </TableRow>
                   </TableHead>
@@ -315,9 +327,15 @@ const PayrollDashboard: React.FC = () => {
                           <TableCell>{payroll.employee?.name}</TableCell>
                           <TableCell>{payroll.period}</TableCell>
                           <TableCell>${payroll.gross_pay.toFixed(2)}</TableCell>
+                          <TableCell>{payroll.base_hour}</TableCell>
+                          <TableCell>{payroll.overtime_15}</TableCell>
+                          <TableCell>{payroll.overtime_20}</TableCell>
+                          <TableCell>{payroll.bonus}</TableCell>
+                          <TableCell>{payroll.other_pay}</TableCell>
                           <TableCell>${payroll.tax.toFixed(2)}</TableCell>
                           <TableCell>${payroll.super.toFixed(2)}</TableCell>
                           <TableCell>${payroll.net_pay.toFixed(2)}</TableCell>
+                          <TableCell>{payroll.note}</TableCell>
                           <TableCell>
                             <Button 
                               variant="outlined" 
@@ -401,16 +419,7 @@ const PayrollDashboard: React.FC = () => {
                 </FormControl>
               </Grid>
 
-              {/* Pay Period */}
-              {/* <Grid item xs={12} sm={6}>
-                <TextField
-                  fullWidth
-                  label="Pay Period"
-                  variant="outlined"
-                  value={payPeriod}
-                  onChange={(e) => setPayPeriod(e.target.value)}
-                />
-              </Grid> */}
+             
 
               {/* Base Pay */}
               <Grid item xs={12} sm={6}>
