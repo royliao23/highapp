@@ -52,6 +52,7 @@ interface Payroll {
   overtime_20:number;
   bonus:number;
   other_pay:number;
+  holiday_pay:number;
   note:string;
 }
 
@@ -149,9 +150,9 @@ const PayrollDashboard: React.FC = () => {
   // Export as CSV
   const handleExportCSV = () => {
     const csvContent =
-      "ID,Employee,Period,Gross Pay,Tax,Super,Net Pay\n" +
+      "ID,Employee,Period,Gross Pay,Tax,Super,Net Pay,Base Hour,Overtime 15,Overtime 20, Holiday Pay,Bonus,Other Pay, Note\n" +
       payrollData
-        .map((p) => `${p.id},${p.employee.name},${p.period},${p.gross_pay},${p.tax},${p.super},${p.net_pay}`)
+        .map((p) => `${p.id},${p.employee.name},${p.period},${p.gross_pay},${p.tax},${p.super},${p.net_pay},${p.base_hour},${p.overtime_15},${p.overtime_20},${p.holiday_pay},${p.bonus},${p.other_pay}, ${p.note}`)
         .join("\n");
     const blob = new Blob([csvContent], { type: "text/csv" });
     const link = document.createElement("a");
@@ -307,7 +308,7 @@ const PayrollDashboard: React.FC = () => {
           <Card>
             <CardContent>
               <Typography variant="h6" sx={{ mb: 2, fontWeight: 'bold' }}>Payroll Summary</Typography>
-              <TableContainer component={Paper}>
+              <TableContainer component={Paper} >
                 <Table>
                   <TableHead>
                     <TableRow>
@@ -341,6 +342,7 @@ const PayrollDashboard: React.FC = () => {
                       <TableCell>Tax ($)</TableCell>
                       <TableCell>Super ($)</TableCell>
                       <TableCell>Net Pay ($)</TableCell>
+                      <TableCell>Holiday Pay ($)</TableCell>
                       <TableCell>Note</TableCell>
                       <TableCell>Action</TableCell>
                     </TableRow>
@@ -363,6 +365,7 @@ const PayrollDashboard: React.FC = () => {
                           <TableCell>${payroll.tax.toFixed(2)}</TableCell>
                           <TableCell>${payroll.super.toFixed(2)}</TableCell>
                           <TableCell>${payroll.net_pay.toFixed(2)}</TableCell>
+                          <TableCell>${payroll.holiday_pay.toFixed(2)}</TableCell>
                           <TableCell>{payroll.note}</TableCell>
                           <TableCell>
                             <Button 
