@@ -82,6 +82,9 @@ const PayrollDashboard: React.FC = () => {
     email: ""
   });
   const [payPeriod, setPayPeriod] = useState("");
+  const [from_date, setFrom_date] = useState("");
+  const [to_date, setTo_date] = useState("");
+  const [note, setNote] = useState("");
   const [basePay, setBasePay] = useState(0);
   const [baseHour, setBaseHour] = useState(0);
   const [overtime15, setOvertime15] = useState(0);
@@ -107,12 +110,12 @@ const PayrollDashboard: React.FC = () => {
     const computedOvertime20 = overtime20 * (selectedEmployee.salary ? selectedEmployee.salary / 38 * 2 : 46);
     const computedHours = baseHour + overtime15 + overtime20;
     const computedGrossPay = parseFloat((computedBasePay + computedOvertime15 + computedOvertime20 + bonus + holidayPay + others).toFixed(2));
-
+    setPayPeriod(from_date + " -- " + to_date)
     setBasePay(computedBasePay);
     setHours(computedHours);
     setGrossPay(computedGrossPay);
     console.log(computedBasePay, 'overtime 1.5:', computedOvertime15, computedOvertime20)
-  }, [selectedEmployee, baseHour, overtime15, overtime20, bonus, holidayPay, others]);
+  }, [from_date, to_date, selectedEmployee, baseHour, overtime15, overtime20, bonus, holidayPay, others]);
 
   // Handle Sorting
   const handleSort = (property: keyof Payroll) => {
@@ -168,8 +171,8 @@ const PayrollDashboard: React.FC = () => {
   }, []);
 
   const handleAddPayroll = async () => {
-    if (!selectedEmployee || !payPeriod || grossPay <= 0) {
-      alert("Fill all fields!");
+    if (!selectedEmployee || !from_date || !to_date || grossPay <= 0) {
+      alert("Fill all needed fields!");
       return;
     }
 
@@ -192,7 +195,10 @@ const PayrollDashboard: React.FC = () => {
       overtime_20:overtime20,
       bonus:bonus,
       holiday_pay:holidayPay,
-      other_pay:others
+      other_pay:others,
+      from_date:from_date,
+      to_date:to_date,
+      note:note
     };
 
     const { data, error } = await supabase.from("payroll").insert([newPayroll]);
@@ -212,6 +218,9 @@ const PayrollDashboard: React.FC = () => {
       setOthers(0);
       setBaseHour(0);
       setHolidayPay(0);
+      setNote("");
+      setFrom_date("");
+      setTo_date("");
     }
   };
 
@@ -343,6 +352,35 @@ const PayrollDashboard: React.FC = () => {
           <CardContent>
             <Typography variant="h6" sx={{ mb: 2, fontWeight: 'bold' }}>Add Payroll</Typography>
             <Grid container spacing={2}>
+              {/* Others */}
+              <Grid item xs={12} sm={6}>
+                <TextField
+                  fullWidth
+                  label="From Date"
+                  type="date"
+                  variant="outlined"
+                  value={from_date || ""}
+                  onChange={(e) => {
+                    const value = e.target.value;
+                    setFrom_date(value);
+                  }}
+                  InputLabelProps={{ shrink: true }} // Ensures label stays on top
+                />
+              </Grid>
+              {/* Others */}
+              <Grid item xs={12} sm={6}>
+                <TextField
+                  fullWidth
+                  label="To Date"
+                  type="date"
+                  variant="outlined"
+                  onChange={(e) => {
+                    const value = e.target.value;
+                    setTo_date(value);
+                  }}
+                  InputLabelProps={{ shrink: true }} // Ensures label stays on top
+                />
+              </Grid>
 
               {/* Select Employee */}
               <Grid item xs={12} sm={6}>
@@ -364,7 +402,7 @@ const PayrollDashboard: React.FC = () => {
               </Grid>
 
               {/* Pay Period */}
-              <Grid item xs={12} sm={6}>
+              {/* <Grid item xs={12} sm={6}>
                 <TextField
                   fullWidth
                   label="Pay Period"
@@ -372,7 +410,7 @@ const PayrollDashboard: React.FC = () => {
                   value={payPeriod}
                   onChange={(e) => setPayPeriod(e.target.value)}
                 />
-              </Grid>
+              </Grid> */}
 
               {/* Base Pay */}
               <Grid item xs={12} sm={6}>
@@ -453,13 +491,26 @@ const PayrollDashboard: React.FC = () => {
               <Grid item xs={12} sm={6}>
                 <TextField
                   fullWidth
-                  label="Others"
+                  label="Other Pay"
                   type="number"
                   variant="outlined"
                   value={others || ""}
                   onChange={(e) => {
                     const value = parseFloat(e.target.value);
                     setOthers(isNaN(value) ? 0 : value);
+                  }}
+                />
+              </Grid>
+              <Grid item xs={12} sm={6}>
+                <TextField
+                  fullWidth
+                  label="Note"
+                  type="text"
+                  variant="outlined"
+                  value={note || ""}
+                  onChange={(e) => {
+                    const value = e.target.value;
+                    setNote(value);
                   }}
                 />
               </Grid>
