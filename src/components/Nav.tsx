@@ -9,12 +9,15 @@ const Nav: React.FC<NavProps> = ({ onLogout }) => {
   const navigate = useNavigate();
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [isReportsDropdownOpen, setIsReportsDropdownOpen] = useState(false);
+  const [isHrDropdownOpen, setIsHrDropdownOpen] = useState(false);
 
   const handleMenuClick = (action?: () => void) => {
     setIsDropdownOpen(false);
     setIsReportsDropdownOpen(false);
+    setIsHrDropdownOpen(false);
     if (action) action();
   };
+  
 
   return (
     <nav className="navbar">
@@ -54,6 +57,20 @@ const Nav: React.FC<NavProps> = ({ onLogout }) => {
           <li className="menu-item">
             <Link to="/category" className="menu-link" onClick={() => handleMenuClick()}>Category</Link>
           </li>
+
+          {/* Hr Dropdown */}
+          <li className={`menu-item dropdown ${isHrDropdownOpen ? "open" : ""}`}>
+            <span className="menu-link dropdown-toggle" onClick={() => setIsHrDropdownOpen(!isHrDropdownOpen)}>
+            HR {isHrDropdownOpen ? "✖" : "▾"}
+            </span>
+            <ul className={`dropdown-menu ${isHrDropdownOpen ? "show" : ""}`}>
+              <li><Link to="/category" className="dropdown-item" onClick={() => handleMenuClick()}>Company</Link></li>
+              <li><Link to="/br" className="dropdown-item" onClick={() => handleMenuClick()}>Employee</Link></li>
+              <li className="menu-item">
+                <Link to="/payroll" className="dropdown-item" onClick={() => handleMenuClick()}>Payroll</Link>
+              </li>
+            </ul>
+          </li>
           
 
           {/* Reports Dropdown */}
@@ -66,9 +83,6 @@ const Nav: React.FC<NavProps> = ({ onLogout }) => {
               <li><Link to="/br" className="dropdown-item" onClick={() => handleMenuClick()}>Reconcile Bank</Link></li>
               <li><Link to="/ledger" className="dropdown-item" onClick={() => handleMenuClick()}>Ledger</Link></li>
               <li><Link to="/chart" className="dropdown-item" onClick={() => handleMenuClick()}>Chart</Link></li>
-              <li className="menu-item">
-                <Link to="/payroll" className="menu-link" onClick={() => handleMenuClick()}>Payroll</Link>
-              </li>
             </ul>
           </li>
 
