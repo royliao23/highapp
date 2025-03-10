@@ -1,297 +1,268 @@
-// Category.tsx
-import React, { useState, useEffect, ChangeEvent, FormEvent } from "react";
+import { useEffect, useState, ChangeEvent, FormEvent } from "react";
+import {
+  Button,
+  TextField,
+  Select,
+  MenuItem,
+  Modal,
+  Box,
+  Table,
+  TableHead,
+  TableRow,
+  TableCell,
+  TableBody,
+  Typography,
+} from "@mui/material";
 import { supabase } from "../supabaseClient";
-import styled from "styled-components";
-import SearchBox from "../components/SearchBox";
-import Modal from "../components/Modal"; // Import the new Modal component
 
-// Define the category type based on the table schema
-interface Categ {
-  code: number;
+interface Employee {
+  id: number;
   name: string;
+  first_name?: string;
+  last_name?: string;
+  email: string;
+  contact: string;
+  department: number | null;
 }
 
-// Styled Components for Styling
-const Container = styled.div`
-  max-width: 1500px;
-  margin: 2rem auto;
-  padding: 2rem;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-  border-radius: 8px;
-  background-color: #f9f9f9;
-`;
+interface Department {
+  id: number;
+  department_name: string;
+}
 
-const Title = styled.h2`
-  text-align: left;
-  color: #333;
-`;
+interface EmployeeFormData {
+  id?: number;
+  first_name: string;
+  last_name: string;
+  email: string;
+  contact: string | null;
+  department: { id: number } | number | null;
+}
 
-const Form = styled.form`
-  display: flex;
-  flex-direction: column;
-  gap: 1rem;
-`;
-
-const Input = styled.input`
-  padding: 0.8rem;
-  border: 1px solid #ddd;
-  border-radius: 4px;
-  font-size: 1rem;
-`;
-
-const Button = styled.button`
-  padding: 0.8rem;
-  border: none;
-  border-radius: 4px;
-  background-color: #007bff;
-  color: #fff;
-  font-size: 1rem;
-  cursor: pointer;
-  &:hover {
-    background-color: #0056b3;
-  }
-`;
-
-const ButtonRow = styled.div`
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 1rem;
-`;
-
-const Table = styled.table`
-  width: 100%;
-  border-collapse: collapse;
-  margin-top: 2rem;
-`;
-
-const Th = styled.th`
-  padding: 0.8rem;
-  background-color: #007bff;
-  color: #fff;
-`;
-
-const Td = styled.td`
-  padding: 0.8rem;
-  text-align: center;
-  border: 1px solid #ddd;
-`;
-
-const DeleteButton = styled.button`
-  padding: 0.5rem;
-  background-color: #dc3545;
-  color: white;
-  border: none;
-  border-radius: 4px;
-  cursor: pointer;
-  &:hover {
-    background-color: #c82333;
-  }
-`;
-
-const List = styled.ul`
-  list-style-type: none;
-  padding: 0;
-  margin-top: 2rem;
-`;
-
-const ListItem = styled.li`
-  padding: 1rem;
-  border: 1px solid #ddd;
-  margin-bottom: 1rem;
-  border-radius: 4px;
-  background-color: #fff;
-`;
-
-// Inside the category component...
-
-const Employee: React.FC = () => {
-  const [categorys, setCategories] = useState<Categ[]>([]);
-  const [formData, setFormData] = useState<Omit<Categ, "code">>({
-    name: "",
+const EmployeeComponent = () => {
+  const [employees, setEmployees] = useState<Employee[]>([]);
+  const [departments, setDepartments] = useState<Department[]>([]);
+  const [formData, setFormData] = useState<EmployeeFormData>({
+    first_name: "",
+    last_name: "",
+    email: "",
+    contact: null,
+    department: null,
   });
-  const [editingCode, setEditingCode] = useState<number | null>(null); // Track which category is being edited
-  const [isMobileView, setIsMobileView] = useState<boolean>(window.innerWidth < 1000);
-  const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
-  const [searchTerm, setSearchTerm] = useState<string>("");
-
-  const fetchCategories = async () => {
-    try {
-      const { data, error } = await supabase.from("categ").select("*");
-      if (error) throw error;
-      setCategories(data || []);
-    } catch (error) {
-      console.error("Error fetching categorys:", error);
-    }
-  };
+  const [editingId, setEditingId] = useState<number | null>(null);
+  const [showModal, setShowModal] = useState<boolean>(false);
 
   useEffect(() => {
-    fetchCategories();
+    fetchEmployees();
+    fetchDepartments();
   }, []);
 
-  useEffect(() => {
-    if (isModalOpen) {
-      document.body.classList.add("no-scroll");
-    } else {
-      document.body.classList.remove("no-scroll");
-    }
-    return () => {
-      document.body.classList.remove("no-scroll"); // Cleanup on unmount
-    };
-  }, [isModalOpen]);
-
-  useEffect(() => {
-    const handleResize = () => setIsMobileView(window.innerWidth < 1000);
-    window.addEventListener("resize", handleResize);
-    return () => window.removeEventListener("resize", handleResize);
-  }, []);
-
-  const handleSearchChange = (e: ChangeEvent<HTMLInputElement>) => {
-    setSearchTerm(e.target.value?.toLowerCase()); // Normalize search term for case-insensitive search
+  const fetchEmployees = async () => {
+    const { data, error } = await supabase
+      .from("employee")
+      .select("id, first_name, last_name, email, contact, department(*)");
+    if (error) console.error("Error fetching employees:", error);
+    else
+      setEmployees(
+        (data || []).map((employee: any) => ({
+          ...employee,
+          department: employee.department?.id,
+        }))
+      );
   };
 
-  const handleOpenModal = (category?: Categ) => {
-    if (category) {
-      handleEdit(category);
-    }
-    setIsModalOpen(true);
+  const fetchDepartments = async () => {
+    const { data, error } = await supabase.from("department").select("*");
+    if (error) console.error("Error fetching departments:", error);
+    else setDepartments(data || []);
   };
 
-  const handleCloseModal = () => {
-    setFormData({
-      name: "",
-    });
-    setEditingCode(null);
-    setIsModalOpen(false);
+  const handleInputChange = (
+    e: ChangeEvent<HTMLInputElement | { name?: string; value: unknown }>
+  ) => {
+    const { name, value } = e.target;
+    setFormData((prevData) => ({
+      ...prevData,
+      [name as string]: name === "department" ? { id: Number(value) } : value,
+    }));
   };
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
-
     try {
-      if (editingCode !== null) {
-        // Update an existing category
-        const { error } = await supabase
-          .from("categ")
-          .update(formData)
-          .eq("code", editingCode);
+      const payload = {
+        ...formData,
+        name: `${formData.first_name} ${formData.last_name}`,
+        department:
+          formData.department && typeof formData.department === "object"
+            ? formData.department.id
+            : formData.department,
+      };
 
-        if (error) throw error;
-
-        // Clear editing state after updating
-        setEditingCode(null);
+      if (editingId !== null) {
+        await supabase.from("employee").update(payload).eq("id", editingId);
       } else {
-        // Add a new category
-        const { error } = await supabase.from("categ").insert([formData]);
-
-        if (error) throw error;
+        await supabase.from("employee").insert([payload]);
       }
 
-      // Refresh the list and reset the form
-      fetchCategories();
+      fetchEmployees();
       handleCloseModal();
     } catch (error) {
-      console.error("Error saving category:", error);
+      console.error("Error saving employee:", error);
     }
   };
 
-  const handleEdit = (category: Categ) => {
-    setEditingCode(category.code);
+  const handleEdit = (employee: any) => {
+    setEditingId(employee.id);
+    setFormData(employee);
+    setShowModal(true);
+  };
+
+  const handleDelete = async (id: number) => {
+    await supabase.from("employee").delete().eq("id", id);
+    fetchEmployees();
+  };
+
+  const handleCloseModal = () => {
+    setEditingId(null);
     setFormData({
-      name: category.name,
+      first_name: "",
+      last_name: "",
+      email: "",
+      contact: null,
+      department: null,
     });
+    setShowModal(false);
   };
 
-  const handleDelete = async (code: number) => {
-    try {
-      const { error } = await supabase.from("categ").delete().eq("code", code);
-      if (error) throw error;
-      fetchCategories(); // Refresh the list
-    } catch (error) {
-      console.error("Error deleting category:", error);
-    }
-  };
-
-  // Filter categorys dynamically based on the search term
-  const filteredCategories = categorys.filter((category) => {
-    return (
-      category.name?.toLowerCase().includes(searchTerm)
-    );
-  });
-
-  // Handle Form Input
-  const handleInputChange = (e: ChangeEvent<HTMLInputElement>) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
-  };
+  
 
   return (
-    <Container>
-      <Title>Category Management</Title>
-      <ButtonRow>
-        <SearchBox searchTerm={searchTerm} onSearchChange={handleSearchChange} />
-        <Button onClick={() => handleOpenModal()}>Add Category</Button>
-      </ButtonRow>
+    <Box sx={{ padding: 3 }}>
+      <Button variant="contained" onClick={() => setShowModal(true)}>
+        Add Employee
+      </Button>
 
-      {isMobileView ? (
-        <List>
-          {filteredCategories.map((category) => (
-            <ListItem key={category.code}>
-              <strong>Code:</strong> {category.code} <br />
-              <strong>Category Name:</strong> {category.name} <br />
-              <Button onClick={() => handleOpenModal(category)}>Edit</Button>
-              <DeleteButton onClick={() => handleDelete(category.code)}>Delete</DeleteButton>
-            </ListItem>
-          ))}
-        </List>
-      ) : (
-        <Table>
-          <thead>
-            <tr>
-              <Th>Code</Th>
-              <Th>Category Name</Th>
-              <Th>Edit</Th>
-              <Th>Delete</Th>
-            </tr>
-          </thead>
-          <tbody>
-            {filteredCategories.map((category) => (
-              <tr key={category.code}>
-                <Td>{category.code}</Td>
-                <Td>{category.name}</Td>
-
-                <Td>
-                  <Button onClick={() => handleOpenModal(category)}>Edit</Button>
-                </Td>
-                <Td>
-                  <DeleteButton onClick={() => handleDelete(category.code)}>Delete</DeleteButton>
-                </Td>
-              </tr>
-            ))}
-          </tbody>
-        </Table>
-      )}
-
-      <Modal show={isModalOpen} onClose={handleCloseModal}>
-        <Form onSubmit={handleSubmit}>
-          <div>
-            <label htmlFor="name">Name</label>
-            <Input
-              id="name"
-              type="text"
-              name="name"
-              value={formData.name}
+      <Modal open={showModal} onClose={handleCloseModal}>
+        <Box
+          sx={{
+            position: "absolute",
+            top: "50%",
+            left: "50%",
+            transform: "translate(-50%, -50%)",
+            width: 400,
+            bgcolor: "background.paper",
+            boxShadow: 24,
+            p: 4,
+          }}
+        >
+          <Typography variant="h6" sx={{ mb: 2 }}>
+            {editingId ? "Edit Employee" : "Add Employee"}
+          </Typography>
+          <form onSubmit={handleSubmit}>
+            <TextField
+              fullWidth
+              label="First Name"
+              name="first_name"
+              value={formData.first_name || ""}
               onChange={handleInputChange}
-              placeholder="Name"
-              autoComplete="off"
               required
+              sx={{ mb: 2 }}
             />
-          </div>
+            <TextField
+              fullWidth
+              label="Last Name"
+              name="last_name"
+              value={formData.last_name || ""}
+              onChange={handleInputChange}
+              required
+              sx={{ mb: 2 }}
+            />
+            <TextField
+              fullWidth
+              label="Email"
+              name="email"
+              value={formData.email || ""}
+              onChange={handleInputChange}
+              required
+              sx={{ mb: 2 }}
+            />
+            <TextField
+              fullWidth
+              label="Contact"
+              name="contact"
+              value={formData.contact || ""}
+              onChange={handleInputChange}
+              required
+              sx={{ mb: 2 }}
+            />
+          
 
-          <Button type="submit">Save Category</Button>
-        </Form>
+            <select name="department"  onChange={handleInputChange} required>
+              <option value="">Select Department</option>
+              {departments.map((dept) => (
+                <option key={dept.id} value={dept.id}>{dept.department_name}</option>
+              ))}
+            </select>
+            <br></br>
+            <br></br>
+            <Button type="submit" variant="contained" sx={{ mr: 2 }}>
+              {editingId ? "Update" : "Add"}
+            </Button>
+            <Button type="button" onClick={handleCloseModal}>
+              Cancel
+            </Button>
+          </form>
+        </Box>
       </Modal>
-    </Container>
+
+      <Table sx={{ mt: 3 }}>
+        <TableHead>
+          <TableRow>
+            <TableCell>First Name</TableCell>
+            <TableCell>Last Name</TableCell>
+            <TableCell>Email</TableCell>
+            <TableCell>Contact</TableCell>
+            <TableCell>Department</TableCell>
+            <TableCell>Actions</TableCell>
+          </TableRow>
+        </TableHead>
+        <TableBody>
+          {employees.map((employee) => (
+            <TableRow key={employee.id}>
+              <TableCell>{employee.first_name}</TableCell>
+              <TableCell>{employee.last_name}</TableCell>
+              <TableCell>{employee.email}</TableCell>
+              <TableCell>{employee.contact}</TableCell>
+              <TableCell>
+                {employee.department
+                  ? departments.find((d) => d.id === employee.department)
+                      ?.department_name || "N/A"
+                  : "N/A"}
+              </TableCell>
+              <TableCell>
+                <Button
+                  variant="contained"
+                  color="primary"
+                  onClick={() => handleEdit(employee)}
+                  sx={{ mr: 1 }}
+                >
+                  Edit
+                </Button>
+                <Button
+                  variant="contained"
+                  color="error"
+                  onClick={() => handleDelete(employee.id)}
+                >
+                  Delete
+                </Button>
+              </TableCell>
+            </TableRow>
+          ))}
+        </TableBody>
+      </Table>
+    </Box>
   );
 };
 
-export default Employee;
+export default EmployeeComponent;
