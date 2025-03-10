@@ -12,6 +12,11 @@ import {
   TableCell,
   TableBody,
   Typography,
+  useMediaQuery,
+  List,
+  ListItem,
+  ListItemText,
+  Divider,
 } from "@mui/material";
 import { supabase } from "../supabaseClient";
 
@@ -51,6 +56,9 @@ const EmployeeComponent = () => {
   });
   const [editingId, setEditingId] = useState<number | null>(null);
   const [showModal, setShowModal] = useState<boolean>(false);
+
+  // Check if the screen width is less than 1000px
+  const isSmallScreen = useMediaQuery("(max-width:1000px)");
 
   useEffect(() => {
     fetchEmployees();
@@ -135,7 +143,8 @@ const EmployeeComponent = () => {
     setShowModal(false);
   };
 
-  
+  // Calculate modal width based on screen size
+  const modalWidth = isSmallScreen ? "80%" : "375px"; // 20% narrower on small screens
 
   return (
     <Box sx={{ padding: 3 }}>
@@ -150,7 +159,7 @@ const EmployeeComponent = () => {
             top: "50%",
             left: "50%",
             transform: "translate(-50%, -50%)",
-            width: 400,
+            width: modalWidth, // Responsive width
             bgcolor: "background.paper",
             boxShadow: 24,
             p: 4,
@@ -189,15 +198,13 @@ const EmployeeComponent = () => {
             />
             <TextField
               fullWidth
-              label="Contact"
+              label="Mobile Number"
               name="contact"
               value={formData.contact || ""}
               onChange={handleInputChange}
               required
               sx={{ mb: 2 }}
             />
-          
-
             <select name="department"  onChange={handleInputChange} required>
               <option value="">Select Department</option>
               {departments.map((dept) => (
@@ -216,31 +223,32 @@ const EmployeeComponent = () => {
         </Box>
       </Modal>
 
-      <Table sx={{ mt: 3 }}>
-        <TableHead>
-          <TableRow>
-            <TableCell>First Name</TableCell>
-            <TableCell>Last Name</TableCell>
-            <TableCell>Email</TableCell>
-            <TableCell>Contact</TableCell>
-            <TableCell>Department</TableCell>
-            <TableCell>Actions</TableCell>
-          </TableRow>
-        </TableHead>
-        <TableBody>
+      {isSmallScreen ? (
+        // List View for Small Screens
+        <List sx={{ mt: 3 }}>
           {employees.map((employee) => (
-            <TableRow key={employee.id}>
-              <TableCell>{employee.first_name}</TableCell>
-              <TableCell>{employee.last_name}</TableCell>
-              <TableCell>{employee.email}</TableCell>
-              <TableCell>{employee.contact}</TableCell>
-              <TableCell>
-                {employee.department
-                  ? departments.find((d) => d.id === employee.department)
-                      ?.department_name || "N/A"
-                  : "N/A"}
-              </TableCell>
-              <TableCell>
+            <Box key={employee.id}>
+              <ListItem>
+                <ListItemText
+                  primary={`${employee.first_name} ${employee.last_name}`}
+                  secondary={
+                    <>
+                      <Typography variant="body2" color="text.secondary">
+                        Email: {employee.email}
+                      </Typography>
+                      <Typography variant="body2" color="text.secondary">
+                        Contact: {employee.contact}
+                      </Typography>
+                      <Typography variant="body2" color="text.secondary">
+                        Department:{" "}
+                        {employee.department
+                          ? departments.find((d) => d.id === employee.department)
+                              ?.department_name || "N/A"
+                          : "N/A"}
+                      </Typography>
+                    </>
+                  }
+                />
                 <Button
                   variant="contained"
                   color="primary"
@@ -256,11 +264,59 @@ const EmployeeComponent = () => {
                 >
                   Delete
                 </Button>
-              </TableCell>
-            </TableRow>
+              </ListItem>
+              <Divider />
+            </Box>
           ))}
-        </TableBody>
-      </Table>
+        </List>
+      ) : (
+        // Table View for Larger Screens
+        <Table sx={{ mt: 3, width: "100%" }}>
+          <TableHead>
+            <TableRow>
+              <TableCell>Name</TableCell>
+              <TableCell>Email</TableCell>
+              <TableCell>Contact</TableCell>
+              <TableCell>Department</TableCell>
+              <TableCell>Actions</TableCell>
+            </TableRow>
+          </TableHead>
+          <TableBody>
+            {employees.map((employee) => (
+              <TableRow key={employee.id}>
+                <TableCell>
+                  {employee.first_name} {employee.last_name}
+                </TableCell>
+                <TableCell>{employee.email}</TableCell>
+                <TableCell>{employee.contact}</TableCell>
+                <TableCell>
+                  {employee.department
+                    ? departments.find((d) => d.id === employee.department)
+                        ?.department_name || "N/A"
+                    : "N/A"}
+                </TableCell>
+                <TableCell>
+                  <Button
+                    variant="contained"
+                    color="primary"
+                    onClick={() => handleEdit(employee)}
+                    sx={{ mr: 1 }}
+                  >
+                    Edit
+                  </Button>
+                  <Button
+                    variant="contained"
+                    color="error"
+                    onClick={() => handleDelete(employee.id)}
+                  >
+                    Delete
+                  </Button>
+                </TableCell>
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
+      )}
     </Box>
   );
 };
