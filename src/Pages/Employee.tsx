@@ -2,8 +2,6 @@ import { useEffect, useState, ChangeEvent, FormEvent } from "react";
 import {
   Button,
   TextField,
-  Select,
-  MenuItem,
   Modal,
   Box,
   Table,
@@ -17,6 +15,7 @@ import {
   ListItem,
   ListItemText,
   Divider,
+  Paper, TablePagination, TableContainer
 } from "@mui/material";
 import { supabase } from "../supabaseClient";
 
@@ -35,6 +34,9 @@ interface Employee {
   account_name: string | null;
   bank_name: string | null;
   address: string | null;
+  super_rate: number | null,
+  employment_type: string | null,
+  role: string | null
 }
 
 interface Department {
@@ -56,6 +58,9 @@ interface EmployeeFormData {
   account_name: string | null;
   bank_name: string | null;
   address: string | null;
+  super_rate: number | null,
+  employment_type: string | null,
+  role: string | null
 }
 
 const EmployeeComponent = () => {
@@ -73,10 +78,16 @@ const EmployeeComponent = () => {
     account_no: null,
     account_name: null,
     bank_name: null,
-    address: null
+    address: null,
+    super_rate: null,
+    employment_type: null,
+    role: null,
   });
   const [editingId, setEditingId] = useState<number | null>(null);
   const [showModal, setShowModal] = useState<boolean>(false);
+  const [page, setPage] = useState(0);
+  const [rowsPerPage, setRowsPerPage] = useState(5);
+  const [search, setSearch] = useState("");
 
   // Check if the screen width is less than 1000px
   const isSmallScreen = useMediaQuery("(max-width:1000px)");
@@ -166,7 +177,10 @@ const EmployeeComponent = () => {
       account_no: null,
       account_name: null,
       bank_name: null,
-      address: null
+      address: null,
+      super_rate: null,
+      employment_type: null,
+      role: null,
     });
     setShowModal(false);
   };
@@ -174,11 +188,38 @@ const EmployeeComponent = () => {
   // Calculate modal width based on screen size
   const modalWidth = isSmallScreen ? "350px" : "950px"; // 20% narrower on small screens
 
+  const handleChangePage = (event:any, newPage:any) => {
+    setPage(newPage);
+  };
+
+  const handleChangeRowsPerPage = (event:any) => {
+    setRowsPerPage(parseInt(event.target.value, 10));
+    setPage(0);
+  };
+
+  const handleSearch = (event:any) => {
+    setSearch(event.target.value);
+  };
+
+  const filteredEmployees = employees.filter((employee) =>
+    employee.name.toLowerCase().includes(search.toLowerCase())
+  );
   return (
+    <Paper>
+
+      
+      
     <Box sx={{ padding: 3 }}>
-      <Button variant="contained" onClick={() => setShowModal(true)}>
-        Add Employee
-      </Button>
+      <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: 2, gap: 2 }}>
+          <TextField
+            label="Search Employee"
+            variant="outlined"
+            margin="normal"
+            onChange={handleSearch}
+          />
+          <Button variant="contained">Add Employee</Button>
+        </Box>
+
 
       <Modal open={showModal} onClose={handleCloseModal}>
           <Box
@@ -292,6 +333,30 @@ const EmployeeComponent = () => {
               onChange={handleInputChange}
               sx={{ mb: 2 }}
             />
+            <TextField
+              fullWidth
+              label="Super Rate"
+              name="super_rate"
+              value={formData.super_rate || ""}
+              onChange={handleInputChange}
+              sx={{ mb: 2 }}
+            />
+            <TextField
+              fullWidth
+              label="Employment Type"
+              name="employment_type"
+              value={formData.employment_type || ""}
+              onChange={handleInputChange}
+              sx={{ mb: 2 }}
+            />
+            <TextField
+              fullWidth
+              label="Role"
+              name="role"
+              value={formData.role || ""}
+              onChange={handleInputChange}
+              sx={{ mb: 2 }}
+            />
 
             <Typography variant="body1" sx={{ mb: 1 }}>
               Department
@@ -333,7 +398,8 @@ const EmployeeComponent = () => {
       {isSmallScreen ? (
         // List View for Small Screens
         <List sx={{ mt: 3 }}>
-          {employees.map((employee) => (
+          {filteredEmployees
+              .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map((employee) => (
             <Box key={employee.id}>
               <ListItem>
                 <ListItemText
@@ -373,6 +439,15 @@ const EmployeeComponent = () => {
                       </Typography>
                       <Typography variant="body2" color="text.secondary">
                         Address: {employee.address}
+                      </Typography>
+                      <Typography variant="body2" color="text.secondary">
+                        Super: {employee.super_rate}
+                      </Typography>
+                      <Typography variant="body2" color="text.secondary">
+                        Employment Type: {employee.employment_type}
+                      </Typography>
+                      <Typography variant="body2" color="text.secondary">
+                        Role: {employee.role}
                       </Typography>
 
                     </>
@@ -414,11 +489,15 @@ const EmployeeComponent = () => {
               <TableCell>Account Name</TableCell>
               <TableCell>Bank Name</TableCell>
               <TableCell>Address</TableCell>
+              <TableCell>Super</TableCell>
+              <TableCell>Employment Type</TableCell>
+              <TableCell>Role</TableCell>
               <TableCell>Actions</TableCell>
             </TableRow>
           </TableHead>
           <TableBody>
-            {employees.map((employee) => (
+          {filteredEmployees
+              .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map((employee) => (
               <TableRow key={employee.id}>
                 <TableCell>
                   {employee.first_name} {employee.last_name}
@@ -438,6 +517,9 @@ const EmployeeComponent = () => {
                 <TableCell>{employee.account_name}</TableCell>
                 <TableCell>{employee.bank_name}</TableCell>
                 <TableCell>{employee.address}</TableCell>
+                <TableCell>{employee.super_rate}</TableCell >
+                <TableCell>{employee.employment_type}</TableCell >
+                <TableCell>{employee.role}</TableCell >
 
                 <TableCell>
                   <Button
@@ -462,6 +544,16 @@ const EmployeeComponent = () => {
         </Table>
       )}
     </Box>
+    <TablePagination
+        rowsPerPageOptions={[5, 10, 25]}
+        component="div"
+        count={filteredEmployees.length}
+        rowsPerPage={rowsPerPage}
+        page={page}
+        onPageChange={handleChangePage}
+        onRowsPerPageChange={handleChangeRowsPerPage}
+      />
+    </Paper>
   );
 };
 
