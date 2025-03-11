@@ -293,32 +293,40 @@ const EmployeeComponent = () => {
               sx={{ mb: 2 }}
             />
 
-            <Typography variant="body1" sx={{ mb: 1 }}>
-              Department
-            </Typography>
-            <Box sx={{ mb: 2 }}>
-            <select
-              name="department"
-              value={formData.department ? (typeof formData.department === "object" ? formData.department.id : formData.department) : ""}
-              onChange={handleInputChange}
-              required
-              style={{
-                width: "100%",
-                padding: "10px",
-                borderRadius: "4px",
-                border: "1px solid #ccc",
-                fontSize: "1rem",
-                backgroundColor: "white",
-              }}
-            >
+            {/* <select name="department" onChange={handleInputChange} required>
               <option value="">Select Department</option>
               {departments.map((dept) => (
-                <option key={dept.id} value={dept.id}>
-                  {dept.department_name}
-                </option>
+                <option key={dept.id} value={dept.id}>{dept.department_name}</option>
               ))}
             </select>
-
+            <br></br>
+            <br></br> */}
+            <Box sx={{ mb: 2 }}>
+        <select
+          name="department"
+          value={
+            formData.department
+              ? (formData.department as { id: number }).id
+              : ""
+          }
+          onChange={handleInputChange}
+          required
+          style={{
+            width: "100%",
+            padding: "10px",
+            borderRadius: "4px",
+            border: "1px solid #ccc",
+            fontSize: "1rem",
+            backgroundColor: "white",
+          }}
+        >
+          <option value="">Select Department</option>
+          {departments.map((dept) => (
+            <option key={dept.id} value={dept.id}>
+              {dept.department_name}
+            </option>
+          ))}
+        </select>
       </Box>
             <Button type="submit" variant="contained" sx={{ mr: 2 }}>
               {editingId ? "Update" : "Add"}
