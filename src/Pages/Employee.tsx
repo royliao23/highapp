@@ -188,16 +188,16 @@ const EmployeeComponent = () => {
   // Calculate modal width based on screen size
   const modalWidth = isSmallScreen ? "350px" : "950px"; // 20% narrower on small screens
 
-  const handleChangePage = (event:any, newPage:any) => {
+  const handleChangePage = (event: any, newPage: any) => {
     setPage(newPage);
   };
 
-  const handleChangeRowsPerPage = (event:any) => {
+  const handleChangeRowsPerPage = (event: any) => {
     setRowsPerPage(parseInt(event.target.value, 10));
     setPage(0);
   };
 
-  const handleSearch = (event:any) => {
+  const handleSearch = (event: any) => {
     setSearch(event.target.value);
   };
 
@@ -207,21 +207,24 @@ const EmployeeComponent = () => {
   return (
     <Paper>
 
-      
-      
-    <Box sx={{ padding: 3 }}>
-      <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: 2, gap: 2 }}>
+
+
+      <Box sx={{ padding: 3 }}>
+        <Typography variant="h4" sx={{ my: 3, color: 'primary.main' }}>
+          Employee Management
+        </Typography>
+        <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: 2, gap: 2 }}>
           <TextField
             label="Search Employee"
             variant="outlined"
             margin="normal"
             onChange={handleSearch}
           />
-          <Button variant="contained">Add Employee</Button>
+          <Button variant="contained" onClick={() => setShowModal(true)}>Add Employee</Button>
         </Box>
 
 
-      <Modal open={showModal} onClose={handleCloseModal}>
+        <Modal open={showModal} onClose={handleCloseModal}>
           <Box
             sx={{
               position: "absolute",
@@ -236,315 +239,315 @@ const EmployeeComponent = () => {
               p: 4,
             }}
           >
-          <Typography variant="h6" sx={{ mb: 2 }}>
-            {editingId ? "Edit Employee" : "Add Employee"}
-          </Typography>
-          <form onSubmit={handleSubmit}>
-            <TextField
-              fullWidth
-              label="First Name"
-              name="first_name"
-              value={formData.first_name || ""}
-              onChange={handleInputChange}
-              required
-              sx={{ mb: 2 }}
-            />
-            <TextField
-              fullWidth
-              label="Last Name"
-              name="last_name"
-              value={formData.last_name || ""}
-              onChange={handleInputChange}
-              required
-              sx={{ mb: 2 }}
-            />
-            <TextField
-              fullWidth
-              label="Email"
-              name="email"
-              value={formData.email || ""}
-              onChange={handleInputChange}
-              required
-              sx={{ mb: 2 }}
-            />
-            <TextField
-              fullWidth
-              label="Mobile Number"
-              name="contact"
-              value={formData.contact || ""}
-              onChange={handleInputChange}
-              required
-              sx={{ mb: 2 }}
-            />
-            <TextField
-              fullWidth
-              label="Salary"
-              name="salary"
-              value={formData.salary || ""}
-              onChange={handleInputChange}
-              required
-              sx={{ mb: 2 }}
-            />
-            <TextField
-              fullWidth
-              label="Position"
-              name="position"
-              value={formData.position || ""}
-              onChange={handleInputChange}
-              sx={{ mb: 2 }}
-            />
-            <TextField
-              fullWidth
-              label="bsb"
-              name="bsb"
-              value={formData.bsb || ""}
-              onChange={handleInputChange}
-              sx={{ mb: 2 }}
-            />
-            <TextField
-              fullWidth
-              label="Account Number"
-              name="account_no"
-              value={formData.account_no || ""}
-              onChange={handleInputChange}
-              sx={{ mb: 2 }}
-            />
-            <TextField
-              fullWidth
-              label="Account Name"
-              name="account_name"
-              value={formData.account_name || ""}
-              onChange={handleInputChange}
-              sx={{ mb: 2 }}
-            />
-            <TextField
-              fullWidth
-              label="Bank Name"
-              name="bank_name"
-              value={formData.bank_name || ""}
-              onChange={handleInputChange}
-              sx={{ mb: 2 }}
-            />
-            <TextField
-              fullWidth
-              label="Address"
-              name="address"
-              value={formData.address || ""}
-              onChange={handleInputChange}
-              sx={{ mb: 2 }}
-            />
-            <TextField
-              fullWidth
-              label="Super Rate"
-              name="super_rate"
-              value={formData.super_rate || ""}
-              onChange={handleInputChange}
-              sx={{ mb: 2 }}
-            />
-            <TextField
-              fullWidth
-              label="Employment Type"
-              name="employment_type"
-              value={formData.employment_type || ""}
-              onChange={handleInputChange}
-              sx={{ mb: 2 }}
-            />
-            <TextField
-              fullWidth
-              label="Role"
-              name="role"
-              value={formData.role || ""}
-              onChange={handleInputChange}
-              sx={{ mb: 2 }}
-            />
-
-            <Typography variant="body1" sx={{ mb: 1 }}>
-              Department
+            <Typography variant="h6" sx={{ mb: 2 }}>
+              {editingId ? "Edit Employee" : "Add Employee"}
             </Typography>
-            <Box sx={{ mb: 2 }}>
-            <select
-              name="department"
-              value={formData.department ? (typeof formData.department === "object" ? formData.department.id : formData.department) : ""}
-              onChange={handleInputChange}
-              required
-              style={{
-                width: "100%",
-                padding: "10px",
-                borderRadius: "4px",
-                border: "1px solid #ccc",
-                fontSize: "1rem",
-                backgroundColor: "white",
-              }}
-            >
-              <option value="">Select Department</option>
-              {departments.map((dept) => (
-                <option key={dept.id} value={dept.id}>
-                  {dept.department_name}
-                </option>
+            <form onSubmit={handleSubmit}>
+              <TextField
+                fullWidth
+                label="First Name"
+                name="first_name"
+                value={formData.first_name || ""}
+                onChange={handleInputChange}
+                required
+                sx={{ mb: 2 }}
+              />
+              <TextField
+                fullWidth
+                label="Last Name"
+                name="last_name"
+                value={formData.last_name || ""}
+                onChange={handleInputChange}
+                required
+                sx={{ mb: 2 }}
+              />
+              <TextField
+                fullWidth
+                label="Email"
+                name="email"
+                value={formData.email || ""}
+                onChange={handleInputChange}
+                required
+                sx={{ mb: 2 }}
+              />
+              <TextField
+                fullWidth
+                label="Mobile Number"
+                name="contact"
+                value={formData.contact || ""}
+                onChange={handleInputChange}
+                required
+                sx={{ mb: 2 }}
+              />
+              <TextField
+                fullWidth
+                label="Salary"
+                name="salary"
+                value={formData.salary || ""}
+                onChange={handleInputChange}
+                required
+                sx={{ mb: 2 }}
+              />
+              <TextField
+                fullWidth
+                label="Position"
+                name="position"
+                value={formData.position || ""}
+                onChange={handleInputChange}
+                sx={{ mb: 2 }}
+              />
+              <TextField
+                fullWidth
+                label="bsb"
+                name="bsb"
+                value={formData.bsb || ""}
+                onChange={handleInputChange}
+                sx={{ mb: 2 }}
+              />
+              <TextField
+                fullWidth
+                label="Account Number"
+                name="account_no"
+                value={formData.account_no || ""}
+                onChange={handleInputChange}
+                sx={{ mb: 2 }}
+              />
+              <TextField
+                fullWidth
+                label="Account Name"
+                name="account_name"
+                value={formData.account_name || ""}
+                onChange={handleInputChange}
+                sx={{ mb: 2 }}
+              />
+              <TextField
+                fullWidth
+                label="Bank Name"
+                name="bank_name"
+                value={formData.bank_name || ""}
+                onChange={handleInputChange}
+                sx={{ mb: 2 }}
+              />
+              <TextField
+                fullWidth
+                label="Address"
+                name="address"
+                value={formData.address || ""}
+                onChange={handleInputChange}
+                sx={{ mb: 2 }}
+              />
+              <TextField
+                fullWidth
+                label="Super Rate"
+                name="super_rate"
+                value={formData.super_rate || ""}
+                onChange={handleInputChange}
+                sx={{ mb: 2 }}
+              />
+              <TextField
+                fullWidth
+                label="Employment Type"
+                name="employment_type"
+                value={formData.employment_type || ""}
+                onChange={handleInputChange}
+                sx={{ mb: 2 }}
+              />
+              <TextField
+                fullWidth
+                label="Role"
+                name="role"
+                value={formData.role || ""}
+                onChange={handleInputChange}
+                sx={{ mb: 2 }}
+              />
+
+              <Typography variant="body1" sx={{ mb: 1 }}>
+                Department
+              </Typography>
+              <Box sx={{ mb: 2 }}>
+                <select
+                  name="department"
+                  value={formData.department ? (typeof formData.department === "object" ? formData.department.id : formData.department) : ""}
+                  onChange={handleInputChange}
+                  required
+                  style={{
+                    width: "100%",
+                    padding: "10px",
+                    borderRadius: "4px",
+                    border: "1px solid #ccc",
+                    fontSize: "1rem",
+                    backgroundColor: "white",
+                  }}
+                >
+                  <option value="">Select Department</option>
+                  {departments.map((dept) => (
+                    <option key={dept.id} value={dept.id}>
+                      {dept.department_name}
+                    </option>
+                  ))}
+                </select>
+
+              </Box>
+              <Button type="submit" variant="contained" sx={{ mr: 2 }}>
+                {editingId ? "Update" : "Add"}
+              </Button>
+              <Button type="button" onClick={handleCloseModal}>
+                Cancel
+              </Button>
+            </form>
+          </Box>
+        </Modal>
+
+        {isSmallScreen ? (
+          // List View for Small Screens
+          <List sx={{ mt: 3 }}>
+            {filteredEmployees
+              .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map((employee) => (
+                <Box key={employee.id}>
+                  <ListItem>
+                    <ListItemText
+                      primary={`${employee.first_name} ${employee.last_name}`}
+                      secondary={
+                        <>
+                          <Typography variant="body2" color="text.secondary">
+                            Email: {employee.email}
+                          </Typography>
+                          <Typography variant="body2" color="text.secondary">
+                            Contact: {employee.contact}
+                          </Typography>
+                          <Typography variant="body2" color="text.secondary">
+                            Department:{" "}
+                            {employee.department
+                              ? departments.find((d) => d.id === employee.department)
+                                ?.department_name || "N/A"
+                              : "N/A"}
+                          </Typography>
+                          <Typography variant="body2" color="text.secondary">
+                            Salary: {employee.salary}
+                          </Typography>
+                          <Typography variant="body2" color="text.secondary">
+                            Position: {employee.position}
+                          </Typography>
+                          <Typography variant="body2" color="text.secondary">
+                            bsb: {employee.bsb}
+                          </Typography>
+                          <Typography variant="body2" color="text.secondary">
+                            Account Number: {employee.account_no}
+                          </Typography>
+                          <Typography variant="body2" color="text.secondary">
+                            Account Name: {employee.account_name}
+                          </Typography>
+                          <Typography variant="body2" color="text.secondary">
+                            Bank Name: {employee.bank_name}
+                          </Typography>
+                          <Typography variant="body2" color="text.secondary">
+                            Address: {employee.address}
+                          </Typography>
+                          <Typography variant="body2" color="text.secondary">
+                            Super: {employee.super_rate}
+                          </Typography>
+                          <Typography variant="body2" color="text.secondary">
+                            Employment Type: {employee.employment_type}
+                          </Typography>
+                          <Typography variant="body2" color="text.secondary">
+                            Role: {employee.role}
+                          </Typography>
+
+                        </>
+                      }
+                    />
+                    <Button
+                      variant="contained"
+                      color="primary"
+                      onClick={() => handleEdit(employee)}
+                      sx={{ mr: 1 }}
+                    >
+                      Edit
+                    </Button>
+                    <Button
+                      variant="contained"
+                      color="error"
+                      onClick={() => handleDelete(employee.id)}
+                    >
+                      Delete
+                    </Button>
+                  </ListItem>
+                  <Divider />
+                </Box>
               ))}
-            </select>
-
-      </Box>
-            <Button type="submit" variant="contained" sx={{ mr: 2 }}>
-              {editingId ? "Update" : "Add"}
-            </Button>
-            <Button type="button" onClick={handleCloseModal}>
-              Cancel
-            </Button>
-          </form>
-        </Box>
-      </Modal>
-
-      {isSmallScreen ? (
-        // List View for Small Screens
-        <List sx={{ mt: 3 }}>
-          {filteredEmployees
-              .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map((employee) => (
-            <Box key={employee.id}>
-              <ListItem>
-                <ListItemText
-                  primary={`${employee.first_name} ${employee.last_name}`}
-                  secondary={
-                    <>
-                      <Typography variant="body2" color="text.secondary">
-                        Email: {employee.email}
-                      </Typography>
-                      <Typography variant="body2" color="text.secondary">
-                        Contact: {employee.contact}
-                      </Typography>
-                      <Typography variant="body2" color="text.secondary">
-                        Department:{" "}
-                        {employee.department
-                          ? departments.find((d) => d.id === employee.department)
-                            ?.department_name || "N/A"
-                          : "N/A"}
-                      </Typography>
-                      <Typography variant="body2" color="text.secondary">
-                        Salary: {employee.salary}
-                      </Typography>
-                      <Typography variant="body2" color="text.secondary">
-                        Position: {employee.position}
-                      </Typography>
-                      <Typography variant="body2" color="text.secondary">
-                        bsb: {employee.bsb}
-                      </Typography>
-                      <Typography variant="body2" color="text.secondary">
-                        Account Number: {employee.account_no}
-                      </Typography>
-                      <Typography variant="body2" color="text.secondary">
-                        Account Name: {employee.account_name}
-                      </Typography>
-                      <Typography variant="body2" color="text.secondary">
-                        Bank Name: {employee.bank_name}
-                      </Typography>
-                      <Typography variant="body2" color="text.secondary">
-                        Address: {employee.address}
-                      </Typography>
-                      <Typography variant="body2" color="text.secondary">
-                        Super: {employee.super_rate}
-                      </Typography>
-                      <Typography variant="body2" color="text.secondary">
-                        Employment Type: {employee.employment_type}
-                      </Typography>
-                      <Typography variant="body2" color="text.secondary">
-                        Role: {employee.role}
-                      </Typography>
-
-                    </>
-                  }
-                />
-                <Button
-                  variant="contained"
-                  color="primary"
-                  onClick={() => handleEdit(employee)}
-                  sx={{ mr: 1 }}
-                >
-                  Edit
-                </Button>
-                <Button
-                  variant="contained"
-                  color="error"
-                  onClick={() => handleDelete(employee.id)}
-                >
-                  Delete
-                </Button>
-              </ListItem>
-              <Divider />
-            </Box>
-          ))}
-        </List>
-      ) : (
-        // Table View for Larger Screens
-        <Table sx={{ mt: 3, width: "100%" }}>
-          <TableHead>
-            <TableRow>
-              <TableCell>Name</TableCell>
-              <TableCell>Email</TableCell>
-              <TableCell>Contact</TableCell>
-              <TableCell>Department</TableCell>
-              <TableCell>Salary</TableCell>
-              <TableCell>Position</TableCell>
-              <TableCell>bsb</TableCell>
-              <TableCell>Account Number</TableCell>
-              <TableCell>Account Name</TableCell>
-              <TableCell>Bank Name</TableCell>
-              <TableCell>Address</TableCell>
-              <TableCell>Super</TableCell>
-              <TableCell>Employment Type</TableCell>
-              <TableCell>Role</TableCell>
-              <TableCell>Actions</TableCell>
-            </TableRow>
-          </TableHead>
-          <TableBody>
-          {filteredEmployees
-              .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map((employee) => (
-              <TableRow key={employee.id}>
-                <TableCell>
-                  {employee.first_name} {employee.last_name}
-                </TableCell>
-                <TableCell>{employee.email}</TableCell>
-                <TableCell>{employee.contact}</TableCell>
-                <TableCell>
-                  {employee.department
-                    ? departments.find((d) => d.id === employee.department)
-                      ?.department_name || "N/A"
-                    : "N/A"}
-                </TableCell>
-                <TableCell>{employee.salary}</TableCell>
-                <TableCell>{employee.position}</TableCell>
-                <TableCell>{employee.bsb}</TableCell>
-                <TableCell>{employee.account_no}</TableCell>
-                <TableCell>{employee.account_name}</TableCell>
-                <TableCell>{employee.bank_name}</TableCell>
-                <TableCell>{employee.address}</TableCell>
-                <TableCell>{employee.super_rate}</TableCell >
-                <TableCell>{employee.employment_type}</TableCell >
-                <TableCell>{employee.role}</TableCell >
-
-                <TableCell>
-                  <Button
-                    variant="contained"
-                    color="primary"
-                    onClick={() => handleEdit(employee)}
-                    sx={{ mr: 1 }}
-                  >
-                    Edit
-                  </Button>
-                  <Button
-                    variant="contained"
-                    color="error"
-                    onClick={() => handleDelete(employee.id)}
-                  >
-                    Delete
-                  </Button>
-                </TableCell>
+          </List>
+        ) : (
+          // Table View for Larger Screens
+          <Table sx={{ mt: 3, width: "100%" }}>
+            <TableHead>
+              <TableRow>
+                <TableCell>Name</TableCell>
+                <TableCell>Email</TableCell>
+                <TableCell>Contact</TableCell>
+                <TableCell>Department</TableCell>
+                <TableCell>Salary</TableCell>
+                <TableCell>Position</TableCell>
+                <TableCell>bsb</TableCell>
+                <TableCell>Account Number</TableCell>
+                <TableCell>Account Name</TableCell>
+                <TableCell>Bank Name</TableCell>
+                <TableCell>Address</TableCell>
+                <TableCell>Super</TableCell>
+                <TableCell>Employment Type</TableCell>
+                <TableCell>Role</TableCell>
+                <TableCell>Actions</TableCell>
               </TableRow>
-            ))}
-          </TableBody>
-        </Table>
-      )}
-    </Box>
-    <TablePagination
+            </TableHead>
+            <TableBody>
+              {filteredEmployees
+                .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map((employee) => (
+                  <TableRow key={employee.id}>
+                    <TableCell>
+                      {employee.first_name} {employee.last_name}
+                    </TableCell>
+                    <TableCell>{employee.email}</TableCell>
+                    <TableCell>{employee.contact}</TableCell>
+                    <TableCell>
+                      {employee.department
+                        ? departments.find((d) => d.id === employee.department)
+                          ?.department_name || "N/A"
+                        : "N/A"}
+                    </TableCell>
+                    <TableCell>{employee.salary}</TableCell>
+                    <TableCell>{employee.position}</TableCell>
+                    <TableCell>{employee.bsb}</TableCell>
+                    <TableCell>{employee.account_no}</TableCell>
+                    <TableCell>{employee.account_name}</TableCell>
+                    <TableCell>{employee.bank_name}</TableCell>
+                    <TableCell>{employee.address}</TableCell>
+                    <TableCell>{employee.super_rate}</TableCell >
+                    <TableCell>{employee.employment_type}</TableCell >
+                    <TableCell>{employee.role}</TableCell >
+
+                    <TableCell>
+                      <Button
+                        variant="contained"
+                        color="primary"
+                        onClick={() => handleEdit(employee)}
+                        sx={{ mr: 1 }}
+                      >
+                        Edit
+                      </Button>
+                      <Button
+                        variant="contained"
+                        color="error"
+                        onClick={() => handleDelete(employee.id)}
+                      >
+                        Delete
+                      </Button>
+                    </TableCell>
+                  </TableRow>
+                ))}
+            </TableBody>
+          </Table>
+        )}
+      </Box>
+      <TablePagination
         rowsPerPageOptions={[5, 10, 25]}
         component="div"
         count={filteredEmployees.length}

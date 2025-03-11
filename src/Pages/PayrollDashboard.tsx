@@ -275,7 +275,7 @@ const PayrollDashboard: React.FC = () => {
   return (
     <Container>
       {/* Header */}
-      <Typography variant="h4" sx={{ my: 3, fontWeight: 'bold', color: 'primary.main' }}>
+      <Typography variant="h4" sx={{ my: 3,  color: 'primary.main' }}>
         Payroll Management
       </Typography>
 
