@@ -14,7 +14,7 @@ interface Pay {
     approved_by: string;
     create_at: Date;
     updated_at: Date;
-    status?:string
+    status?: string
 }
 
 // Dummy Bank Records (from bank statement)
@@ -33,21 +33,21 @@ const BankReconciliation = () => {
     const [bankRecords, setBankRecords] = useState<BankRecord[]>([
         { id: 1, date: "2024-02-20", amount: 500, description: "Bank Transfer ABC" },
         { id: 2, date: "2024-02-18", amount: 4303.80, description: "Bank Deposit XYZ" },
-        { id: 3, date: "2024-02-18", amount: 49.3, description: "Bank Deposit XYZ" },           
-    ]); 
+        { id: 3, date: "2024-02-18", amount: 49.3, description: "Bank Deposit XYZ" },
+    ]);
     // Fetch invoices from Supabase API
     useEffect(() => {
         const fetchInvoices = async () => {
             try {
                 const { data, error } = await supabase.from("jobby").select("*");
 
-if (error) {
-    throw error;
-}
+                if (error) {
+                    throw error;
+                }
 
-const unpaidInvoices = data?.filter((filteredInvoice) => filteredInvoice.status !== "paid");
-console.log("unpaidInvoices:", unpaidInvoices);
-setInvoices(unpaidInvoices);
+                const unpaidInvoices = data?.filter((filteredInvoice) => filteredInvoice.status !== "paid");
+                console.log("unpaidInvoices:", unpaidInvoices);
+                setInvoices(unpaidInvoices);
             } catch (err) {
                 setError("Failed to fetch invoices.");
                 console.error("Error fetching invoices:", err);
@@ -85,21 +85,21 @@ setInvoices(unpaidInvoices);
             alert("Failed to update invoice status!");
             return;
         }
-        
+
 
         if (error) {
             console.error("Error inserting pay record:", error);
             alert("Failed to save payment!");
             return;
         }
-        
+
 
         // Add to state only if insertion is successful
         setPayRecords((prev) => [...prev, newPayRecord]);
         alert("Payment successfully matched!");
     };
 
-    const handleUpload = (records:BankRecord[]) => {
+    const handleUpload = (records: BankRecord[]) => {
         setBankRecords(records); // Update state with uploaded transactions
         console.log("Bank Records:", records);
     };
@@ -109,7 +109,12 @@ setInvoices(unpaidInvoices);
             <Typography variant="h4" sx={{ my: 3 }}>
                 Bank Reconciliation
             </Typography>
-            <CSVUploader onUpload={handleUpload} />
+            <Paper elevation={3} sx={{ p: 3, mb: 3, textAlign: "left", bgcolor: "#f5f5f5" }}>
+                <Typography variant="h6" sx={{ mb: 2 }}>
+                    Upload Bank Statement
+                </Typography>
+                <CSVUploader onUpload={handleUpload} />
+            </Paper>
 
             {/* Bank Transactions Table */}
             <TableContainer component={Paper} sx={{ mb: 3 }}>
@@ -150,7 +155,7 @@ setInvoices(unpaidInvoices);
                                 <TableCell>ID</TableCell>
                                 <TableCell>Amount</TableCell>
                                 <TableCell>Due Date</TableCell>
-                                <TableCell style={{"paddingLeft": "40px"}}>Action</TableCell>
+                                <TableCell style={{ "paddingLeft": "40px" }}>Action</TableCell>
                             </TableRow>
                         </TableHead>
                         <TableBody>
