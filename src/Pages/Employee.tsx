@@ -90,7 +90,7 @@ const EmployeeComponent = () => {
   const [search, setSearch] = useState("");
 
   // Check if the screen width is less than 1000px
-  const isSmallScreen = useMediaQuery("(max-width:1000px)");
+  const isSmallScreen = useMediaQuery("(max-width:1450px)");
 
   useEffect(() => {
     fetchEmployees();

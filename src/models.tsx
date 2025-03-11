@@ -92,3 +92,10 @@ export interface Pay {
   updated_at: Date;
   jobby: Invoice }
 
+export interface BankRecord {
+  id: number;
+  date: string;
+  amount: number;
+  description: string;
+}
+

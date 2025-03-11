@@ -2,7 +2,8 @@ import React, { useState, useEffect } from "react";
 import { supabase } from "../supabaseClient";
 import { Container, Typography, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, Button } from "@mui/material";
 import { Invoice } from "../models";
-
+import CSVUploader from "../components/BankUpload";
+import { BankRecord } from "../models";
 // Interface for Pay (Matched Payments)
 interface Pay {
     invoice_id: number;
@@ -29,7 +30,11 @@ const BankReconciliation = () => {
     const [invoices, setInvoices] = useState<Invoice[]>([]);  // State to hold fetched invoices
     const [loading, setLoading] = useState<boolean>(true); // State to handle loading state
     const [error, setError] = useState<string | null>(null); // State to handle error messages
-
+    const [bankRecords, setBankRecords] = useState<BankRecord[]>([
+        { id: 1, date: "2024-02-20", amount: 500, description: "Bank Transfer ABC" },
+        { id: 2, date: "2024-02-18", amount: 4303.80, description: "Bank Deposit XYZ" },
+        { id: 3, date: "2024-02-18", amount: 49.3, description: "Bank Deposit XYZ" },           
+    ]); 
     // Fetch invoices from Supabase API
     useEffect(() => {
         const fetchInvoices = async () => {
@@ -94,11 +99,17 @@ setInvoices(unpaidInvoices);
         alert("Payment successfully matched!");
     };
 
+    const handleUpload = (records:BankRecord[]) => {
+        setBankRecords(records); // Update state with uploaded transactions
+        console.log("Bank Records:", records);
+    };
+
     return (
         <Container>
             <Typography variant="h4" sx={{ my: 3 }}>
                 Bank Reconciliation
             </Typography>
+            <CSVUploader onUpload={handleUpload} />
 
             {/* Bank Transactions Table */}
             <TableContainer component={Paper} sx={{ mb: 3 }}>
