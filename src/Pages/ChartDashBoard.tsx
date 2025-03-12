@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { BarChart, Bar, XAxis, YAxis, Tooltip, Legend, ResponsiveContainer } from "recharts";
-import { Button, Card, CardContent, Typography, Box, Stack } from "@mui/material";
+import { Button, Card, Typography, Box, Stack, useMediaQuery } from "@mui/material";
 
 const projectData = [
   { name: "Project A", invoiced: 50000, paid: 40000 },
@@ -14,36 +14,68 @@ const payeeData = [
   { name: "Payee Z", invoiced: 50000, paid: 49000 }
 ];
 
+const projectJobData: Record<string, { name: string; invoiced: number; paid: number }[]> = {
+    "project-job-x": [
+      { name: "Job A", invoiced: 20000, paid: 18000 },
+      { name: "Job B", invoiced: 35000, paid: 32000 },
+    ],
+    "project-job-y": [
+      { name: "Job C", invoiced: 45000, paid: 40000 },
+      { name: "Job D", invoiced: 30000, paid: 28000 },
+    ],
+    "project-job-z": [
+      { name: "Job E", invoiced: 50000, paid: 47000 },
+      { name: "Job F", invoiced: 60000, paid: 58000 },
+    ],
+  };
+  
 export default function ChartDashboard() {
-  const [chartType, setChartType] = useState("project"); // Toggle between project/payee
+  const [chartType, setChartType] = useState("project");
+  const isMobile = useMediaQuery("(max-width:1000px)");
 
-  const data = chartType === "project" ? projectData : payeeData;
+  const data =
+  chartType.startsWith("project-job") ? projectJobData[chartType] || [] :
+  chartType === "project" ? projectData :
+  payeeData;
 
   return (
-    <Box sx={{ display: "flex", gap: 3, p: 3 }}>
-      {/* Left Panel (Buttons) */}
-      <Card sx={{ p: 2, width: "250px", textAlign: "center", height: "fit-content" }}>
-        <Typography variant="h6" sx={{ mb: 2 }}>Select View</Typography>
-        <Stack spacing={1}>
-          <Button 
-            variant={chartType === "project" ? "contained" : "outlined"} 
-            onClick={() => setChartType("project")}
-          >
-            Project Invoiced vs Paid
+    <Box sx={{ display: "flex", flexDirection: isMobile ? "column" : "row", gap: 3, p: 3 }}>
+      {/* Buttons Panel */}
+      <Card sx={{ p: 2, textAlign: "center", width: isMobile ? "100%" : "250px" }}>
+        <Typography variant="h6" sx={{ mb: 2 }}>Project Payment Status</Typography>
+        <Stack direction={isMobile ? "row" : "column"} spacing={1} justifyContent="center">
+          <Button variant={chartType === "project" ? "contained" : "outlined"} onClick={() => setChartType("project")}>
+            Project
           </Button>
-          <Button 
-            variant={chartType === "payee" ? "contained" : "outlined"} 
-            onClick={() => setChartType("payee")}
-          >
-            Payee Invoiced vs Paid
+          <Button variant={chartType === "payee" ? "contained" : "outlined"} onClick={() => setChartType("payee")}>
+            Payee
           </Button>
+        </Stack>
+
+        <Box sx={{ p: 1 }}></Box>
+
+        <Typography variant="h6" sx={{ mb: 2 }}>Project Jobs Status</Typography>
+        <Stack direction={isMobile ? "row" : "column"} spacing={1} justifyContent="center">
+          {["project-job-x", "project-job-y", "project-job-z"].map((jobType) => (
+            <Button
+              key={jobType}
+              variant={chartType === jobType ? "contained" : "outlined"}
+              onClick={() => setChartType(jobType)}
+            >
+              {jobType.replace("project-job-", "Project ")}
+            </Button>
+          ))}
         </Stack>
       </Card>
 
-      {/* Right Panel (Chart) */}
+      {/* Chart Panel */}
       <Card sx={{ p: 2, flex: 1 }}>
         <Typography variant="h6" sx={{ textAlign: "center", mb: 2 }}>
-          {chartType === "project" ? "Project Invoiced vs Paid" : "Payee Invoiced vs Paid"}
+          {chartType === "project"
+            ? "Project Invoiced vs Paid"
+            : chartType === "payee"
+            ? "Payee Invoiced vs Paid"
+            : `Jobs for ${chartType.replace("project-job-", "Project ")}`}
         </Typography>
         <ResponsiveContainer width="100%" height={400}>
           <BarChart data={data} margin={{ top: 10, right: 30, left: 0, bottom: 20 }}>
