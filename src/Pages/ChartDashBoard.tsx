@@ -1,8 +1,9 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { BarChart, Bar, XAxis, YAxis, Tooltip, Legend, ResponsiveContainer } from "recharts";
 import { Button, Card, Typography, Box, Stack, useMediaQuery } from "@mui/material";
+import { getProjectData } from "../services/SharedServices";
 
-const projectData = [
+let projectData = [
   { name: "Project A", invoiced: 50000, paid: 40000 },
   { name: "Project B", invoiced: 70000, paid: 65000 },
   { name: "Project C", invoiced: 45000, paid: 42000 }
@@ -21,9 +22,11 @@ const projectJobData: Record<string, { name: string; invoiced: number; paid: num
     ],
     "project-job-y": [
       { name: "Job C", invoiced: 45000, paid: 40000 },
+
       { name: "Job D", invoiced: 30000, paid: 28000 },
     ],
     "project-job-z": [
+      { name: "Job A", invoiced: 20000, paid: 18000 },
       { name: "Job E", invoiced: 50000, paid: 47000 },
       { name: "Job F", invoiced: 60000, paid: 58000 },
     ],
@@ -31,7 +34,21 @@ const projectJobData: Record<string, { name: string; invoiced: number; paid: num
   
 export default function ChartDashboard() {
   const [chartType, setChartType] = useState("project");
+  const [projData, setProjData] = useState([
+    { name: "Job A", invoiced: 20000, paid: 18000 },
+    { name: "Job B", invoiced: 35000, paid: 32000 },
+  ]);
   const isMobile = useMediaQuery("(max-width:1000px)");
+
+  useEffect(() => {
+    const fetchData = async () => {
+      if (chartType === "project") {
+        setProjData(await getProjectData());
+      } 
+    };
+
+    fetchData();
+  }, [chartType]);
 
   const data =
   chartType.startsWith("project-job") ? projectJobData[chartType] || [] :
@@ -79,6 +96,16 @@ export default function ChartDashboard() {
         </Typography>
         <ResponsiveContainer width="100%" height={400}>
           <BarChart data={data} margin={{ top: 10, right: 30, left: 0, bottom: 20 }}>
+            <XAxis dataKey="name" />
+            <YAxis />
+            <Tooltip />
+            <Legend />
+            <Bar dataKey="invoiced" fill="#8884d8" name="Invoiced" />
+            <Bar dataKey="paid" fill="#82ca9d" name="Paid" />
+          </BarChart>
+        </ResponsiveContainer>
+        <ResponsiveContainer width="100%" height={400}>
+          <BarChart data={projData} margin={{ top: 10, right: 30, left: 0, bottom: 20 }}>
             <XAxis dataKey="name" />
             <YAxis />
             <Tooltip />
