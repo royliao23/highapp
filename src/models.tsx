@@ -23,6 +23,25 @@ export interface Author {
   age: number;
   articles: Article[];
 }
+export interface Categ {
+  code: number;
+  name: string;
+}
+export interface Project {
+  code: number;
+  project_name: string;
+  manager: string;
+  description: string;
+  status: string;
+}
+
+export interface Job {
+  code: number;
+  job_category_id: number;
+  name: string;
+  description: string;
+}
+
 
 export interface InvoiceShort { code: number;ref?:string;cost?:number;}
 export interface Purchase {

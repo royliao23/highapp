@@ -5,18 +5,7 @@ import SearchBox from "../components/SearchBox";
 import JobModal from "../components/JobModal";
 import { fetchJobService } from "../services/SupaEndPoints";
 import { PaginationContainer } from "../StyledComponent";
-// Define the job type based on the table schema
-interface Job {
-  code: number;
-  job_category_id: number;
-  name: string;
-  description: string;
-}
-
-interface Categ {
-  code: number;
-  name: string;
-}
+import { Job } from "../models";
 
 // (Existing styled-components code...)
 const Container = styled.div`

@@ -3,15 +3,8 @@ import { supabase } from "../supabaseClient";
 import styled from "styled-components";
 import SearchBox from "../components/SearchBox";
 import Modal from "../components/Modal"; // Import the reusable Modal component
-
+import { Project } from "../models";
 // Define the project type based on the table schema
-interface Project {
-  code: number;
-  project_name: string;
-  manager: string;
-  description: string;
-  status: string;
-}
 
 // Styled Components for Styling
 const Container = styled.div`

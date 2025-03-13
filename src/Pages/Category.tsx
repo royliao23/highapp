@@ -5,11 +5,7 @@ import styled from "styled-components";
 import SearchBox from "../components/SearchBox";
 import Modal from "../components/Modal"; // Import the new Modal component
 
-// Define the category type based on the table schema
-interface Categ {
-  code: number;
-  name: string;
-}
+import { Categ } from "../models";
 
 // Styled Components for Styling
 const Container = styled.div`

@@ -124,7 +124,7 @@ function PayView() {
   return (
     <Box sx={{ p: 4, bgcolor: '#f0f0f0' }}> {/* Main container */}
       <Typography variant="h4" fontWeight="bold" sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', mb: 4 }}>
-        Paid Journal
+        Remittance Advice
       </Typography>
       <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', mb: 4 ,gap: '16px',}}>
             <Typography variant="body2">Green Real Pty Ltd</Typography>
