@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { BarChart, Bar, XAxis, YAxis, Tooltip, Legend, ResponsiveContainer } from "recharts";
 import { Button, Card, Typography, Box, Stack, useMediaQuery } from "@mui/material";
-import { getProjectData } from "../services/SharedServices";
+import { getProjectData, getJobDataByProject,getPayeeData } from "../services/SharedServices";
 
 let projectData = [
   { name: "Project A", invoiced: 50000, paid: 40000 },
@@ -44,7 +44,11 @@ export default function ChartDashboard() {
     const fetchData = async () => {
       if (chartType === "project") {
         setProjData(await getProjectData());
-      } 
+      } else if (chartType.startsWith("project-job")) {
+        setProjData(await getJobDataByProject(1));
+      } else {
+        setProjData(await getPayeeData());
+      }
     };
 
     fetchData();
