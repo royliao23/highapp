@@ -163,6 +163,21 @@ export const getPayeeData = async () => {
   return Object.values(groupedData);
 };
 
+export const getAllProjectCodes = async () => {
+  const { data, error } = await supabase
+    .from("project")
+    .select("code, project_name");
+    
+
+  if (error) {
+    console.error(`Error fetching project codes`, error);
+    return [];
+  }
+  console.log("project code:",data);
+  return data;
+};
+
+
 
 export const useNavigationService = () => {
   const navigate = useNavigate();
