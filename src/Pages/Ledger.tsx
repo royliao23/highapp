@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import styled from 'styled-components';
-import { getProjectsForLedger } from '../services/LedgerServices';
+import { getForLedgerSingle } from '../services/LedgerServices';
+import { getAllProjectCodes } from '../services/SharedServices';
 
 // Define types based on the provided models
 export interface InvoiceLedger {
@@ -67,36 +68,73 @@ const ExpandButton = styled.button`
 `;
 
 const LedgerCategory = () => {
-  const [projects, setProjects] = useState<Project[]>([]);
+  const [projects, setProjects] = useState<any[]>([]);
+  const [expandedProjects, setExpandedProjects] = useState<{ [key: number]: boolean }>({});
   const [expandedCategories, setExpandedCategories] = useState<{ [key: string]: boolean }>({});
   const [expandedJobs, setExpandedJobs] = useState<{ [key: string]: boolean }>({});
-  const [expandedProjects, setExpandedProjects] = useState<{ [key: string]: boolean }>({});
+  const [projectDetails, setProjectDetails] = useState<{ [key: number]: Project }>({});
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
+  // Fetch all project codes on component mount
   useEffect(() => {
-    const fetchData = async () => {
+    const fetchProjects = async () => {
       try {
-        const projectsData = await getProjectsForLedger();
-        console.log('Data for ledger:', projectsData);
-        setProjects(projectsData);
+        const projectCodes = await getAllProjectCodes();
+        setProjects(projectCodes);
       } catch (error) {
-        console.error('Error fetching data:', error);
-        setError('Failed to fetch data. Please try again later.');
+        console.error('Error fetching project codes:', error);
+        setError('Failed to fetch project codes. Please try again later.');
       } finally {
         setLoading(false);
       }
     };
 
-    fetchData();
+    fetchProjects();
   }, []);
 
-  const toggleExpand = (
-    id: string,
-    setState: React.Dispatch<React.SetStateAction<Record<string, boolean>>>,
-    state: Record<string, boolean>
-  ) => {
-    setState(prevState => ({ ...prevState, [id]: !prevState[id] }));
+  // Fetch details for a specific project when expanded
+  const fetchProjectDetails = async (projectCode: number) => {
+    try {
+      const details = await getForLedgerSingle(projectCode);
+      setProjectDetails((prev) => ({
+        ...prev,
+        [projectCode]: details[0], // Assuming the API returns an array with a single project
+      }));
+    } catch (error) {
+      console.error('Error fetching project details:', error);
+      setError('Failed to fetch project details. Please try again later.');
+    }
+  };
+
+  // Toggle expanded state for projects
+  const toggleProject = (projectCode: number) => {
+    setExpandedProjects((prev) => ({
+      ...prev,
+      [projectCode]: !prev[projectCode],
+    }));
+
+    if (!projectDetails[projectCode]) {
+      fetchProjectDetails(projectCode);
+    }
+  };
+
+  // Toggle expanded state for categories
+  const toggleCategory = (projectCode: number, categoryCode: number) => {
+    const key = `${projectCode}-${categoryCode}`;
+    setExpandedCategories((prev) => ({
+      ...prev,
+      [key]: !prev[key],
+    }));
+  };
+
+  // Toggle expanded state for jobs
+  const toggleJob = (projectCode: number, categoryCode: number, jobCode: number) => {
+    const key = `${projectCode}-${categoryCode}-${jobCode}`;
+    setExpandedJobs((prev) => ({
+      ...prev,
+      [key]: !prev[key],
+    }));
   };
 
   // Function to calculate the total for a job
@@ -128,15 +166,17 @@ const LedgerCategory = () => {
         </thead>
         <tbody>
           {projects.map((proj) => {
-            const projectTotal = calculateProjectTotal(proj);
-            if (projectTotal === 0) return null; // Skip projects with a total of 0
+            const projectTotal = calculateProjectTotal(projectDetails[proj.code] || { categories: [] });
+
+            // Skip rendering if project total is 0
+            // if (projectTotal === 0) return null;
 
             return (
               <React.Fragment key={proj.code}>
                 <tr>
                   <Td>
                     <ExpandButton
-                      onClick={() => toggleExpand(proj.code.toString(), setExpandedProjects, expandedProjects)}
+                      onClick={() => toggleProject(proj.code)}
                       aria-expanded={expandedProjects[proj.code] || false}
                     >
                       {expandedProjects[proj.code] ? '-' : '+'}
@@ -145,57 +185,68 @@ const LedgerCategory = () => {
                   </Td>
                   <Td>${projectTotal.toFixed(2)}</Td>
                 </tr>
-                {expandedProjects[proj.code] &&
-                  proj.categories
-                    ?.filter((cat) => calculateCategoryTotal(cat) > 0) // Filter out categories with a total of 0
-                    .map((cat) => {
-                      const categoryTotal = calculateCategoryTotal(cat);
-                      return (
-                        <React.Fragment key={`${proj.code}-${cat.code}`}>
-                          <tr>
-                            <Td style={{ paddingLeft: '2rem' }}>
-                              <ExpandButton
-                                onClick={() => toggleExpand(`${proj.code}-${cat.code}`, setExpandedCategories, expandedCategories)}
-                                aria-expanded={expandedCategories[`${proj.code}-${cat.code}`] || false}
-                              >
-                                {expandedCategories[`${proj.code}-${cat.code}`] ? '-' : '+'}
-                              </ExpandButton>
-                              {cat.name}
-                            </Td>
-                            <Td>${categoryTotal.toFixed(2)}</Td>
-                          </tr>
-                          {expandedCategories[`${proj.code}-${cat.code}`] &&
-                            cat.jobs
-                              ?.filter((job) => calculateJobTotal(job) > 0) // Filter out jobs with a total of 0
-                              .map((job) => {
-                                const jobTotal = calculateJobTotal(job);
-                                return (
-                                  <React.Fragment key={`${proj.code}-${cat.code}-${job.code}`}>
-                                    <tr>
-                                      <Td style={{ paddingLeft: '4rem' }}>
-                                        <ExpandButton
-                                          onClick={() => toggleExpand(`${proj.code}-${cat.code}-${job.code}`, setExpandedJobs, expandedJobs)}
-                                          aria-expanded={expandedJobs[`${proj.code}-${cat.code}-${job.code}`] || false}
-                                        >
-                                          {expandedJobs[`${proj.code}-${cat.code}-${job.code}`] ? '-' : '+'}
-                                        </ExpandButton>
-                                        {job.name}
-                                      </Td>
-                                      <Td>${jobTotal.toFixed(2)}</Td>
-                                    </tr>
-                                    {expandedJobs[`${proj.code}-${cat.code}-${job.code}`] &&
-                                      job.details?.map((invoice: InvoiceLedger) => (
-                                        <tr key={`${proj.code}-${cat.code}-${job.code}-${invoice.id}`} style={{ color: 'blue' }}>
-                                          <Td style={{ paddingLeft: '6rem' }}>Supplier Reference: {invoice.description}</Td>
-                                          <Td>${invoice.amount.toFixed(2)}</Td>
+                {expandedProjects[proj.code] && projectDetails[proj.code] && (
+                  <>
+                    {projectDetails[proj.code].categories
+                      ?.filter((cat) => calculateCategoryTotal(cat) > 0) // Skip categories with total 0
+                      .map((cat) => {
+                        const categoryTotal = calculateCategoryTotal(cat);
+
+                        return (
+                          <React.Fragment key={`${proj.code}-${cat.code}`}>
+                            <tr>
+                              <Td style={{ paddingLeft: '2rem' }}>
+                                <ExpandButton
+                                  onClick={() => toggleCategory(proj.code, cat.code)}
+                                  aria-expanded={expandedCategories[`${proj.code}-${cat.code}`] || false}
+                                >
+                                  {expandedCategories[`${proj.code}-${cat.code}`] ? '-' : '+'}
+                                </ExpandButton>
+                                {cat.name}
+                              </Td>
+                              <Td>${categoryTotal.toFixed(2)}</Td>
+                            </tr>
+                            {expandedCategories[`${proj.code}-${cat.code}`] && (
+                              <>
+                                {cat.jobs
+                                  ?.filter((job) => calculateJobTotal(job) > 0) // Skip jobs with total 0
+                                  .map((job) => {
+                                    const jobTotal = calculateJobTotal(job);
+
+                                    return (
+                                      <React.Fragment key={`${proj.code}-${cat.code}-${job.code}`}>
+                                        <tr>
+                                          <Td style={{ paddingLeft: '4rem' }}>
+                                            <ExpandButton
+                                              onClick={() => toggleJob(proj.code, cat.code, job.code)}
+                                              aria-expanded={expandedJobs[`${proj.code}-${cat.code}-${job.code}`] || false}
+                                            >
+                                              {expandedJobs[`${proj.code}-${cat.code}-${job.code}`] ? '-' : '+'}
+                                            </ExpandButton>
+                                            {job.name}
+                                          </Td>
+                                          <Td>${jobTotal.toFixed(2)}</Td>
                                         </tr>
-                                      ))}
-                                  </React.Fragment>
-                                );
-                              })}
-                        </React.Fragment>
-                      );
-                    })}
+                                        {expandedJobs[`${proj.code}-${cat.code}-${job.code}`] && (
+                                          <>
+                                            {job.details?.map((invoice) => (
+                                              <tr key={`${proj.code}-${cat.code}-${job.code}-${invoice.id}`} style={{ color: 'blue' }}>
+                                                <Td style={{ paddingLeft: '6rem' }}>Supplier Reference: {invoice.description}</Td>
+                                                <Td>inv#:{invoice.id}: ${invoice.amount.toFixed(2)}</Td>
+                                              </tr>
+                                            ))}
+                                          </>
+                                        )}
+                                      </React.Fragment>
+                                    );
+                                  })}
+                              </>
+                            )}
+                          </React.Fragment>
+                        );
+                      })}
+                  </>
+                )}
               </React.Fragment>
             );
           })}
