@@ -33,7 +33,8 @@ export const getProjectsForLedger = async () => {
         const { data: invoices, error: invoiceError } = await supabase
           .from('jobby')
           .select('*')
-          .eq('job_id', job.code);
+          .eq('job_id', job.code)
+          .eq('project_id', project.code);
 
         if (invoiceError) throw invoiceError;
         job.details = invoices.map(invoice => ({
