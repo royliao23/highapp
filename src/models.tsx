@@ -52,6 +52,8 @@ export interface Purchase {
   cost: number;
   ref: string;
   contact: string;
+  description: string;
+  note: string;
   create_at: Date;
   updated_at: Date;
   due_at: Date
@@ -73,6 +75,8 @@ export interface Invoice {
   create_at: Date;
   updated_at: Date;
   due_at: Date;
+  description?: string;
+  note?: string;
   outstanding?: number;
 }
 export interface Contractor {

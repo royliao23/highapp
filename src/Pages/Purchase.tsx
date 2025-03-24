@@ -5,7 +5,6 @@ import SearchBox from "../components/SearchBox";
 import Dropdown from "../components/Dropdown";
 import JobModalComp from "../components/JobModal";
 import ContractorModal from "../components/Modal";
-import { useNavigate } from "react-router-dom";
 import { fetchInvoiceDetails, fetchJobService } from "../services/SupaEndPoints";
 import { Purchase, Contractor } from "../models";
 import { useNavigationService } from "../services/SharedServices";
@@ -165,6 +164,8 @@ const PurchaseComp: React.FC = () => {
     ref: "",
     cost: 0,
     contact: "",
+    description: "",
+    note: "",
     create_at: new Date(),
     updated_at: new Date(),
     due_at: new Date(),
@@ -234,6 +235,7 @@ const PurchaseComp: React.FC = () => {
       name: "",
       job_category_id: 0,
       description: "",
+     
     });
     setEditingJobCode(null);
     setIsJobModalOpen(false);
@@ -412,6 +414,8 @@ const PurchaseComp: React.FC = () => {
       by_id: 0,
       project_id: 0,
       ref: "",
+      description: "",
+      note: "", 
       cost: 0,
       contact: "",
       create_at: new Date(),
@@ -453,7 +457,7 @@ const PurchaseComp: React.FC = () => {
           .eq("code", editingCode);
 
         if (error) throw error;
-
+        alert("Purchase updated successfully");
         // Clear editing state after updating
         setEditingCode(null);
       } else {
@@ -463,6 +467,7 @@ const PurchaseComp: React.FC = () => {
           .insert([payload]); // Use the payload without `invoice`
 
         if (error) throw error;
+        alert("Purchase added successfully");
       }
 
       // Refresh the list and reset the form
@@ -515,6 +520,8 @@ const PurchaseComp: React.FC = () => {
       ref: purchase.ref,
       cost: purchase.cost,
       contact: purchase.contact,
+      description: purchase.description,
+      note: purchase.note,
       create_at: purchase.create_at,
       updated_at: purchase.updated_at,
       due_at: purchase.due_at,
@@ -617,6 +624,7 @@ const PurchaseComp: React.FC = () => {
       if (error) throw error;
       // Refresh the list and reset the form
       setTimeout(() => {
+        alert("Invoice created successfully");
         fetchPurchases();
         handleCloseModal();
       }, 1000); // Delay of 100ms to allow the database to update  
@@ -637,8 +645,8 @@ const PurchaseComp: React.FC = () => {
       by_id: formData.by_id,
       project_id: formData.project_id,
       paid: 0,
-      note: "test note",
-      discription: "test",
+      note: formData.note,
+      description: formData.description,
       ref: formData.ref,
       cost: formData.cost,
       contact: formData.contact,
@@ -831,8 +839,6 @@ const PurchaseComp: React.FC = () => {
               />
             </div>
 
-
-
             <div>
               <label htmlFor="ref">Reference</label>
               <Input
@@ -843,9 +849,35 @@ const PurchaseComp: React.FC = () => {
                 onChange={handleInputChange}
                 placeholder="Ref"
                 autoComplete="off"
-                required
               />
             </div>
+
+            <div>
+              <label htmlFor="description">Description</label>
+              <Input
+                id="description"      
+                type="text"
+                name="description"
+                value={formData.description}
+                onChange={handleInputChange}
+                placeholder="Description"
+                autoComplete="off"
+              />
+            </div>
+
+            <div>
+              <label htmlFor="note">Note</label>
+              <Input
+                id="note"
+                type="text"
+                name="note"
+                value={formData.note}
+                onChange={handleInputChange}
+                placeholder="Note"
+                autoComplete="off"
+              />
+            </div>
+
 
             {/* Display the total cost of all invoices */}
 

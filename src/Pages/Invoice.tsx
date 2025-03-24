@@ -186,7 +186,10 @@ const InvoiceComp: React.FC = () => {
     contact: "",
     create_at: new Date(),
     updated_at: new Date(),
-    due_at: new Date(),
+    due_at:new Date(),
+    note: "",
+    description: "",
+
   });
   const [formContractorData, setFormContractorData] = useState<Omit<Contractor, "code">>({
     contact_person: "",
@@ -444,6 +447,8 @@ const InvoiceComp: React.FC = () => {
       ref: "",
       cost: 0,
       contact: "",
+      description: "",
+      note: "",
       create_at: new Date(),
       updated_at: new Date(),
       due_at: new Date(),
@@ -479,6 +484,7 @@ const InvoiceComp: React.FC = () => {
           .eq("code", editingCode);
 
         if (error) throw error;
+        alert("Invoice updated successfully");
         
         // Clear editing state after updating
         setEditingCode(null);
@@ -487,6 +493,7 @@ const InvoiceComp: React.FC = () => {
         const { error } = await supabase.from("jobby").insert([formData]);
 
         if (error) throw error;
+        alert("Invoice added successfully");
         
       }
 
@@ -540,6 +547,8 @@ const InvoiceComp: React.FC = () => {
       ref: Invoice.ref,
       cost: Invoice.cost,
       contact: Invoice.contact,
+      description: Invoice.description,
+      note: Invoice.note,
       create_at: Invoice.create_at,
       updated_at: Invoice.updated_at,
       due_at: Invoice.due_at,
@@ -570,6 +579,7 @@ const InvoiceComp: React.FC = () => {
   // Handle Form Input
   const handleInputChange = (e: ChangeEvent<HTMLInputElement>) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
+    console.log("Form Data:", formData);
   };
   const handleContractorInputChange = (e: ChangeEvent<HTMLInputElement>) => {
     setFormContractorData({ ...formContractorData, [e.target.name]: e.target.value });
@@ -689,7 +699,16 @@ const exportToExcel = () => {
   const { handleViewInvoice } = useNavigationService();
   const { handleViewPay } = useNavigationService();
 
- 
+  const formatDate = (dateString: Date | null | undefined): string => {
+    if (!dateString) {
+        return '';
+    }
+    const date = new Date(dateString);
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`; 
+};
 
   return (
     <Container>
@@ -942,18 +961,44 @@ const exportToExcel = () => {
               />
             </div>
 
-            {/* <div>
-    <label htmlFor="phone_number">Phone</label>
-    <Input
-      id="phone"
-      type="string"
-      name="phone_number"
-      value={formData.phone_number}
-      onChange={handleInputChange}
-      placeholder="Phone Number"
-      autoComplete="off"
-    />
-  </div> */}
+            <div>
+              <label htmlFor="due_at">Due Date</label>
+              <Input
+                id="due_at"
+                type="date"
+                name="due_at"
+                // value={formData.due_at}
+                value={formData.due_at ? formatDate(formData.due_at) : ''}
+                onChange={handleInputChange}
+                placeholder="Due Date"
+                autoComplete="off"
+              />
+            </div>
+            <div>
+              <label htmlFor="description">Description</label>
+              <Input
+                id="description"
+                type="text"
+                name="description"
+                value={formData.description}
+                onChange={handleInputChange}
+                placeholder="Description"
+                autoComplete="off"
+              />
+            </div>
+            <div>
+              <label htmlFor="note">Note</label>
+              <Input
+                id="note"
+                type="text"
+                name="note"
+                value={formData.note}
+                onChange={handleInputChange}
+                placeholder="Note"
+                autoComplete="off"
+              />
+            </div>
+            
 
             <div>
               <label htmlFor="ref">Reference</label>
@@ -965,7 +1010,6 @@ const exportToExcel = () => {
                 onChange={handleInputChange}
                 placeholder="Ref"
                 autoComplete="off"
-                required
               />
             </div>
 
