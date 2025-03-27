@@ -1,0 +1,35 @@
+{
+    "family": "nodejs-app",
+    "networkMode": "awsvpc",
+    "executionRoleArn": "arn:aws:iam::324037283653:role/ecsTaskExecutionRole",
+    "containerDefinitions": [
+      {
+        "name": "nodejs-app",
+        "image": "324037283653.dkr.ecr.us-west-2.amazonaws.com/express-eks:latest",
+        "portMappings": [
+          {
+            "containerPort": 3000,
+            "protocol": "tcp"
+          }
+        ],
+        "essential": true,
+        "environment": [
+          {
+            "name": "NODE_ENV",
+            "value": "production"
+          }
+        ],
+        "logConfiguration": {
+          "logDriver": "awslogs",
+          "options": {
+            "awslogs-group": "/ecs/nodejs-app",
+            "awslogs-region": "ap-southeast-2",
+            "awslogs-stream-prefix": "ecs"
+          }
+        }
+      }
+    ],
+    "requiresCompatibilities": ["FARGATE"],
+    "cpu": "512",
+    "memory": "3072"
+  }
