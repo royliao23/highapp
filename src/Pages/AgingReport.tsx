@@ -171,7 +171,7 @@ const AgingReport: React.FC = () => {
         <Container>
             <Title>Creditor Aging Report</Title>
             <ButtonRow>
-                <SearchBox searchTerm={searchTerm} onSearchChange={handleSearchChange} />
+                <SearchBox searchTerm={searchTerm}  onSearchChange={handleSearchChange} />
                 <Button onClick={handlePrint}>Print Report</Button>
             </ButtonRow>
 

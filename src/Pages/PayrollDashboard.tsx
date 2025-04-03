@@ -28,7 +28,7 @@ import {
 } from "@mui/material";
 
 import { supabase } from "../supabaseClient";
-
+import { Company } from "../models";
 interface Employee {
   id: number;
   name: string;
@@ -107,7 +107,21 @@ const PayrollDashboard: React.FC = () => {
   const [selectedPayroll, setSelectedPayroll] = useState<Payroll | null>(null);
   const [openDialog, setOpenDialog] = useState(false);
   const [ytd,setYtd] = useState({ gross_total: 0, tax_total: 0, super_total: 0, net_total: 0 })
-
+  const [company, setCompany] = useState<Company | null>(null);
+  
+  const fetchCompany = async () => {
+      try {
+        const { data, error } = await supabase.from("company").select("*").single();
+        if (error) throw error;
+        setCompany(data);
+      } catch (error) {
+        console.error("Error fetching company:", error);
+      }
+    };
+  
+  useEffect(() => {
+    fetchCompany();
+  }, []);
   // Handle Tab Change
   const handleTabChange = (_event: React.SyntheticEvent, newValue: number) => {
     setTabValue(newValue);
@@ -179,6 +193,22 @@ const PayrollDashboard: React.FC = () => {
     fetchpayRolls();
   }, []);
 
+  const calculateAustralianTax = (weeklyGrossPay:number) => {
+    const annualGrossPay = weeklyGrossPay * 52; // Approximate annual income
+
+  if (annualGrossPay <= 18200) {
+    return 0;
+  } else if (annualGrossPay <= 45000) {
+    return ((annualGrossPay - 18200) * 0.19) / 52;
+  } else if (annualGrossPay <= 120000) {
+    return (5092 + (annualGrossPay - 45000) * 0.325) / 52;
+  } else if (annualGrossPay <= 180000) {
+    return (29467 + (annualGrossPay - 120000) * 0.37) / 52;
+  } else {
+    return (51667 + (annualGrossPay - 180000) * 0.45) / 52;
+  }
+  }
+
   const handleAddPayroll = async () => {
     if (!selectedEmployee || !from_date || !to_date || grossPay <= 0) {
       alert("Fill all needed fields!");
@@ -186,7 +216,8 @@ const PayrollDashboard: React.FC = () => {
     }
 
     // Calculate tax (15%) and super (10%)
-    const tax = parseFloat((grossPay * 0.15).toFixed(2));
+    const tax:number = calculateAustralianTax(grossPay);
+    console.log(tax);
     const superAmount = parseFloat(
       (grossPay * (selectedEmployee.super_rate ? selectedEmployee.super_rate : 0.1)).toFixed(2)
     );
@@ -328,6 +359,7 @@ const PayrollDashboard: React.FC = () => {
                           ID
                         </TableSortLabel>
                       </TableCell>
+                      <TableCell>View</TableCell>
                       <TableCell>
                           Employee
                       </TableCell>
@@ -351,7 +383,7 @@ const PayrollDashboard: React.FC = () => {
                       <TableCell>Net Pay ($)</TableCell>
                       <TableCell>Holiday Pay ($)</TableCell>
                       <TableCell>Note</TableCell>
-                      <TableCell>Action</TableCell>
+                      
                     </TableRow>
                   </TableHead>
                   <TableBody>
@@ -361,6 +393,15 @@ const PayrollDashboard: React.FC = () => {
                       .map((payroll) => (
                         <TableRow key={payroll.id}>
                           <TableCell>{payroll.id}</TableCell>
+                          <TableCell>
+                            <Button 
+                              variant="outlined" 
+                              size="small" 
+                              onClick={() => handleViewPayroll(payroll)}
+                            >
+                              View
+                            </Button>
+                          </TableCell>
                           <TableCell>{payroll.employee?.name}</TableCell>
                           <TableCell>{payroll.period}</TableCell>
                           <TableCell>${payroll.gross_pay.toFixed(2)}</TableCell>
@@ -374,15 +415,7 @@ const PayrollDashboard: React.FC = () => {
                           <TableCell>${payroll.net_pay.toFixed(2)}</TableCell>
                           <TableCell>${payroll.holiday_pay.toFixed(2)}</TableCell>
                           <TableCell>{payroll.note}</TableCell>
-                          <TableCell>
-                            <Button 
-                              variant="outlined" 
-                              size="small" 
-                              onClick={() => handleViewPayroll(payroll)}
-                            >
-                              View
-                            </Button>
-                          </TableCell>
+                          
                         </TableRow>
                       ))}
                   </TableBody>
@@ -599,8 +632,8 @@ const PayrollDashboard: React.FC = () => {
         <Box sx={{ position: "absolute", top: "10%", left: "10%", width: "80%", bgcolor: "white", p: 4 }}>
           {selectedPayroll && (
             <div id="payslip">
-              <Typography variant="h5" align="center">Clear Water Pty Ltd</Typography>
-              <Typography variant="subtitle2" align="right">ABN: 80 000 000 001</Typography>
+              <Typography variant="h5" align="center">{company?.company_name}</Typography>
+              <Typography variant="subtitle2" align="right">ABN: {company?.abn}</Typography>
               <Typography variant="body1"><strong>Pay Slip For:</strong> {selectedPayroll.employee.name}</Typography>
               {/* <Typography variant="body1"><strong>Annual Salary:</strong> ${selectedPayroll.annualSalary.toFixed(2)}</Typography> */}
               <Typography variant="body1"><strong>Hourly Rate:</strong> {selectedPayroll.employee.salary ? (selectedPayroll.employee.salary / 38).toFixed(2) : 'no entry'}</Typography>

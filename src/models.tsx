@@ -122,3 +122,15 @@ export interface BankRecord {
   description: string;
 }
 
+export interface Company {
+  id: number;
+  company_name: string;
+  address: string;
+  abn: string;
+  director: string;
+  tfn?: string | null;
+  acn?: string | null;
+  phone: string;
+  email: string;
+}
+

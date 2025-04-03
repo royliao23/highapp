@@ -2,20 +2,7 @@ import React, { useState, useEffect, ChangeEvent, FormEvent } from "react";
 import { supabase } from "../supabaseClient";
 import styled from "styled-components";
 import Modal from "../components/Modal"; // Import the Modal component
-
-// Define the company interface
-interface Company {
-  id: number;
-  company_name: string;
-  address: string;
-  abn: string;
-  director: string;
-  tfn?: string | null;
-  acn?: string | null;
-  phone: string;
-  email: string;
-}
-
+import { Company as CompanyI } from "../models";
 // Styled Components
 const Container = styled.div`
   max-width: 800px;
@@ -74,8 +61,8 @@ const CompanyDetails = styled.div`
 `;
 
 const Company: React.FC = () => {
-  const [company, setCompany] = useState<Company | null>(null);
-  const [formData, setFormData] = useState<Company | null>(null);
+  const [company, setCompany] = useState<CompanyI | null>(null);
+  const [formData, setFormData] = useState<CompanyI | null>(null);
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
 
   // Fetch company data
