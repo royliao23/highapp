@@ -254,6 +254,7 @@ const PayComp: React.FC = () => {
   }, []);
 
   const handleSearchChange = (e: ChangeEvent<HTMLInputElement>) => {
+    setCurrentPage(0);
     setSearchTerm(e.target.value.toLowerCase()); // Normalize search term for case-insensitive search
   };
 
@@ -377,10 +378,17 @@ const PayComp: React.FC = () => {
 
   // Filter Pays dynamically based on the search term
   const filteredPays = Pays.filter((Pay) => {
+    if (searchTerm.includes("="))
+      return (Pay.amount === Number(searchTerm.substring(1)))
+    else if (searchTerm.includes(">"))
+      return (Pay.amount > Number(searchTerm.substring(1)))
+    else if (searchTerm.includes("<"))
+      return (Pay.amount < Number(searchTerm.substring(1)))
+    else
     return (
       (Pay.jobby?.contact?.toString() || "").includes(searchTerm.toLowerCase()) ||
-      (Pay.invoice_id?.toString() || "").includes(searchTerm.toLowerCase()) ||
-      (Pay.approved_by).includes(searchTerm.toLowerCase()) ||
+      (Pay.invoice_id === Number(searchTerm)) ||
+      (Pay.approved_by?.toLowerCase() || "").includes(searchTerm.toLowerCase()) ||
       (Pay.supply_invoice?.toLowerCase() || "").includes(searchTerm.toLowerCase())
     );
   });

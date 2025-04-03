@@ -165,6 +165,7 @@ const ContractorComp: React.FC = () => {
   }, []);
 
   const handleSearchChange = (e: ChangeEvent<HTMLInputElement>) => {
+    setCurrentPage(1);
     setSearchTerm(e.target.value.toLowerCase()); // Normalize search term for case-insensitive search
   };
 

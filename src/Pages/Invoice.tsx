@@ -427,6 +427,7 @@ const InvoiceComp: React.FC = () => {
   }, []);
 
   const handleSearchChange = (e: ChangeEvent<HTMLInputElement>) => {
+    setCurrentPage(1);
     setSearchTerm(e.target.value.toLowerCase()); // Normalize search term for case-insensitive search
   };
 
@@ -567,10 +568,24 @@ const InvoiceComp: React.FC = () => {
 
   // Filter Invoices dynamically based on the search term
   const filteredInvoices = Invoices.filter((Invoice) => {
-    return (
-      (Invoice.ref?.toLowerCase() || "").includes(searchTerm.toLowerCase()) ||
-      (Invoice.contact?.toLowerCase() || "").includes(searchTerm.toLowerCase())
-    );
+    const contractor = contractorOptions.find((c) => c.value === Invoice.by_id);
+    const project = projectOptions.find((p) => p.value === Invoice.project_id);
+    const job = jobOptions.find((j) => j.value === Invoice.job_id);
+    if (searchTerm.includes("="))
+      return (Invoice.cost === Number(searchTerm.substring(1)))
+    else if (searchTerm.includes(">"))
+      return (Invoice.cost > Number(searchTerm.substring(1)))
+    else if (searchTerm.includes("<"))
+      return (Invoice.cost < Number(searchTerm.substring(1)))
+    else
+      return (
+        (Invoice.code === Number(searchTerm)) ||
+        (Invoice.ref?.toLowerCase() || "").includes(searchTerm.toLowerCase()) ||
+        (Invoice.contact?.toLowerCase() || "").includes(searchTerm.toLowerCase()) ||
+        (contractor?.label?.toLowerCase() || "").includes(searchTerm.toLowerCase()) ||
+        (project?.label?.toLowerCase() || "").includes(searchTerm.toLowerCase()) ||
+        (job?.label?.toLowerCase() || "").includes(searchTerm.toLowerCase())
+      );
   });
 
   const displayedInvoices = showOutstanding

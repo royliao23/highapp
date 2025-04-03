@@ -32,6 +32,8 @@ import { supabase } from "../supabaseClient";
 interface Employee {
   id: number;
   name: string;
+  first_name?:string;
+  last_name?:string;
   email: string;
   salary?: number;
   position?: string;
@@ -73,11 +75,11 @@ const getComparator = (order: "asc" | "desc", orderBy: keyof Payroll) =>
 
 const PayrollDashboard: React.FC = () => {
   const [payrollData, setPayrollData] = useState<Payroll[]>([]);
-  const [search, setSearch] = useState<string>("");
+  const [search, setSearch] = useState("");
   const [order, setOrder] = useState<"asc" | "desc">("asc");
   const [orderBy, setOrderBy] = useState<keyof Payroll>("employee");
-  const [page, setPage] = useState<number>(0);
-  const [rowsPerPage, setRowsPerPage] = useState<number>(5);
+  const [page, setPage] = useState(0);
+  const [rowsPerPage, setRowsPerPage] = useState(5);
   const [employees, setEmployees] = useState<any[] | null>([{
     id: 0,
     name: "",
@@ -134,7 +136,7 @@ const PayrollDashboard: React.FC = () => {
   // Handle Search
   const filteredData = payrollData.filter(
     (payroll: Payroll) =>
-      payroll.employee?.name?.toLowerCase().includes(search.toLowerCase()) ||
+      (payroll.employee?.first_name?.toLowerCase().trim()+" "+payroll.employee?.last_name?.toLowerCase().trim()).includes(search.toLowerCase()) ||
       payroll.period.includes(search)
   );
 
@@ -254,7 +256,10 @@ const PayrollDashboard: React.FC = () => {
   };
   
  
-  
+  const handleSearch = (event: any) => {
+    setPage(0)
+    setSearch(event.target.value);
+  };
 
   const handleViewPayroll = (payroll: Payroll) => {
     setSelectedPayroll(payroll);
@@ -294,15 +299,17 @@ const PayrollDashboard: React.FC = () => {
         <>
           {/* Actions & Filters */}
           <Box sx={{ display: "flex", gap: 2, mb: 3, flexWrap: "wrap" }}>
-            <Button variant="outlined" color="secondary" onClick={handleExportCSV}>Export CSV</Button>
-            <TextField
-              label="Search by Employee or Date"
-              variant="outlined"
-              size="small"
-              sx={{ flexGrow: 1, minWidth: 200 }}
-              onChange={(e) => setSearch(e.target.value)}
-            />
+            <Button variant="outlined" color="secondary" onClick={handleExportCSV} sx={{ height:"20px", padding: 3.5, gap: 2, marginTop:4, marginLeft:2 }}>Export CSV</Button>
+            <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: 2, gap: 2 }}>
+              <TextField
+                label="Search Employee Name or Period"
+                variant="outlined"
+                margin="normal"
+                onChange={handleSearch}
+              />
+            </Box>
           </Box>
+          
 
           {/* Payroll Summary Table */}
           <Card>

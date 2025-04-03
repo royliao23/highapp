@@ -198,6 +198,7 @@ const EmployeeComponent = () => {
   };
 
   const handleSearch = (event: any) => {
+    setPage(0)
     setSearch(event.target.value);
   };
 
@@ -215,7 +216,7 @@ const EmployeeComponent = () => {
         </Typography>
         <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: 2, gap: 2 }}>
           <TextField
-            label="Search Employee"
+            label="Search Employee Name"
             variant="outlined"
             margin="normal"
             onChange={handleSearch}
