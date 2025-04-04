@@ -83,10 +83,13 @@ const Td = styled.td`
 
 // Main Component
 const AgingReport: React.FC = () => {
-    const [invoices, setInvoices] = useState<AgeInvoice[]>([]);
-    const [loading, setLoading] = useState(true);
-    const [searchTerm, setSearchTerm] = useState<string>("");
-    const printRef = useRef<HTMLDivElement>(null);
+  const [invoices, setInvoices] = useState<AgeInvoice[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [searchTerm, setSearchTerm] = useState<string>("");
+  const [isPrinting, setIsPrinting] = useState(false);
+  const printRef = useRef<HTMLDivElement>(null);
+  const [currentPage, setCurrentPage] = useState<number>(1);
+  const [itemsPerPage] = useState<number>(10);
 
     useEffect(() => {
         const fetchAgingReport = async () => {
@@ -147,13 +150,17 @@ const AgingReport: React.FC = () => {
     );
 
     const handlePrint = () => {
-        if (printRef.current) {
-            window.print();
-        }
-    };
+      setIsPrinting(true);
+      setTimeout(() => {
+          window.print();
+          setIsPrinting(false);
+      }, 100);
+  };
 
-    const [currentPage, setCurrentPage] = useState<number>(1);
-    const [itemsPerPage] = useState<number>(10); 
+  
+
+
+    
     const handlePageChange = (newPage: number) => {
         setCurrentPage(newPage);
       };
@@ -164,52 +171,57 @@ const AgingReport: React.FC = () => {
 
     const totalPages = Math.ceil(displayedInvoices.length / itemsPerPage);
 
-    
+    const itemsToDisplay = isPrinting ? displayedInvoices : paginatedReport;
     if (loading) return <p>Loading...</p>;
 
     return (
-        <Container>
-            <Title>Creditor Aging Report</Title>
-            <ButtonRow>
-                <SearchBox searchTerm={searchTerm}  onSearchChange={handleSearchChange} />
-                <Button onClick={handlePrint}>Print Report</Button>
-            </ButtonRow>
+      <Container>
+          <Title>Creditor Aging Report</Title>
+          <ButtonRow>
+              <SearchBox searchTerm={searchTerm} onSearchChange={handleSearchChange} />
+              <Button onClick={handlePrint}>Print Report</Button>
+          </ButtonRow>
 
-            <Pagination totalPages={totalPages} currentPage={currentPage} handlePageChange={handlePageChange} />
+          {!isPrinting && (
+              <Pagination 
+                  totalPages={totalPages} 
+                  currentPage={currentPage} 
+                  handlePageChange={handlePageChange} 
+              />
+          )}
 
-            {/* Printable Report Section */}
-            <div ref={printRef}>
-                <Table>
-                    <thead>
-                        <tr>
-                            <Th>Company</Th>
-                            <Th>Due Date</Th>
-                            <Th>Invoice Code</Th>
-                            <Th>Reference</Th>
-                            <Th>Amount</Th>
-                            <Th>Paid</Th>
-                            <Th>Due</Th>
-                            <Th>Aging Bucket</Th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {paginatedReport.map((invoice) => (
-                            <tr key={invoice.code}>
-                                <Td>{invoice.contractor.company_name}</Td>
-                                <Td>{new Date(invoice.due_at).toLocaleDateString()}</Td>
-                                <Td>{invoice.code}</Td>
-                                <Td>{invoice.ref}</Td>
-                                <Td>${invoice.cost.toFixed(2)}</Td>
-                                <Td>${invoice.totalPaid.toFixed(2)}</Td>
-                                <Td>${invoice.amountDue.toFixed(2)}</Td>
-                                <Td>{invoice.agingBucket}</Td>
-                            </tr>
-                        ))}
-                    </tbody>
-                </Table>
-            </div>
-        </Container>
-    );
+          <div ref={printRef}>
+              <Table>
+                  <thead>
+                      <tr>
+                          <Th>Company</Th>
+                          <Th>Due Date</Th>
+                          <Th>Invoice Code</Th>
+                          <Th>Reference</Th>
+                          <Th>Amount</Th>
+                          <Th>Paid</Th>
+                          <Th>Due</Th>
+                          <Th>Aging Bucket</Th>
+                      </tr>
+                  </thead>
+                  <tbody>
+                      {itemsToDisplay.map((invoice) => (
+                          <tr key={invoice.code}>
+                              <Td>{invoice.contractor.company_name}</Td>
+                              <Td>{new Date(invoice.due_at).toLocaleDateString()}</Td>
+                              <Td>{invoice.code}</Td>
+                              <Td>{invoice.ref}</Td>
+                              <Td>${invoice.cost.toFixed(2)}</Td>
+                              <Td>${invoice.totalPaid.toFixed(2)}</Td>
+                              <Td>${invoice.amountDue.toFixed(2)}</Td>
+                              <Td>{invoice.agingBucket}</Td>
+                          </tr>
+                      ))}
+                  </tbody>
+              </Table>
+          </div>
+      </Container>
+  );
 };
 
 export default AgingReport;
