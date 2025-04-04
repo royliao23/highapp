@@ -3,10 +3,12 @@ import { supabase } from "../supabaseClient";
 import styled from "styled-components";
 import SearchBox from "../components/SearchBox";
 import Dropdown from "../components/Dropdown";
+import StringDropdown from "../components/StringDropdown";
 import { Pay, Contractor, } from "../models";
 import { useNavigationService } from "../services/SharedServices";
 import { fetchInvoiceDetails } from "../services/SupaEndPoints";
 import { PaginationContainer } from "../StyledComponent";
+
 // Styled Components for Styling
 const Container = styled.div`
   max-width: 1500px;
@@ -175,6 +177,15 @@ const PayComp: React.FC = () => {
   const handlePageChange = (newPage: number) => {
     setCurrentPage(newPage);
   };
+
+  const [paymentOptions, setPaymentOptions] = useState([
+    'Credit Card',
+    'EFT',
+    'Check',
+    'Cash',
+    'Credit Note',
+    'Others',
+  ]);
   
   const fetchPays = async () => {
     try {
@@ -310,8 +321,9 @@ const PayComp: React.FC = () => {
         const balance = Math.max(0, invoiceData.cost - totalPaid);
 
         // Check if the new payment exceeds the balance
-        if (formData.amount > balance) {
-            alert(`Payment exceeds balance! Remaining balance: $${balance.toFixed(2)}`);
+        if (formData.amount > parseFloat(balance.toFixed(2))) {
+            
+            alert(`You entered: $${formData.amount}, Payment exceeds balance! Remaining balance: $${balance.toFixed(2)}`);
             return; // Stop execution
         }
 
@@ -407,6 +419,16 @@ const PayComp: React.FC = () => {
       [name]: value,
     }));
   };
+
+  const handleStringDropChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
+    //  const pay_via  = event.target;  // This is the whole Select element
+    const pay_via = event.target.value; // This gets the selected value
+    setFormData((prevData) => ({
+      ...prevData,
+      pay_via: pay_via, // Use the value, not the element
+    }));
+  };
+
 
   const paginatedPays = filteredPays.slice(
     (currentPage - 1) * itemsPerPage,
@@ -514,7 +536,7 @@ const PayComp: React.FC = () => {
         <ModalContent>
           <CloseButton onClick={handleCloseModal}>&times;</CloseButton>
           <Form onSubmit={handleSubmit}>
-            <div>
+            {/* <div>
               <label htmlFor="contact">Pay Via</label>
               <Input
                 id="pay_via"
@@ -526,8 +548,20 @@ const PayComp: React.FC = () => {
                 autoComplete="off"
                 required
               />
-            </div>
+            </div> */}
 
+            <div>
+              <label id="pay_via">Pay Via</label>
+              <StringDropdown
+                name="pay_via"
+                value={formData.pay_via}
+                onChange={handleStringDropChange}
+                options={paymentOptions}
+                placeholder="Select Payment Method"
+                required
+              />
+            </div>
+              
             <div>
               <label htmlFor="project" >Invoice</label>
               <Dropdown
@@ -578,7 +612,6 @@ const PayComp: React.FC = () => {
                 onChange={handleInputChange}
                 placeholder="Note"
                 autoComplete="off"
-                required
               />        
             </div>
             <div>

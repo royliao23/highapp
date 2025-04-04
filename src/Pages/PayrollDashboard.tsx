@@ -29,6 +29,7 @@ import {
 
 import { supabase } from "../supabaseClient";
 import { Company } from "../models";
+
 interface Employee {
   id: number;
   name: string;
@@ -108,18 +109,34 @@ const PayrollDashboard: React.FC = () => {
   const [openDialog, setOpenDialog] = useState(false);
   const [ytd,setYtd] = useState({ gross_total: 0, tax_total: 0, super_total: 0, net_total: 0 })
   const [company, setCompany] = useState<Company | null>(null);
+  const [role, setRole] = useState<string>("");
   
   const fetchCompany = async () => {
       try {
         const { data, error } = await supabase.from("company").select("*").single();
         if (error) throw error;
         setCompany(data);
+        
       } catch (error) {
         console.error("Error fetching company:", error);
       }
-    };
+      const id=localStorage.getItem("id")
+      const { data, error } = await supabase
+        .from("user_role")
+        .select("*")
+        .eq('user_id', id)  // Critical for RLS!
+        .maybeSingle();           // Use `maybeSingle` if the role might not exist
+
+      if (error) {
+        console.error("Error fetching role:", error);
+        return;
+      }
+      console.log("User role:", data?.role);
+      setRole(data?.role || "");
+          };
   
   useEffect(() => {
+    
     fetchCompany();
   }, []);
   // Handle Tab Change
@@ -181,16 +198,35 @@ const PayrollDashboard: React.FC = () => {
     if (!error) setPayrollData(data || []);
   };
   useEffect(() => {
-    const fetchpayRolls = async () => {
-      let { data, error } = await supabase.from("payroll").select("*, employee(*)");
-      if (!error) setPayrollData(data || []);
+    const fetchData = async () => {
+      // 1. Get the current user's role
+      const { data: { user } } = await supabase.auth.getUser();
+      const { data: roleData, error: roleError } = await supabase
+        .from("user_role")
+        .select("role")
+        .eq("user_id", localStorage.getItem("id"))
+        .single();
+  
+      if (roleError || !roleData || roleData.role !== "hr") {
+        console.log("Access denied: User is not HR");
+        return; // Exit if role is not "hr"
+      }
+  
+      // 2. Only fetch if role === "hr"
+      const fetchPayrolls = async () => {
+        const { data, error } = await supabase.from("payroll").select("*, employee(*)");
+        if (!error) setPayrollData(data || []);
+      };
+  
+      const fetchEmployees = async () => {
+        const { data, error } = await supabase.from("employee").select("*");
+        if (!error) setEmployees(data || []);
+      };
+  
+      await Promise.all([fetchPayrolls(), fetchEmployees()]);
     };
-    const fetchEmployees = async () => {
-      let { data, error } = await supabase.from("employee").select("*");
-      if (!error) setEmployees(data);
-    };
-    fetchEmployees();
-    fetchpayRolls();
+  
+    fetchData();
   }, []);
 
   const calculateAustralianTax = (weeklyGrossPay:number) => {
@@ -310,7 +346,23 @@ const PayrollDashboard: React.FC = () => {
 
   return (
     <Container>
-      {/* Header */}
+      { role !== 'hr' ? (
+        <Box sx={{ height: '300px', position: 'relative' }}>
+        <Typography
+          variant="h6"
+          sx={{
+            fontWeight: 'bold',
+            position: 'absolute',
+            top: '50%',
+            left: '50%',
+            transform: 'translate(-50%, -50%)', // Precise centering
+          }}
+        >
+          You are not authorized to view this page.
+        </Typography>
+      </Box>
+      ) : (
+        <>
       <Typography variant="h4" sx={{ my: 3,  color: 'primary.main' }}>
         Payroll Management
       </Typography>
@@ -683,6 +735,8 @@ const PayrollDashboard: React.FC = () => {
           )}
         </Box>
       </Modal>
+      </>
+      )}
     </Container>
   );
 };
