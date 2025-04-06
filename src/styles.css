@@ -526,3 +526,18 @@ label {
     display: none !important;
   }
 }
+
+.homecog {
+  background-image: url('assets/easterimg.jpg');
+  background-size: cover; /* covers the full area */
+  background-position: center;
+  background-repeat: no-repeat; /* prevents image tiling */
+  min-height:100vh; /* fills the screen height */
+  overflow: hidden; /* stops content overflow if needed */
+  padding: 2rem;
+  color: white;
+  display: flex;
+  flex-direction: column;
+  justify-content: center; /* centers vertically */
+  
+}

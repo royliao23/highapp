@@ -27,6 +27,7 @@ import Company from "./Pages/Company";
 import Employee from "./Pages/Employee";
 import ChartDashboard from "./Pages/ChartDashBoard";
 import CategoryLedger from "./Pages/Ledger";
+import EasterEvent from "./Pages/HomeCOG";
 const App: React.FC = () => {
   const [isLoggedIn, setIsLoggedIn] = useState(
     localStorage.getItem("isLoggedIn") === "true"
@@ -70,7 +71,7 @@ const MainApp: React.FC<MainAppProps> = ({
 
   
   useEffect(() => {
-    const publicPaths = ["/login", "/signup", "/forgot-password", "/reset-password"];
+    const publicPaths = ["/login", "/signup", "/forgot-password", "/reset-password","/event"];
     if (!isLoggedIn && !publicPaths.includes(pathname)) {
       navigate("/login");
     }
@@ -84,6 +85,7 @@ const MainApp: React.FC<MainAppProps> = ({
       )}
       <Routes>
         <Route path="/signup" element={<Signup />} />
+        <Route path="/event" element={<EasterEvent />} />
         <Route path="/forgot-password" element={<ForgotPassword />} />
         <Route path="/reset-password" element={<ResetPassword />} />
         <Route path="/login" element={<Login onLoginSuccess={onLoginSuccess} />} />
