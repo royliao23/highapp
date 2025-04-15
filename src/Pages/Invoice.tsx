@@ -479,13 +479,17 @@ const InvoiceComp: React.FC = () => {
     try {
       if (editingCode !== null) {
         // Update an existing Invoice
-        const { error } = await supabase
+        const { data, error } = await supabase
           .from("jobby")
           .update(formData)
-          .eq("code", editingCode);
-
-        if (error) throw error;
-        alert("Invoice updated successfully");
+          .eq("code", editingCode)
+          .select() // This forces returning the updated record;
+        
+        if (error) {throw error} else if (data.length > 0) {
+          alert('Update succeeded.')
+        } else {
+          alert('Only current month transactions are allowed to be updated or there are no matching rows')
+        }
         
         // Clear editing state after updating
         setEditingCode(null);
@@ -558,8 +562,12 @@ const InvoiceComp: React.FC = () => {
 
   const handleDelete = async (code: number) => {
     try {
-      const { error } = await supabase.from("jobby").delete().eq("code", code);
-      if (error) throw error;
+      const { data,error } = await supabase.from("jobby").delete().eq("code", code).select();
+      if (error) {throw error} else if (data.length > 0) {
+        alert('Deletion succeeded.')
+      } else {
+        alert('Only current month transactions are allowed to be deleted or there are no matching rows')
+      }
       fetchInvoices(); // Refresh the list
     } catch (error) {
       console.error("Error deleting Invoice:", error);
