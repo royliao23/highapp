@@ -31,7 +31,7 @@ const EasterEvent = () => {
         >
           {/* Top Header */}
           <Typography
-            variant="h3"
+            variant="h4"
             fontWeight="bold"
             sx={{
               color: "#6A1B9A",
@@ -39,7 +39,7 @@ const EasterEvent = () => {
               mb: 1,
             }}
           >
-            JAMES COOK TECHNOLOGY HIGH SCHOOL
+            JAMES COOK TECHNOLOGY BOYS HIGH SCHOOL
           </Typography>
 
           <Typography
