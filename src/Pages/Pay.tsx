@@ -329,12 +329,17 @@ const PayComp: React.FC = () => {
 
         if (editingCode !== null) {
             // Update an existing Pay
-            const { error } = await supabase
+            const { data, error } = await supabase
                 .from("pay")
                 .update(formData)
-                .eq("code", editingCode);
+                .eq("code", editingCode).select();
 
-            if (error) throw error;
+                if (error) {throw error} else if (data.length > 0) {
+                  alert('Update succeeded.')
+                } else {
+                  alert('Only current month transactions are allowed to be updated or there are no matching rows')
+                }
+                fetchPays(); // Refresh the list
 
             setEditingCode(null);
         } else {
@@ -380,8 +385,12 @@ const PayComp: React.FC = () => {
 
   const handleDelete = async (code: number) => {
     try {
-      const { error } = await supabase.from("pay").delete().eq("code", code);
-      if (error) throw error;
+      const { data, error } = await supabase.from("pay").delete().eq("code", code).select();
+      if (error) {throw error} else if (data.length > 0) {
+        alert('Deletion succeeded.')
+      } else {
+        alert('Only current month transactions are allowed to be deleted or there are no matching rows')
+      }
       fetchPays(); // Refresh the list
     } catch (error) {
       console.error("Error deleting Pay:", error);
