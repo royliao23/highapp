@@ -1,0 +1,366 @@
+import React, { useState, useEffect } from 'react';
+import { fetchInvoicesForPeriod } from '../services/SupaEndPoints';
+import {
+  Box,
+  FormControl,
+  FormControlLabel,
+  RadioGroup,
+  Radio,
+  TextField,
+  Button,
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableRow,
+  Tabs,
+  Tab,
+  CircularProgress,
+  Alert,
+} from '@mui/material';
+import { DatePicker, LocalizationProvider } from '@mui/x-date-pickers';
+import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns';
+import { enAU } from 'date-fns/locale'; 
+import { Invoice } from '../models'; // Adjust the import based on your project structure
+
+
+
+interface TabPanelProps {
+  children?: React.ReactNode;
+  index: number;
+  value: number;
+}
+
+function TabPanel(props: TabPanelProps) {
+  const { children, value, index, ...other } = props;
+
+  return (
+    <div
+      role="tabpanel"
+      hidden={value !== index}
+      id={`simple-tabpanel-${index}`}
+      aria-labelledby={`simple-tab-${index}`}
+      {...other}
+    >
+      {value === index && (
+        <Box sx={{ p: 3 }}>
+          {children}
+        </Box>
+      )}
+    </div>
+  );
+}
+
+function a11yProps(index: number) {
+  return {
+    id: `simple-tab-${index}`,
+    'aria-controls': `simple-tabpanel-${index}`,
+  };
+}
+
+const BASReportPage: React.FC = () => {
+  const [reportPeriod, setReportPeriod] = useState<'quarterly' | 'half-yearly' | 'annually'>('quarterly');
+  const currentYear = new Date().getFullYear();
+  const financialYearStart = new Date(currentYear - 1, 6, 1); // July 1st of the previous year
+  const financialYearEnd = new Date(currentYear, 6, 0);   // June 30th of the current year
+
+  const [startDate, setStartDate] = useState<Date | null>();
+  const [endDate, setEndDate] = useState<Date | null>();
+  const [invoices, setInvoices] = useState<Invoice[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [reportType, setReportType] = useState(0); // 0: GST, 1: TPAR
+
+  const handleChangeReportType = (event: React.SyntheticEvent, newValue: number) => {
+    setReportType(newValue);
+  };
+
+//   const handlePeriodChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+//     setReportPeriod(event.target.value as 'quarterly' | 'half-yearly' | 'annually');
+//     // Reset dates when period changes
+//     setStartDate(null);
+//     setEndDate(null);
+//   };
+
+//   const handleStartDateChange = (date: Date | null) => {
+//     setStartDate(date);
+//   };
+
+//   const handleEndDateChange = (date: Date | null) => {
+//     setEndDate(date);
+//   };
+
+  const generateDateRange = (period: 'quarterly' | 'half-yearly' | 'annually') => {
+    const today = new Date();
+    const year = today.getFullYear();
+    const month = today.getMonth();
+
+    // switch (period) {
+    //   case 'quarterly':
+    //     // Logic to set default quarterly ranges (e.g., based on current month)
+    //     if (month >= 0 && month <= 2) {
+    //       setStartDate(new Date(year, 0, 1));
+    //       setEndDate(new Date(year, 3, 0));
+    //     } else if (month >= 3 && month <= 5) {
+    //       setStartDate(new Date(year, 3, 1));
+    //       setEndDate(new Date(year, 6, 0));
+    //     } else if (month >= 6 && month <= 8) {
+    //       setStartDate(new Date(year, 6, 1));
+    //       setEndDate(new Date(year, 9, 0));
+    //     } else {
+    //       setStartDate(new Date(year, 9, 1));
+    //       setEndDate(new Date(year, 12, 0));
+    //     }
+    //     break;
+    //   case 'half-yearly':
+    //     if (month >= 0 && month <= 5) {
+    //       setStartDate(new Date(year, 0, 1));
+    //       setEndDate(new Date(year, 6, 0));
+    //     } else {
+    //       setStartDate(new Date(year, 6, 1));
+    //       setEndDate(new Date(year + 1, 0, 0)); // End of December
+    //     }
+    //     break;
+    //   case 'annually':
+    //     setStartDate(new Date(year, 0, 1));
+    //     setEndDate(new Date(year + 1, 0, 0)); // End of December
+    //     break;
+    //   default:
+    //     break;
+    // }
+  };
+
+  const fetchData = async () => {
+    if (!startDate || !endDate) {
+    //   setError('Please select a valid date range.');
+      return;
+    }
+
+    setLoading(true);
+    setError(null);
+
+    try {
+      const fetchedInvoices = await fetchInvoicesForPeriod(startDate, endDate);
+      setInvoices(fetchedInvoices);
+    } catch (err: any) {
+      setError(err.message || 'Failed to fetch invoice data.');
+      setInvoices([]);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchData();
+    if (reportPeriod) {
+      generateDateRange(reportPeriod);
+    }
+  }, [reportPeriod]);
+
+  const calculateGST = (cost: number) => {
+    return cost / 11; // Assuming cost includes GST
+  };
+
+  const formatNumber = (num: number | undefined) => {
+    if (num === undefined) return '';
+    return parseFloat(num.toFixed(2));
+  };
+
+  const handleExportATO = () => {
+    if (reportType === 0) {
+      // Generate GST ATO export data (likely a CSV format)
+      const gstData = invoices.map(invoice => ({
+        invoiceId: invoice.invoice_id,
+        date: invoice.create_at.toString(),
+        supplier: invoice.contact,
+        grossAmount: formatNumber(invoice.cost),
+        gstAmount: formatNumber(calculateGST(invoice.cost)),
+      }));
+      downloadCSV(gstData, 'gst_report_ato.csv');
+    } else {
+      // Generate TPAR ATO export data (needs specific ATO format - likely CSV)
+      const tparData = invoices.map(invoice => ({
+        invoiceId: invoice.invoice_id,
+        date: invoice.create_at.toString(),
+        contractorABN: 'TODO', // You'll need to fetch contractor ABN
+        contractorName: invoice.contact,
+        grossAmountPaid: formatNumber(invoice.cost),
+        gstPaid: formatNumber(calculateGST(invoice.cost)), // Assuming cost includes GST
+      }));
+      downloadCSV(tparData, 'tpar_report_ato.csv');
+    }
+  };
+
+  const handleExportMYOB = () => {
+    if (reportType === 0) {
+      // Generate GST MYOB export data (likely a different CSV format or other)
+      const gstData = invoices.map(invoice => ({
+        date: invoice.create_at.toString(),
+        supplier: invoice.contact,
+        total: formatNumber(invoice.cost),
+        gst: formatNumber(calculateGST(invoice.cost)),
+        // Add other MYOB specific fields
+      }));
+      downloadCSV(gstData, 'gst_report_myob.csv');
+    } else {
+      // Generate TPAR MYOB export data (likely CSV)
+      const tparData = invoices.map(invoice => ({
+        date: invoice.create_at.toString(),
+        contractor: invoice.contact,
+        amount: formatNumber(invoice.cost),
+        gst: formatNumber(calculateGST(invoice.cost)),
+        // Add other MYOB specific fields
+      }));
+      downloadCSV(tparData, 'tpar_report_myob.csv');
+    }
+  };
+
+  const downloadCSV = (data: any[], filename: string) => {
+    const csvRows = [];
+    const headers = Object.keys(data[0] || {});
+    csvRows.push(headers.join(','));
+
+    for (const row of data) {
+      const values = headers.map(header => String(row[header]).replace(/,/g, '')); // Escape commas
+      csvRows.push(values.join(','));
+    }
+
+    const csvData = csvRows.join('\n');
+    const blob = new Blob([csvData], { type: 'text/csv' });
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.setAttribute('href', url);
+    a.setAttribute('download', filename);
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    window.URL.revokeObjectURL(url);
+  };
+  const handleStartDateInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    setStartDate(event.target.value ? new Date(event.target.value) : null);
+  };
+
+  const handleEndDateInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    setEndDate(event.target.value ? new Date(event.target.value) : null);
+  };
+
+  return (
+    <Box sx={{ p: 3 }}>
+      <h2>Business Activity Statement (BAS) Report</h2>
+
+      {/* <FormControl component="fieldset" sx={{ mb: 2 }}>
+        <RadioGroup row aria-label="report-period" name="report-period" value={reportPeriod} onChange={handlePeriodChange}>
+          <FormControlLabel value="quarterly" control={<Radio />} label="Quarterly" />
+          <FormControlLabel value="half-yearly" control={<Radio />} label="Half-Yearly" />
+          <FormControlLabel value="annually" control={<Radio />} label="Annually" />
+        </RadioGroup>
+      </FormControl> */}
+
+      <Box sx={{ display: 'flex', gap: 2, mb: 2 }}>
+        <TextField
+          label="Start Date"
+          type="date"
+          value={startDate ? startDate.toISOString().split('T')[0] : ''}
+          onChange={handleStartDateInputChange}
+          disabled={!reportPeriod}
+          InputLabelProps={{ shrink: true }} // To keep the label at the top
+        />
+        <TextField
+          label="End Date"
+          type="date"
+          value={endDate ? endDate.toISOString().split('T')[0] : ''}
+          onChange={handleEndDateInputChange}
+          disabled={!reportPeriod}
+          InputLabelProps={{ shrink: true }} // To keep the label at the top
+        />
+        <Button variant="contained" onClick={fetchData} disabled={!startDate || !endDate || loading}>
+          Generate Report Data
+        </Button>
+      </Box>
+
+
+        <Box sx={{ width: '100%', mb: 2 }}>
+          <Tabs value={reportType} onChange={handleChangeReportType} aria-label="report type tabs">
+            <Tab label="GST Report" {...a11yProps(0)} />
+            <Tab label="TPAR Report" {...a11yProps(1)} />
+          </Tabs>
+        </Box>
+
+        {loading && <CircularProgress />}
+        {error && <Alert severity="error">{error}</Alert>}
+
+        <TabPanel value={reportType} index={0}>
+          {invoices.length > 0 && (
+            <Table sx={{ minWidth: 650 }} aria-label="gst report preview">
+              <TableHead>
+                <TableRow>
+                  <TableCell>Invoice ID</TableCell>
+                  <TableCell>Date</TableCell>
+                  <TableCell>Supplier</TableCell>
+                  <TableCell align="right">Gross Amount</TableCell>
+                  <TableCell align="right">GST Amount</TableCell>
+                </TableRow>
+              </TableHead>
+              <TableBody>
+                {invoices.map((invoice) => (
+                  <TableRow key={invoice.code}>
+                    <TableCell component="th" scope="row">
+                      {invoice.code}
+                    </TableCell>
+                    <TableCell>{invoice.create_at?.toString()}</TableCell>
+                    <TableCell>{invoice.contact}</TableCell>
+                    <TableCell align="right">{formatNumber(invoice.cost)}</TableCell>
+                    <TableCell align="right">{formatNumber(calculateGST(invoice.cost))}</TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          )}
+          {invoices.length === 0 && !loading && !error && <Alert severity="info">No invoices found for the selected period.</Alert>}
+        </TabPanel>
+
+        <TabPanel value={reportType} index={1}>
+          {invoices.length > 0 && (
+            <Table sx={{ minWidth: 650 }} aria-label="tpar report preview">
+              <TableHead>
+                <TableRow>
+                  <TableCell>Invoice ID</TableCell>
+                  <TableCell>Date</TableCell>
+                  <TableCell>Contractor</TableCell>
+                  <TableCell align="right">Gross Amount Paid</TableCell>
+                  <TableCell align="right">GST Paid (if any)</TableCell>
+                  {/* You might need to display other contractor details here */}
+                </TableRow>
+              </TableHead>
+              <TableBody>
+                {invoices.map((invoice) => (
+                  <TableRow key={invoice.code}>
+                    <TableCell component="th" scope="row">
+                      {invoice.code}
+                    </TableCell>
+                    <TableCell>{invoice.create_at?.toString()}</TableCell>
+                    <TableCell>{invoice.contact}</TableCell>
+                    <TableCell align="right">{formatNumber(invoice.cost)}</TableCell>
+                    <TableCell align="right">{formatNumber(calculateGST(invoice.cost))}</TableCell>
+                    {/* Display other contractor details if available in your 'invoices' table or fetched from 'jobby' */}
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          )}
+          {invoices.length === 0 && !loading && !error && <Alert severity="info">No invoices found for the selected period.</Alert>}
+        </TabPanel>
+
+        <Box sx={{ mt: 3 }}>
+          <Button variant="contained" color="primary" onClick={handleExportATO} disabled={invoices.length === 0}>
+            Export for ATO
+          </Button>
+          <Button sx={{ ml: 2 }} variant="contained" color="secondary" onClick={handleExportMYOB} disabled={invoices.length === 0}>
+            Export for MYOB
+          </Button>
+        </Box>
+      </Box>
+  );
+};
+
+export default BASReportPage;

@@ -29,6 +29,7 @@ import ChartDashboard from "./Pages/ChartDashBoard";
 import CategoryLedger from "./Pages/Ledger";
 import EasterEvent from "./Pages/HomeCOG";
 import DepartmentComponent from "./Pages/Department";
+import BASReportPage from "./Pages/BasReportPage";
 const App: React.FC = () => {
   const [isLoggedIn, setIsLoggedIn] = useState(
     localStorage.getItem("isLoggedIn") === "true"
@@ -108,6 +109,7 @@ const MainApp: React.FC<MainAppProps> = ({
         {isLoggedIn && <Route path="/payroll" element={<PayrollDashboard />} />}
         {isLoggedIn && <Route path="/company" element={<Company />} />}
         {isLoggedIn && <Route path="/employee" element={<Employee />} />}
+        {isLoggedIn && <Route path="/bas" element={<BASReportPage />} />}
         {isLoggedIn && <Route path="/department" element={< DepartmentComponent/>} />}
         {isLoggedIn && <Route path="/ledger" element={<CategoryLedger />} />}
         <Route path="/purchase/:code" element={<PurchaseView />} />

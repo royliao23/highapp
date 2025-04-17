@@ -67,6 +67,7 @@ const Nav: React.FC<NavProps> = ({ onLogout }) => {
               <li><Link to="/company" className="dropdown-item" onClick={() => handleMenuClick()}>Company</Link></li>
               <li><Link to="/department" className="dropdown-item" onClick={() => handleMenuClick()}>Department</Link></li>
               <li><Link to="/employee" className="dropdown-item" onClick={() => handleMenuClick()}>Employee</Link></li>
+              <li><Link to="/bas" className="dropdown-item" onClick={() => handleMenuClick()}>BAS</Link></li>
               <li className="menu-item">
                 <Link to="/payroll" className="dropdown-item" onClick={() => handleMenuClick()}>Payroll</Link>
               </li>

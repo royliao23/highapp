@@ -145,3 +145,24 @@ export const fetchJobService = async () => {
     }
   };
 
+export const fetchInvoicesForPeriod = async (startDate: Date, endDate: Date) => {
+  try {
+    const { data, error } = await supabase
+      .from('jobby') // Replace 'invoices' with your actual table name
+      .select('*')
+      .gte('create_at', startDate.toISOString())
+      .lte('create_at', endDate.toISOString());
+
+    if (error) {
+      console.error('Error fetching invoices:', error);
+      throw error;
+    }
+
+    return data || [];
+  } catch (error: any) {
+    console.error('Failed to fetch invoices:', error.message);
+    throw error;
+  }
+  };
+
+
