@@ -165,4 +165,60 @@ export const fetchInvoicesForPeriod = async (startDate: Date, endDate: Date) => 
   }
   };
 
+export const fetchInvoicesForPeriodDeep = async (startDate: Date, endDate: Date) => {
+  try {
+    const { data, error } = await supabase
+      .from('jobby')
+      .select(`
+        *,
+        contractor (
+          code,
+          contact_person,
+          company_name,
+          phone_number,
+          email,
+          bsb,
+          account_no,
+          account_name,
+          address
+        )
+      `)
+      .gte('create_at', startDate.toISOString())
+      .lte('create_at', endDate.toISOString());
+
+    if (error) {
+      console.error('Error fetching invoices with contractor details:', error);
+      throw error;
+    }
+
+    // Supabase's join will nest the contractor data under the 'contractor' key
+    // We need to map the result to match the InvoiceDeep interface
+    const formattedData = data ? data.map(item => ({
+      code: item.code,
+      po_id: item.po_id,
+      job_id: item.job_id,
+      by_id: item.contractor, // Assign the nested contractor object to by_id
+      project_id: item.project_id,
+      invoice_id: item.invoice_id,
+      cost: item.cost,
+      ref: item.ref,
+      pay: item.pay,
+      paid: item.paid,
+      contact: item.contact,
+      create_at: new Date(item.create_at),
+      updated_at: new Date(item.updated_at),
+      due_at: new Date(item.due_at),
+      description: item.description,
+      note: item.note,
+      outstanding: item.outstanding,
+    })) : [];
+
+    return formattedData;
+  } catch (error: any) {
+    console.error('Failed to fetch invoices with contractor details:', error.message);
+    throw error;
+  }
+};
+
+
 

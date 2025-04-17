@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { fetchInvoicesForPeriod } from '../services/SupaEndPoints';
+import { fetchInvoicesForPeriodDeep } from '../services/SupaEndPoints';
 import {
   Box,
   FormControl,
@@ -21,7 +21,7 @@ import {
 import { DatePicker, LocalizationProvider } from '@mui/x-date-pickers';
 import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns';
 import { enAU } from 'date-fns/locale'; 
-import { Invoice } from '../models'; // Adjust the import based on your project structure
+import { InvoiceDeep } from '../models'; // Adjust the import based on your project structure
 
 
 
@@ -78,7 +78,7 @@ const BASReportPage: React.FC = () => {
 //   const [endDate, setEndDate] = useState<Date | null>(financialYearEnd);
   const [startDate, setStartDate] = useState<Date | null>();
   const [endDate, setEndDate] = useState<Date | null>();
-  const [invoices, setInvoices] = useState<Invoice[]>([]);
+  const [invoices, setInvoices] = useState<InvoiceDeep[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [reportType, setReportType] = useState(0); // 0: GST, 1: TPAR
@@ -152,7 +152,7 @@ const BASReportPage: React.FC = () => {
     setError(null);
 
     try {
-      const fetchedInvoices = await fetchInvoicesForPeriod(startDate, endDate);
+      const fetchedInvoices = await fetchInvoicesForPeriodDeep(startDate, endDate);
       setInvoices(fetchedInvoices);
     } catch (err: any) {
       setError(err.message || 'Failed to fetch invoice data.');
@@ -184,7 +184,7 @@ const BASReportPage: React.FC = () => {
       const gstData = invoices.map(invoice => ({
         invoiceId: invoice.code,
         date: invoice.create_at.toString(),
-        supplier: invoice.contact,
+        supplier: invoice.by_id.company_name,
         grossAmount: formatNumber(invoice.cost),
         gstAmount: formatNumber(calculateGST(invoice.cost)),
       }));
@@ -195,7 +195,7 @@ const BASReportPage: React.FC = () => {
         invoiceId: invoice.code,
         date: invoice.create_at.toString(),
         contractorABN: 'TODO', // You'll need to fetch contractor ABN
-        contractorName: invoice.contact,
+        contractorName: invoice.by_id.company_name,
         grossAmountPaid: formatNumber(invoice.cost),
         gstPaid: formatNumber(calculateGST(invoice.cost)), // Assuming cost includes GST
       }));
@@ -208,7 +208,8 @@ const BASReportPage: React.FC = () => {
       // Generate GST MYOB export data (likely a different CSV format or other)
       const gstData = invoices.map(invoice => ({
         date: invoice.create_at.toString(),
-        supplier: invoice.contact,
+        invoiceId: invoice.code,
+        supplier: invoice.by_id.company_name,
         total: formatNumber(invoice.cost),
         gst: formatNumber(calculateGST(invoice.cost)),
         // Add other MYOB specific fields
@@ -218,7 +219,8 @@ const BASReportPage: React.FC = () => {
       // Generate TPAR MYOB export data (likely CSV)
       const tparData = invoices.map(invoice => ({
         date: invoice.create_at.toString(),
-        contractor: invoice.contact,
+        invoiceId: invoice.code,
+        contractor: invoice.by_id.company_name,
         amount: formatNumber(invoice.cost),
         gst: formatNumber(calculateGST(invoice.cost)),
         // Add other MYOB specific fields
@@ -320,7 +322,7 @@ const BASReportPage: React.FC = () => {
                       {invoice.code}
                     </TableCell>
                     <TableCell>{invoice.create_at?.toString()}</TableCell>
-                    <TableCell>{invoice.contact}</TableCell>
+                    <TableCell>{invoice.by_id.company_name}</TableCell>
                     <TableCell align="right">{formatNumber(invoice.cost)}</TableCell>
                     <TableCell align="right">{formatNumber(calculateGST(invoice.cost))}</TableCell>
                   </TableRow>
@@ -351,7 +353,7 @@ const BASReportPage: React.FC = () => {
                       {invoice.code}
                     </TableCell>
                     <TableCell>{invoice.create_at?.toString()}</TableCell>
-                    <TableCell>{invoice.contact}</TableCell>
+                    <TableCell>{invoice.by_id.company_name}</TableCell>
                     <TableCell align="right">{formatNumber(invoice.cost)}</TableCell>
                     <TableCell align="right">{formatNumber(calculateGST(invoice.cost))}</TableCell>
                     {/* Display other contractor details if available in your 'invoices' table or fetched from 'jobby' */}

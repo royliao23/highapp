@@ -92,6 +92,26 @@ export interface Invoice {
   outstanding?: number;
 }
 
+export interface InvoiceDeep {
+  code: number;
+  po_id?: number;
+  job_id: number;
+  by_id: Contractor;
+  project_id: number;
+  invoice_id?: number;
+  cost: number;
+  ref: string;
+  pay?: Pay[];
+  paid?: number;
+  contact: string;
+  create_at: Date;
+  updated_at: Date;
+  due_at: Date;
+  description?: string;
+  note?: string;
+  outstanding?: number;
+}
+
 export interface AgeInvoice  {
   totalPaid: number;
   amountDue: number;
