@@ -60,6 +60,18 @@ export interface Purchase {
   invoice?:InvoiceShort[]
 }
 
+export interface Contractor {
+  code: number;
+  contact_person: string;
+  company_name: string;
+  phone_number: string;
+  email: string;
+  bsb: string;
+  account_no: string;
+  account_name: string;
+  address: string;
+}
+
 export interface Invoice {
   code: number;
   po_id?: number;
@@ -79,17 +91,7 @@ export interface Invoice {
   note?: string;
   outstanding?: number;
 }
-export interface Contractor {
-  code: number;
-  contact_person: string;
-  company_name: string;
-  phone_number: string;
-  email: string;
-  bsb: string;
-  account_no: string;
-  account_name: string;
-  address: string;
-}
+
 export interface AgeInvoice  {
   totalPaid: number;
   amountDue: number;

@@ -59,11 +59,23 @@ function a11yProps(index: number) {
 }
 
 const BASReportPage: React.FC = () => {
-  const [reportPeriod, setReportPeriod] = useState<'quarterly' | 'half-yearly' | 'annually'>('quarterly');
+  const [reportPeriod, setReportPeriod] = useState<'' | 'quarterly' | 'half-yearly' | 'annually'>('');
   const currentYear = new Date().getFullYear();
-  const financialYearStart = new Date(currentYear - 1, 6, 1); // July 1st of the previous year
-  const financialYearEnd = new Date(currentYear, 6, 0);   // June 30th of the current year
+  let financialYearStartYear = currentYear;
+  let financialYearEndYear = currentYear + 1;
 
+  // If the current month is before July, the current financial year started in the previous year
+  const currentMonth = new Date().getMonth(); // 0-indexed (0 for January, 6 for July)
+  if (currentMonth < 6) {
+    financialYearStartYear = currentYear - 1;
+    financialYearEndYear = currentYear;
+  }
+
+  const financialYearStart = new Date(financialYearStartYear, 6, 1); // July 1st
+  const financialYearEnd = new Date(financialYearEndYear, 5, 30);   // June 30th
+
+//   const [startDate, setStartDate] = useState<Date | null>(financialYearStart);
+//   const [endDate, setEndDate] = useState<Date | null>(financialYearEnd);
   const [startDate, setStartDate] = useState<Date | null>();
   const [endDate, setEndDate] = useState<Date | null>();
   const [invoices, setInvoices] = useState<Invoice[]>([]);
@@ -75,59 +87,59 @@ const BASReportPage: React.FC = () => {
     setReportType(newValue);
   };
 
-//   const handlePeriodChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-//     setReportPeriod(event.target.value as 'quarterly' | 'half-yearly' | 'annually');
-//     // Reset dates when period changes
-//     setStartDate(null);
-//     setEndDate(null);
-//   };
+  const handlePeriodChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    setReportPeriod(event.target.value as 'quarterly' | 'half-yearly' | 'annually');
+    // Reset dates when period changes
+    setStartDate(null);
+    setEndDate(null);
+  };
 
-//   const handleStartDateChange = (date: Date | null) => {
-//     setStartDate(date);
-//   };
+  const handleStartDateChange = (date: Date | null) => {
+    setStartDate(date);
+  };
 
-//   const handleEndDateChange = (date: Date | null) => {
-//     setEndDate(date);
-//   };
+  const handleEndDateChange = (date: Date | null) => {
+    setEndDate(date);
+  };
 
   const generateDateRange = (period: 'quarterly' | 'half-yearly' | 'annually') => {
     const today = new Date();
     const year = today.getFullYear();
     const month = today.getMonth();
 
-    // switch (period) {
-    //   case 'quarterly':
-    //     // Logic to set default quarterly ranges (e.g., based on current month)
-    //     if (month >= 0 && month <= 2) {
-    //       setStartDate(new Date(year, 0, 1));
-    //       setEndDate(new Date(year, 3, 0));
-    //     } else if (month >= 3 && month <= 5) {
-    //       setStartDate(new Date(year, 3, 1));
-    //       setEndDate(new Date(year, 6, 0));
-    //     } else if (month >= 6 && month <= 8) {
-    //       setStartDate(new Date(year, 6, 1));
-    //       setEndDate(new Date(year, 9, 0));
-    //     } else {
-    //       setStartDate(new Date(year, 9, 1));
-    //       setEndDate(new Date(year, 12, 0));
-    //     }
-    //     break;
-    //   case 'half-yearly':
-    //     if (month >= 0 && month <= 5) {
-    //       setStartDate(new Date(year, 0, 1));
-    //       setEndDate(new Date(year, 6, 0));
-    //     } else {
-    //       setStartDate(new Date(year, 6, 1));
-    //       setEndDate(new Date(year + 1, 0, 0)); // End of December
-    //     }
-    //     break;
-    //   case 'annually':
-    //     setStartDate(new Date(year, 0, 1));
-    //     setEndDate(new Date(year + 1, 0, 0)); // End of December
-    //     break;
-    //   default:
-    //     break;
-    // }
+    switch (period) {
+      case 'quarterly':
+        // Logic to set default quarterly ranges (e.g., based on current month)
+        if (month >= 0 && month <= 2) {
+          setStartDate(new Date(year, 0, 1));
+          setEndDate(new Date(year, 3, 0));
+        } else if (month >= 3 && month <= 5) {
+          setStartDate(new Date(year, 3, 1));
+          setEndDate(new Date(year, 6, 0));
+        } else if (month >= 6 && month <= 8) {
+          setStartDate(new Date(year, 6, 1));
+          setEndDate(new Date(year, 9, 0));
+        } else {
+          setStartDate(new Date(year, 9, 1));
+          setEndDate(new Date(year, 12, 0));
+        }
+        break;
+      case 'half-yearly':
+        if (month >= 0 && month <= 5) {
+          setStartDate(new Date(year, 0, 1));
+          setEndDate(new Date(year, 6, 0));
+        } else {
+          setStartDate(new Date(year, 6, 1));
+          setEndDate(new Date(year + 1, 0, 0)); // End of December
+        }
+        break;
+      case 'annually':
+        setStartDate(new Date(year, 0, 1));
+        setEndDate(new Date(year + 1, 0, 0)); // End of December
+        break;
+      default:
+        break;
+    }
   };
 
   const fetchData = async () => {
@@ -170,7 +182,7 @@ const BASReportPage: React.FC = () => {
     if (reportType === 0) {
       // Generate GST ATO export data (likely a CSV format)
       const gstData = invoices.map(invoice => ({
-        invoiceId: invoice.invoice_id,
+        invoiceId: invoice.code,
         date: invoice.create_at.toString(),
         supplier: invoice.contact,
         grossAmount: formatNumber(invoice.cost),
@@ -180,7 +192,7 @@ const BASReportPage: React.FC = () => {
     } else {
       // Generate TPAR ATO export data (needs specific ATO format - likely CSV)
       const tparData = invoices.map(invoice => ({
-        invoiceId: invoice.invoice_id,
+        invoiceId: invoice.code,
         date: invoice.create_at.toString(),
         contractorABN: 'TODO', // You'll need to fetch contractor ABN
         contractorName: invoice.contact,
@@ -248,13 +260,13 @@ const BASReportPage: React.FC = () => {
     <Box sx={{ p: 3 }}>
       <h2>Business Activity Statement (BAS) Report</h2>
 
-      {/* <FormControl component="fieldset" sx={{ mb: 2 }}>
+      <FormControl component="fieldset" sx={{ mb: 2 }}>
         <RadioGroup row aria-label="report-period" name="report-period" value={reportPeriod} onChange={handlePeriodChange}>
           <FormControlLabel value="quarterly" control={<Radio />} label="Quarterly" />
           <FormControlLabel value="half-yearly" control={<Radio />} label="Half-Yearly" />
           <FormControlLabel value="annually" control={<Radio />} label="Annually" />
         </RadioGroup>
-      </FormControl> */}
+      </FormControl>
 
       <Box sx={{ display: 'flex', gap: 2, mb: 2 }}>
         <TextField
