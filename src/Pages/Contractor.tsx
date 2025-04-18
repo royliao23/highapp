@@ -4,18 +4,8 @@ import styled from "styled-components";
 import SearchBox from "../components/SearchBox";
 import Modal from "../components/Modal";
 import { PaginationContainer } from "../StyledComponent";
-// Define the Contractor type based on the table schema
-interface Contractor {
-  code: number;
-  contact_person: string;
-  company_name: string;
-  phone_number: string;
-  email: string;
-  bsb: string;
-  account_no: string;
-  account_name: string;
-  address: string;
-}
+import { Contractor } from "../models";
+
 
 // Styled Components for Styling
 const Container = styled.div`
@@ -122,6 +112,8 @@ const ContractorComp: React.FC = () => {
     account_no: "",
     account_name: "",
     address: "",
+    abn: "",
+    gst_registered: false,
   });
   const [editingCode, setEditingCode] = useState<number | null>(null); // Track which contractor is being edited
   const [isMobileView, setIsMobileView] = useState<boolean>(window.innerWidth < 1000);
@@ -186,6 +178,8 @@ const ContractorComp: React.FC = () => {
       account_no: "",
       account_name: "",
       address: "",
+      abn: "",
+      gst_registered: true,
     });
     setEditingCode(null);
     setIsModalOpen(false);
@@ -232,6 +226,8 @@ const ContractorComp: React.FC = () => {
       account_no: contractor.account_no,
       account_name: contractor.account_name,
       address: contractor.address,
+      abn: contractor.abn,
+      gst_registered: contractor.gst_registered,
     });
   };
 
@@ -265,7 +261,13 @@ const ContractorComp: React.FC = () => {
   const handleInputChange = (e: ChangeEvent<HTMLInputElement>) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
-
+  const handleContractorCheckBoxChange = (event:any) => {
+    const { name, type, checked, value } = event.target;
+    setFormData(prevState => ({
+      ...prevState,
+      [name]: type === 'checkbox' ? checked : value,
+    }));
+  };
   return (
     <Container>
       <Title>Contractor Management</Title>
@@ -446,6 +448,33 @@ const ContractorComp: React.FC = () => {
                 placeholder="Address"
                 autoComplete="off"
                 required
+              />
+            </div>
+
+            <div>
+              <label htmlFor="abn">ABN</label>
+              <Input
+                id="abn"
+                type="text"
+                name="abn"
+                value={formData.abn}
+                onChange={handleInputChange}
+                placeholder="ABN"
+                autoComplete="off"
+                required
+              />
+            </div>
+
+            <div>
+              <label htmlFor="gst_registered">GST Registered</label>
+              <Input
+                id="gst_registered"
+                type="checkbox"
+                name="gst_registered"
+                checked={formData.gst_registered} 
+                onChange={handleContractorCheckBoxChange}
+                placeholder="GST Registered"
+                autoComplete="off"
               />
             </div>
 

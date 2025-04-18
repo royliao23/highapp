@@ -180,6 +180,8 @@ const PurchaseComp: React.FC = () => {
     account_no: "",
     account_name: "",
     address: "",
+    abn: "",
+    gst_registered: false,
   });
   const [editingCode, setEditingCode] = useState<number | null>(null); // Track which purchase is being edited
   const [contractoreditingCode, setContractorEditingCode] = useState<number | null>(null); // Track which purchase is being edited
@@ -437,6 +439,8 @@ const PurchaseComp: React.FC = () => {
       account_no: "",
       account_name: "",
       address: "",
+      abn: "",
+      gst_registered: true,
     });
     setContractorEditingCode(null);
     setIsContractorModalOpen(false);
@@ -487,7 +491,7 @@ const PurchaseComp: React.FC = () => {
         // Update an existing contractor
         const { error } = await supabase
           .from("contractor")
-          .update(formContractorData)
+          .update([formContractorData])
           .eq("code", editingCode);
 
         if (error) throw error;
@@ -676,6 +680,14 @@ const PurchaseComp: React.FC = () => {
  
   const { handleViewPurchase } = useNavigationService();
   const { handleViewInvoice } = useNavigationService();
+
+  const handleContractorCheckBoxChange = (event:any) => {
+    const { name, type, checked, value } = event.target;
+    setFormContractorData(prevState => ({
+      ...prevState,
+      [name]: type === 'checkbox' ? checked : value,
+    }));
+  };
   return (
     <Container>
       <Title>Purchase Order Management</Title>
@@ -1052,6 +1064,32 @@ const PurchaseComp: React.FC = () => {
               required
             />
           </div>
+          <div>
+              <label htmlFor="abn">ABN</label>
+              <Input
+                id="abn"
+                type="text"
+                name="abn"
+                value={formContractorData.abn}
+                onChange={handleContractorInputChange}
+                placeholder="ABN"
+                autoComplete="off"
+                required
+              />
+            </div>
+
+            <div>
+              <label htmlFor="gst_registered">GST Registered</label>
+              <Input
+                id="gst_registered"
+                type="checkbox"
+                name="gst_registered"
+                checked={formContractorData.gst_registered} 
+                onChange={handleContractorCheckBoxChange}
+                placeholder="GST Registered"
+                autoComplete="off"
+              />
+            </div>
 
           <Button type="submit">Save Contractor</Button>
         </Form>

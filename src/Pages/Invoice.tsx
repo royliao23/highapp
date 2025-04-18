@@ -200,6 +200,8 @@ const InvoiceComp: React.FC = () => {
     account_no: "",
     account_name: "",
     address: "",
+    abn: "",
+    gst_registered: false,
   });
   const [editingCode, setEditingCode] = useState<number | null>(null); // Track which Invoice is being edited
   const [contractoreditingCode, setContractorEditingCode] = useState<number | null>(null); // Track which Invoice is being edited
@@ -468,6 +470,8 @@ const InvoiceComp: React.FC = () => {
       account_no: "",
       account_name: "",
       address: "",
+      abn: "",
+      gst_registered: true,
     });
     setContractorEditingCode(null);
     setIsContractorModalOpen(false);

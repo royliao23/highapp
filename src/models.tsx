@@ -70,7 +70,10 @@ export interface Contractor {
   account_no: string;
   account_name: string;
   address: string;
+  abn: string;
+  gst_registered: boolean;
 }
+
 
 export interface Invoice {
   code: number;
