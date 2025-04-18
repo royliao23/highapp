@@ -518,24 +518,8 @@ const InvoiceComp: React.FC = () => {
     e.preventDefault();
 
     try {
-      if (editingCode !== null) {
-        // Update an existing contractor
-        const { error } = await supabase
-          .from("contractor")
-          .update(formContractorData)
-          .eq("code", editingCode);
-
-        if (error) throw error;
-
-        // Clear editing state after updating
-        setContractorEditingCode(null);
-      } else {
-        // Add a new contractor
         const { error } = await supabase.from("contractor").insert([formContractorData]);
-
         if (error) throw error;
-      }
-
       // Refresh the list and reset the form
       fetchContractors();
       handleContractorCloseModal();
@@ -736,6 +720,14 @@ const exportToExcel = () => {
     const day = String(date.getDate()).padStart(2, '0');
     return `${year}-${month}-${day}`; 
 };
+
+  const handleContractorCheckBoxChange = (event:any) => {
+    const { name, type, checked, value } = event.target;
+    setFormContractorData(prevState => ({
+      ...prevState,
+      [name]: type === 'checkbox' ? checked : value,
+    }));
+  };
 
   return (
     <Container>
@@ -1173,6 +1165,33 @@ const exportToExcel = () => {
               required
             />
           </div>
+
+          <div>
+              <label htmlFor="abn">ABN</label>
+              <Input
+                id="abn"
+                type="text"
+                name="abn"
+                value={formContractorData.abn}
+                onChange={handleContractorInputChange}
+                placeholder="ABN"
+                autoComplete="off"
+                required
+              />
+            </div>
+
+            <div>
+              <label htmlFor="gst_registered">GST Registered</label>
+              <Input
+                id="gst_registered"
+                type="checkbox"
+                name="gst_registered"
+                checked={formContractorData.gst_registered} 
+                onChange={handleContractorCheckBoxChange}
+                placeholder="GST Registered"
+                autoComplete="off"
+              />
+            </div>
 
           <Button type="submit">Save Contractor</Button>
         </Form>

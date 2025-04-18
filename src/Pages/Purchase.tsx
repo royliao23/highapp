@@ -487,23 +487,8 @@ const PurchaseComp: React.FC = () => {
     e.preventDefault();
 
     try {
-      if (editingCode !== null) {
-        // Update an existing contractor
-        const { error } = await supabase
-          .from("contractor")
-          .update([formContractorData])
-          .eq("code", editingCode);
-
-        if (error) throw error;
-
-        // Clear editing state after updating
-        setContractorEditingCode(null);
-      } else {
-        // Add a new contractor
-        const { error } = await supabase.from("contractor").insert([formContractorData]);
-
-        if (error) throw error;
-      }
+      const { error } = await supabase.from("contractor").insert([formContractorData]);
+      if (error) throw error;
 
       // Refresh the list and reset the form
       fetchContractors();
