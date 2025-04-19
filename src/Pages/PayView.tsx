@@ -1,7 +1,7 @@
 import { useLocation, useNavigate } from 'react-router-dom';
 import emailjs from '@emailjs/browser';
 import { styled } from '@mui/material/styles';
-import { Pay } from '../models';
+import { Pay, Contractor } from '../models';
 import {
   Typography,
   Box,
@@ -32,19 +32,6 @@ interface Project {
     description: string;
   }
   
-  interface Contractor {
-    code: number;
-    contact_person: string;
-    company_name: string;
-    phone_number: string;
-    email: string;
-    bsb: string;
-    account_no: string;
-    account_name: string;
-    address: string;
-  }
-
-
 export interface Option {
   value: string;
   label: string;
@@ -83,6 +70,8 @@ function PayView() {
         account_no: "",
         account_name: "",
         address: "",
+        abn: "",
+        gst_registered: false,
     });
   const location = useLocation();
   const { pay } = location.state as { pay: Pay };
@@ -107,7 +96,7 @@ function PayView() {
   };
 
   const fetchContractors = async () => {
-    const contractorData = await fetchContractorDetails(pay.jobby.by_id);
+    const contractorData = await fetchContractorDetails(pay.jobby.by_id.code);
     if (contractorData) setContractorDetails(contractorData);
   };
 
@@ -138,7 +127,9 @@ function PayView() {
             <Box>
                 <Typography variant="body2">{ contractorDetails.company_name}</Typography>
                 <Typography variant="body2">Account:{ contractorDetails.account_no}</Typography>
-                <Typography variant="body2">{ contractorDetails.address}</Typography>
+                <Typography variant="body2">ABN:{ contractorDetails.abn}</Typography>
+                <Typography variant="body2">GST Registered:{ contractorDetails.gst_registered?"Yes":"No"}</Typography>
+                <Typography variant="body2">Address:{ contractorDetails.address}</Typography>
                 <Typography variant="body2">Contact:{ contractorDetails.contact_person}</Typography>
                 <Typography variant="body2">Phone: { contractorDetails.phone_number}</Typography>
             </Box>
@@ -177,7 +168,7 @@ function PayView() {
         </TableContainer>
 
         <Box mt={4} textAlign="right">
-          <Typography variant="body1">GST: ${(pay.amount/10).toFixed(2)}</Typography>
+          <Typography variant="body1">GST: ${contractorDetails.gst_registered?(pay.amount/10).toFixed(2):0}</Typography>
           <Typography variant="body1">
             Together with GST: ${pay.amount.toFixed(2)}
           </Typography>

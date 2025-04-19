@@ -44,7 +44,7 @@ export const fetchContractorDetails = async (contractorId: number) => {
   try {
     const { data, error } = await supabase.from("contractor").select("*").eq("code", contractorId);
     if (error) throw error;
-
+    console.log("contractor data:", data);
     return data.length > 0
       ? {
           code: data[0].code,
@@ -56,6 +56,8 @@ export const fetchContractorDetails = async (contractorId: number) => {
           account_no: data[0].account_no,
           account_name: data[0].account_name,
           address: data[0].address,
+          abn: data[0].abn,
+          gst_registered: data[0].gst_registered,
         }
       : null;
   } catch (error) {

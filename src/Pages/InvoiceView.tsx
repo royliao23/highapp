@@ -1,6 +1,7 @@
 import { useLocation, useNavigate } from 'react-router-dom';
 import emailjs from '@emailjs/browser';
 import { styled } from '@mui/material/styles';
+import { Contractor } from '../models';
 
 import {
   Typography,
@@ -33,17 +34,17 @@ interface Project {
     description: string;
   }
   
-  interface Contractor {
-    code: number;
-    contact_person: string;
-    company_name: string;
-    phone_number: string;
-    email: string;
-    bsb: string;
-    account_no: string;
-    account_name: string;
-    address: string;
-  }
+  // interface Contractor {
+  //   code: number;
+  //   contact_person: string;
+  //   company_name: string;
+  //   phone_number: string;
+  //   email: string;
+  //   bsb: string;
+  //   account_no: string;
+  //   account_name: string;
+  //   address: string;
+  // }
 interface Invoice {
     code: number;
     po_id?: number;
@@ -59,6 +60,8 @@ interface Invoice {
     due_at: Date;
     pay: Pay[];
     paid: number;
+    abn?: string;
+    gst_registered?: boolean;
   }
 
 export interface Option {
@@ -99,6 +102,8 @@ function InvoiceView() {
         account_no: "",
         account_name: "",
         address: "",
+        abn: "",
+        gst_registered: true,
     });
   const location = useLocation();
   console.log("invoice state:", location.state);
@@ -154,6 +159,8 @@ function InvoiceView() {
         <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 4 }}>
             <Box>
                 <Typography variant="body2">{ contractorDetails.company_name}</Typography>
+                <Typography variant="body2">ABN:{ contractorDetails.abn}</Typography>
+                <Typography variant="body2">GST Registered:{ contractorDetails.gst_registered?"Yes":"No"}</Typography>
                 <Typography variant="body2">Account:{ contractorDetails.account_no}</Typography>
                 <Typography variant="body2">{ contractorDetails.address}</Typography>
                 <Typography variant="body2">Contact:{ contractorDetails.contact_person}</Typography>
@@ -190,9 +197,8 @@ function InvoiceView() {
             </TableBody>
           </Table>
         </TableContainer>
-
         <Box mt={4} textAlign="right">
-          <Typography variant="body1">GST: ${(invoice.cost/10).toFixed(2)}</Typography>
+          <Typography variant="body1">GST: ${contractorDetails.gst_registered?(invoice.cost/10).toFixed(2):0}</Typography>
           <Typography variant="body1">
             Together with GST: ${invoice.cost.toFixed(2)}
           </Typography>

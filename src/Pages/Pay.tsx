@@ -191,7 +191,7 @@ const PayComp: React.FC = () => {
     try {
         const { data, error } = await supabase
         .from("pay")
-        .select("*, jobby(*)") // Fetch all columns from pay and related invoice details
+        .select("*, jobby(*,by_id: contractor (*))") // Fetch all columns from pay and related invoice details
         .order("code", { ascending: false });
       if (error) throw error;
       setPays(data || []);
@@ -501,6 +501,7 @@ const PayComp: React.FC = () => {
             <tr>
               <Th>Pay #</Th>
               <Th>Invoice ID</Th>
+              <Th>Supplier Name</Th>
               <Th>Pay Via</Th>
               <Th>Supplier Invoice</Th>
               <Th>Price</Th>
@@ -524,6 +525,7 @@ const PayComp: React.FC = () => {
                                   console.error("Error fetching purchase details:", error);
                                   // Handle the error (e.g., show an error message)
                                 }}} className="text-blue-500">{Pay.invoice_id}</Td>
+                <Td>{Pay.jobby.by_id.company_name}</Td>
                 <Td>{Pay.pay_via}</Td>
                 <Td>{Pay.supply_invoice}</Td>
                 <Td>{(Pay.amount)?.toFixed(2)}</Td>
