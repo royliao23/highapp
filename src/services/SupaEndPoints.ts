@@ -182,7 +182,9 @@ export const fetchInvoicesForPeriodDeep = async (startDate: Date, endDate: Date)
           bsb,
           account_no,
           account_name,
-          address
+          address, 
+          abn,
+          gst_registered
         )
       `)
       .gte('create_at', startDate.toISOString())

@@ -172,6 +172,11 @@ const BASReportPage: React.FC = () => {
   const calculateGST = (cost: number) => {
     return cost / 11; // Assuming cost includes GST
   };
+  const calculateGST2 = (cost: number, gst_registered:boolean) => {
+    if (gst_registered)
+      return cost / 11; 
+    else return 0; // Assuming cost includes GST
+  };
 
   const formatNumber = (num: number | undefined) => {
     if (num === undefined) return '';
@@ -186,7 +191,7 @@ const BASReportPage: React.FC = () => {
         date: invoice.create_at.toString(),
         supplier: invoice.by_id.company_name,
         grossAmount: formatNumber(invoice.cost),
-        gstAmount: formatNumber(calculateGST(invoice.cost)),
+        gstAmount: formatNumber(calculateGST2(invoice.cost, invoice.by_id.gst_registered)),
       }));
       downloadCSV(gstData, 'gst_report_ato.csv');
     } else {
@@ -197,7 +202,7 @@ const BASReportPage: React.FC = () => {
         contractorABN: 'TODO', // You'll need to fetch contractor ABN
         contractorName: invoice.by_id.company_name,
         grossAmountPaid: formatNumber(invoice.cost),
-        gstPaid: formatNumber(calculateGST(invoice.cost)), // Assuming cost includes GST
+        gstPaid: formatNumber(calculateGST2(invoice.cost, invoice.by_id.gst_registered)), // Assuming cost includes GST
       }));
       downloadCSV(tparData, 'tpar_report_ato.csv');
     }
@@ -211,7 +216,7 @@ const BASReportPage: React.FC = () => {
         invoiceId: invoice.code,
         supplier: invoice.by_id.company_name,
         total: formatNumber(invoice.cost),
-        gst: formatNumber(calculateGST(invoice.cost)),
+        gst: formatNumber(calculateGST2(invoice.cost, invoice.by_id.gst_registered)),
         // Add other MYOB specific fields
       }));
       downloadCSV(gstData, 'gst_report_myob.csv');
@@ -222,7 +227,7 @@ const BASReportPage: React.FC = () => {
         invoiceId: invoice.code,
         contractor: invoice.by_id.company_name,
         amount: formatNumber(invoice.cost),
-        gst: formatNumber(calculateGST(invoice.cost)),
+        gst: formatNumber(calculateGST2(invoice.cost, invoice.by_id.gst_registered)),
         // Add other MYOB specific fields
       }));
       downloadCSV(tparData, 'tpar_report_myob.csv');
@@ -324,7 +329,7 @@ const BASReportPage: React.FC = () => {
                     <TableCell>{invoice.create_at?.toString()}</TableCell>
                     <TableCell>{invoice.by_id.company_name}</TableCell>
                     <TableCell align="right">{formatNumber(invoice.cost)}</TableCell>
-                    <TableCell align="right">{formatNumber(calculateGST(invoice.cost))}</TableCell>
+                    <TableCell align="right">{formatNumber(calculateGST2(invoice.cost, invoice.by_id.gst_registered))}</TableCell>
                   </TableRow>
                 ))}
               </TableBody>
@@ -355,7 +360,7 @@ const BASReportPage: React.FC = () => {
                     <TableCell>{invoice.create_at?.toString()}</TableCell>
                     <TableCell>{invoice.by_id.company_name}</TableCell>
                     <TableCell align="right">{formatNumber(invoice.cost)}</TableCell>
-                    <TableCell align="right">{formatNumber(calculateGST(invoice.cost))}</TableCell>
+                    <TableCell align="right">{formatNumber(calculateGST2(invoice.cost, invoice.by_id.gst_registered))}</TableCell>
                     {/* Display other contractor details if available in your 'invoices' table or fetched from 'jobby' */}
                   </TableRow>
                 ))}
