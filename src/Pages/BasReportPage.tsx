@@ -206,7 +206,7 @@ const BASReportPage: React.FC = () => {
       const tparData = invoices.map(invoice => ({
         invoiceId: invoice.code,
         date: invoice.create_at.toString(),
-        contractorABN: 'TODO', // You'll need to fetch contractor ABN
+        contractorABN: invoice.by_id.abn, // You'll need to fetch contractor ABN
         contractorName: invoice.by_id.company_name,
         grossAmountPaid: formatNumber(invoice.cost),
         gstPaid: formatNumber(calculateGST2(invoice.cost, invoice.by_id.gst_registered)), // Assuming cost includes GST
