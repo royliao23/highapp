@@ -17,6 +17,11 @@ import {
   Tab,
   CircularProgress,
   Alert,
+  useMediaQuery,
+  useTheme,
+  Paper,
+  Typography,
+  TableContainer,
 } from '@mui/material';
 import { DatePicker, LocalizationProvider } from '@mui/x-date-pickers';
 import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns';
@@ -59,6 +64,8 @@ function a11yProps(index: number) {
 }
 
 const BASReportPage: React.FC = () => {
+  const theme = useTheme();
+  const isSmallScreen = useMediaQuery(theme.breakpoints.down('sm'));
   const [reportPeriod, setReportPeriod] = useState<'' | 'quarterly' | 'half-yearly' | 'annually'>('');
   const currentYear = new Date().getFullYear();
   let financialYearStartYear = currentYear;
@@ -309,66 +316,75 @@ const BASReportPage: React.FC = () => {
         {error && <Alert severity="error">{error}</Alert>}
 
         <TabPanel value={reportType} index={0}>
-          {invoices.length > 0 && (
-            <Table sx={{ minWidth: 650 }} aria-label="gst report preview">
-              <TableHead>
-                <TableRow>
-                  <TableCell>Invoice ID</TableCell>
-                  <TableCell>Date</TableCell>
-                  <TableCell>Supplier</TableCell>
-                  <TableCell align="right">Gross Amount</TableCell>
-                  <TableCell align="right">GST Amount</TableCell>
-                </TableRow>
-              </TableHead>
-              <TableBody>
+        {invoices.length > 0 && (
+          <>
+            {isSmallScreen ? (
+              <Box>
                 {invoices.map((invoice) => (
-                  <TableRow key={invoice.code}>
-                    <TableCell component="th" scope="row">
-                      {invoice.code}
-                    </TableCell>
-                    <TableCell>{invoice.create_at?.toString()}</TableCell>
-                    <TableCell>{invoice.by_id.company_name}</TableCell>
-                    <TableCell align="right">{formatNumber(invoice.cost)}</TableCell>
-                    <TableCell align="right">{formatNumber(calculateGST2(invoice.cost, invoice.by_id.gst_registered))}</TableCell>
-                  </TableRow>
+                  <Paper key={invoice.code} sx={{ p: 2, mb: 2 }}>
+                    <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
+                      <Box>
+                        <Typography variant="subtitle2">{invoice.code}</Typography>
+                        <Typography variant="caption">{invoice.create_at?.toString()}</Typography>
+                      </Box>
+                      <Box textAlign="right">
+                        <Typography variant="body2">{formatNumber(invoice.cost)}</Typography>
+                        <Typography variant="caption">GST: {formatNumber(calculateGST2(invoice.cost, invoice.by_id.gst_registered))}</Typography>
+                      </Box>
+                    </Box>
+                    <Typography variant="body2" sx={{ mt: 1 }}>{invoice.by_id.company_name}</Typography>
+                  </Paper>
                 ))}
-              </TableBody>
-            </Table>
-          )}
-          {invoices.length === 0 && !loading && !error && <Alert severity="info">No invoices found for the selected period.</Alert>}
-        </TabPanel>
-
-        <TabPanel value={reportType} index={1}>
-          {invoices.length > 0 && (
-            <Table sx={{ minWidth: 650 }} aria-label="tpar report preview">
-              <TableHead>
-                <TableRow>
-                  <TableCell>Invoice ID</TableCell>
-                  <TableCell>Date</TableCell>
-                  <TableCell>Contractor</TableCell>
-                  <TableCell align="right">Gross Amount Paid</TableCell>
-                  <TableCell align="right">GST Paid (if any)</TableCell>
-                  {/* You might need to display other contractor details here */}
-                </TableRow>
-              </TableHead>
-              <TableBody>
-                {invoices.map((invoice) => (
-                  <TableRow key={invoice.code}>
-                    <TableCell component="th" scope="row">
-                      {invoice.code}
-                    </TableCell>
-                    <TableCell>{invoice.create_at?.toString()}</TableCell>
-                    <TableCell>{invoice.by_id.company_name}</TableCell>
-                    <TableCell align="right">{formatNumber(invoice.cost)}</TableCell>
-                    <TableCell align="right">{formatNumber(calculateGST2(invoice.cost, invoice.by_id.gst_registered))}</TableCell>
-                    {/* Display other contractor details if available in your 'invoices' table or fetched from 'jobby' */}
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          )}
-          {invoices.length === 0 && !loading && !error && <Alert severity="info">No invoices found for the selected period.</Alert>}
-        </TabPanel>
+              </Box>
+            ) : (
+              <TableContainer component={Paper} sx={{ maxWidth: '100%', overflowX: 'auto' }}>
+                <Table sx={{ 
+                  minWidth: 650,
+                  '& .MuiTableCell-root': {
+                    fontSize: { xs: '0.75rem', sm: '0.875rem' },
+                    padding: { xs: '8px', sm: '16px' }
+                  }
+                }}>
+                  <TableHead>
+                    <TableRow>
+                      <TableCell>Invoice ID</TableCell>
+                      <TableCell>Date</TableCell>
+                      <TableCell sx={{ maxWidth: 100 }}>Supplier</TableCell>
+                      <TableCell align="right">Gross Amount</TableCell>
+                      <TableCell align="right">GST Amount</TableCell>
+                    </TableRow>
+                  </TableHead>
+                  <TableBody>
+                    {invoices.map((invoice) => (
+                      <TableRow key={invoice.code}>
+                        <TableCell component="th" scope="row" sx={{ whiteSpace: 'nowrap' }}>
+                          {invoice.code}
+                        </TableCell>
+                        <TableCell sx={{ whiteSpace: 'nowrap' }}>
+                          {invoice.create_at?.toString()}
+                        </TableCell>
+                        <TableCell sx={{ 
+                          maxWidth: 100,
+                          whiteSpace: 'nowrap',
+                          overflow: 'hidden',
+                          textOverflow: 'ellipsis'
+                        }}>
+                          {invoice.by_id.company_name}
+                        </TableCell>
+                        <TableCell align="right">{formatNumber(invoice.cost)}</TableCell>
+                        <TableCell align="right">
+                          {formatNumber(calculateGST2(invoice.cost, invoice.by_id.gst_registered))}
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </TableContainer>
+            )}
+          </>
+        )}
+        {invoices.length === 0 && !loading && !error && <Alert severity="info">No invoices found.</Alert>}
+      </TabPanel>
 
         <Box sx={{ mt: 3 }}>
           <Button variant="contained" color="primary" onClick={handleExportATO} disabled={invoices.length === 0}>
