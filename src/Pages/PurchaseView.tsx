@@ -110,8 +110,34 @@ function PurchaseView() {
 
   const dueDate = new Date(purchase.due_at);
   const createDate = new Date(purchase.create_at);
-  const handleEmail = () => {
-    // ... (Your email logic)
+  const handleEmail = async () => {
+    try {
+      // Prepare email parameters
+      const templateParams = {
+        to_name: contractorDetails.contact_person,
+        from_name: "Green Real Pty Ltd",
+        company_name: contractorDetails.company_name,
+        invoice_number: purchase.code,
+        amount: purchase.cost.toFixed(2),
+        gst: (purchase.cost/11).toFixed(2),
+        description: "Job:"+jobDetails.name+",  "+ jobDetails.description,
+        project_name: projectDetails.project_name,
+        to_email:"yunzhi.liao@me.com",//contractorDetails.email,
+      };
+  
+      // Send email using EmailJS
+      await emailjs.send(
+        'service_685ie7g',      // EmailJS service ID
+        'template_pvqd7ih',     // EmailJS template ID
+        templateParams,
+        '-IDuhdkou_DfXqc5d'          // EmailJS user ID
+      );
+  
+      alert('Email sent successfully!');
+    } catch (error) {
+      console.error('Failed to send email:', error);
+      alert('Failed to send email. Please try again.');
+    }
   };
 
   const fetchJobs = async () => {
@@ -187,7 +213,7 @@ function PurchaseView() {
         </TableContainer>
 
         <Box mt={4} textAlign="right">
-          <Typography variant="body1">GST: ${(purchase.cost/10).toFixed(2)}</Typography>
+          <Typography variant="body1">GST: ${(purchase.cost/11).toFixed(2)}</Typography>
           <Typography variant="body1" fontWeight="bold">
             Together with GST: ${(purchase.cost).toFixed(2)}
           </Typography>

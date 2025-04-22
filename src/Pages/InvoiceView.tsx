@@ -34,17 +34,6 @@ interface Project {
     description: string;
   }
   
-  // interface Contractor {
-  //   code: number;
-  //   contact_person: string;
-  //   company_name: string;
-  //   phone_number: string;
-  //   email: string;
-  //   bsb: string;
-  //   account_no: string;
-  //   account_name: string;
-  //   address: string;
-  // }
 interface Invoice {
     code: number;
     po_id?: number;
@@ -119,9 +108,6 @@ function InvoiceView() {
 
   const dueDate = new Date(invoice.due_at);
   const createDate = new Date(invoice.create_at);
-  const handleEmail = () => {
-    // ... (Your email logic)
-  };
 
   const fetchJobs = async () => {
     const jobData = await fetchJobDetails(invoice.job_id);
@@ -198,7 +184,7 @@ function InvoiceView() {
           </Table>
         </TableContainer>
         <Box mt={4} textAlign="right">
-          <Typography variant="body1">GST: ${contractorDetails.gst_registered?(invoice.cost/10).toFixed(2):0}</Typography>
+          <Typography variant="body1">GST: ${contractorDetails.gst_registered?(invoice.cost/11).toFixed(2):0}</Typography>
           <Typography variant="body1">
             Together with GST: ${invoice.cost.toFixed(2)}
           </Typography>
@@ -217,9 +203,9 @@ function InvoiceView() {
           <Button variant="contained" onClick={handlePrint}>
             Print
           </Button>
-          <Button variant="contained" onClick={handleEmail}>
+          {/* <Button variant="contained" onClick={handleEmail}>
             Email
-          </Button>
+          </Button> */}
           <Button variant="contained" onClick={() => navigate(-1)}>
             Back
           </Button>

@@ -86,8 +86,34 @@ function PayView() {
 
   const dueDate = new Date(pay.jobby.due_at);
   const createDate = new Date(pay.create_at);
-  const handleEmail = () => {
-    // ... (Your email logic)
+  const handleEmail = async () => {
+    try {
+      // Prepare email parameters
+      const templateParams = {
+        to_name: contractorDetails.contact_person,
+        from_name: "Green Real Pty Ltd",
+        company_name: contractorDetails.company_name,
+        invoice_number: pay.code,
+        amount: pay.amount.toFixed(2),
+        gst: (pay.amount/11).toFixed(2),
+        description: "Job:"+jobDetails.name+",  "+ jobDetails.description +". Your Ref:"+pay.jobby.ref +". Our ref:"+pay.code,
+        project_name: projectDetails.project_name,
+        to_email:"yunzhi.liao@me.com",//contractorDetails.email,
+      };
+  
+      // Send email using EmailJS
+      await emailjs.send(
+        'service_685ie7g',      // EmailJS service ID
+        'template_ygy5bra',     // EmailJS template ID
+        templateParams,
+        '-IDuhdkou_DfXqc5d'          // EmailJS user ID
+      );
+  
+      alert('Email sent successfully!');
+    } catch (error) {
+      console.error('Failed to send email:', error);
+      alert('Failed to send email. Please try again.');
+    }
   };
 
   const fetchJobs = async () => {
@@ -168,7 +194,7 @@ function PayView() {
         </TableContainer>
 
         <Box mt={4} textAlign="right">
-          <Typography variant="body1">GST: ${contractorDetails.gst_registered?(pay.amount/10).toFixed(2):0}</Typography>
+          <Typography variant="body1">GST: ${contractorDetails.gst_registered?(pay.amount/11).toFixed(2):0}</Typography>
           <Typography variant="body1">
             Together with GST: ${pay.amount.toFixed(2)}
           </Typography>
