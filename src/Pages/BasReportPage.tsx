@@ -25,7 +25,7 @@ import {
 } from '@mui/material';
 import { DatePicker, LocalizationProvider } from '@mui/x-date-pickers';
 import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns';
-import { enAU } from 'date-fns/locale'; 
+import { enAU } from 'date-fns/locale';
 import { InvoiceDeep } from '../models'; // Adjust the import based on your project structure
 
 
@@ -81,8 +81,8 @@ const BASReportPage: React.FC = () => {
   const financialYearStart = new Date(financialYearStartYear, 6, 1); // July 1st
   const financialYearEnd = new Date(financialYearEndYear, 5, 30);   // June 30th
 
-//   const [startDate, setStartDate] = useState<Date | null>(financialYearStart);
-//   const [endDate, setEndDate] = useState<Date | null>(financialYearEnd);
+  //   const [startDate, setStartDate] = useState<Date | null>(financialYearStart);
+  //   const [endDate, setEndDate] = useState<Date | null>(financialYearEnd);
   const [startDate, setStartDate] = useState<Date | null>();
   const [endDate, setEndDate] = useState<Date | null>();
   const [invoices, setInvoices] = useState<InvoiceDeep[]>([]);
@@ -151,7 +151,7 @@ const BASReportPage: React.FC = () => {
 
   const fetchData = async () => {
     if (!startDate || !endDate) {
-    //   setError('Please select a valid date range.');
+      //   setError('Please select a valid date range.');
       return;
     }
 
@@ -179,9 +179,9 @@ const BASReportPage: React.FC = () => {
   const calculateGST = (cost: number) => {
     return cost / 11; // Assuming cost includes GST
   };
-  const calculateGST2 = (cost: number, gst_registered:boolean) => {
+  const calculateGST2 = (cost: number, gst_registered: boolean) => {
     if (gst_registered)
-      return cost / 11; 
+      return cost / 11;
     else return 0; // Assuming cost includes GST
   };
 
@@ -305,17 +305,17 @@ const BASReportPage: React.FC = () => {
       </Box>
 
 
-        <Box sx={{ width: '100%', mb: 2 }}>
-          <Tabs value={reportType} onChange={handleChangeReportType} aria-label="report type tabs">
-            <Tab label="GST Report" {...a11yProps(0)} />
-            <Tab label="TPAR Report" {...a11yProps(1)} />
-          </Tabs>
-        </Box>
+      <Box sx={{ width: '100%', mb: 2 }}>
+        <Tabs value={reportType} onChange={handleChangeReportType} aria-label="report type tabs">
+          <Tab label="GST Report" {...a11yProps(0)} />
+          <Tab label="TPAR Report" {...a11yProps(1)} />
+        </Tabs>
+      </Box>
 
-        {loading && <CircularProgress />}
-        {error && <Alert severity="error">{error}</Alert>}
+      {loading && <CircularProgress />}
+      {error && <Alert severity="error">{error}</Alert>}
 
-        <TabPanel value={reportType} index={0}>
+      <TabPanel value={reportType} index={0}>
         {invoices.length > 0 && (
           <>
             {isSmallScreen ? (
@@ -338,7 +338,7 @@ const BASReportPage: React.FC = () => {
               </Box>
             ) : (
               <TableContainer component={Paper} sx={{ maxWidth: '100%', overflowX: 'auto' }}>
-                <Table sx={{ 
+                <Table sx={{
                   minWidth: 650,
                   '& .MuiTableCell-root': {
                     fontSize: { xs: '0.75rem', sm: '0.875rem' },
@@ -363,7 +363,7 @@ const BASReportPage: React.FC = () => {
                         <TableCell sx={{ whiteSpace: 'nowrap' }}>
                           {invoice.create_at?.toString()}
                         </TableCell>
-                        <TableCell sx={{ 
+                        <TableCell sx={{
                           maxWidth: 100,
                           whiteSpace: 'nowrap',
                           overflow: 'hidden',
@@ -385,16 +385,99 @@ const BASReportPage: React.FC = () => {
         )}
         {invoices.length === 0 && !loading && !error && <Alert severity="info">No invoices found.</Alert>}
       </TabPanel>
+      <TabPanel value={reportType} index={1}>
+        {invoices.length > 0 && (
+          <>
+            {isSmallScreen ? (
+              <Box>
+                {invoices.map((invoice) => (
+                  <Paper key={invoice.code} sx={{ p: 2, mb: 2 }}>
+                    <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
+                      <Box>
+                        <Typography variant="subtitle2">{invoice.code}</Typography>
+                        <Typography variant="caption">{invoice.create_at?.toString()}</Typography>
+                      </Box>
+                      <Box textAlign="right">
+                        <Typography variant="body2">{formatNumber(invoice.cost)}</Typography>
+                        <Typography variant="caption">
+                          GST: {formatNumber(calculateGST2(invoice.cost, invoice.by_id.gst_registered))}
+                        </Typography>
+                      </Box>
+                    </Box>
+                    <Typography variant="body2" sx={{ mt: 1 }}>
+                      Contractor: {invoice.by_id.company_name}
+                    </Typography>
+                    {/* Add any additional TPAR-specific fields here */}
+                    <Typography variant="caption" sx={{ display: 'block', mt: 1 }}>
+                      {/* Example of additional TPAR data - adjust based on your needs */}
+                      ABN: {invoice.by_id.abn || 'N/A'}
+                    </Typography>
+                  </Paper>
+                ))}
+              </Box>
+            ) : (
+              <TableContainer component={Paper} sx={{ maxWidth: '100%', overflowX: 'auto' }}>
+                <Table sx={{
+                  minWidth: 650,
+                  '& .MuiTableCell-root': {
+                    fontSize: { xs: '0.75rem', sm: '0.875rem' },
+                    padding: { xs: '8px', sm: '16px' }
+                  }
+                }}>
+                  <TableHead>
+                    <TableRow>
+                      <TableCell>Invoice ID</TableCell>
+                      <TableCell>Date</TableCell>
+                      <TableCell sx={{ maxWidth: 100 }}>Contractor</TableCell>
+                      <TableCell>ABN</TableCell> {/* Added ABN column for TPAR */}
+                      <TableCell align="right">Gross Amount Paid</TableCell>
+                      <TableCell align="right">GST Paid</TableCell>
+                    </TableRow>
+                  </TableHead>
+                  <TableBody>
+                    {invoices.map((invoice) => (
+                      <TableRow key={invoice.code}>
+                        <TableCell component="th" scope="row" sx={{ whiteSpace: 'nowrap' }}>
+                          {invoice.code}
+                        </TableCell>
+                        <TableCell sx={{ whiteSpace: 'nowrap' }}>
+                          {invoice.create_at?.toString()}
+                        </TableCell>
+                        <TableCell sx={{
+                          maxWidth: 100,
+                          whiteSpace: 'nowrap',
+                          overflow: 'hidden',
+                          textOverflow: 'ellipsis'
+                        }}>
+                          {invoice.by_id.company_name}
+                        </TableCell>
+                        <TableCell sx={{ whiteSpace: 'nowrap' }}>
+                          {invoice.by_id.abn || 'N/A'}
+                        </TableCell>
+                        <TableCell align="right">{formatNumber(invoice.cost)}</TableCell>
+                        <TableCell align="right">
+                          {formatNumber(calculateGST2(invoice.cost, invoice.by_id.gst_registered))}
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </TableContainer>
+            )}
+          </>
+        )}
+        {invoices.length === 0 && !loading && !error && <Alert severity="info">No invoices found for the selected period.</Alert>}
+      </TabPanel>
 
-        <Box sx={{ mt: 3 }}>
-          <Button variant="contained" color="primary" onClick={handleExportATO} disabled={invoices.length === 0}>
-            Export for ATO
-          </Button>
-          <Button sx={{ ml: 2 }} variant="contained" color="secondary" onClick={handleExportMYOB} disabled={invoices.length === 0}>
-            Export for MYOB
-          </Button>
-        </Box>
+      <Box sx={{ mt: 3 }}>
+        <Button variant="contained" color="primary" onClick={handleExportATO} disabled={invoices.length === 0}>
+          Export for ATO
+        </Button>
+        <Button sx={{ ml: 2 }} variant="contained" color="secondary" onClick={handleExportMYOB} disabled={invoices.length === 0}>
+          Export for MYOB
+        </Button>
       </Box>
+    </Box>
   );
 };
 
