@@ -17,6 +17,7 @@ import {
 
 import { fetchJobDetails, fetchContractorDetails, fetchProjectDetails } from '../services/SupaEndPoints';
 import { useEffect, useState } from 'react';
+
 interface Project {
     code: number;
     project_name: string;
@@ -86,6 +87,14 @@ function PayView() {
 
   const dueDate = new Date(pay.jobby.due_at);
   const createDate = new Date(pay.create_at);
+  const emailJsKey = process.env.REACT_APP_EMAILJS_PUBLIC_KEY;
+  const emailJsServiceId = process.env.REACT_APP_SERVICE_ID;
+  const emailJsTemplateId = process.env.REACT_APP_PTID;
+
+if ( !emailJsKey || !emailJsServiceId || !emailJsTemplateId) {
+  throw new Error("Missing environment variables. Check .env configuration.");
+}
+
   const handleEmail = async () => {
     try {
       // Prepare email parameters
@@ -103,10 +112,10 @@ function PayView() {
   
       // Send email using EmailJS
       await emailjs.send(
-        'service_685ie7g',      // EmailJS service ID
-        'template_ygy5bra',     // EmailJS template ID
+        emailJsServiceId as string,      // EmailJS service ID
+        emailJsTemplateId as string,    // EmailJS template ID
         templateParams,
-        '-IDuhdkou_DfXqc5d'          // EmailJS user ID
+        emailJsKey as string        
       );
   
       alert('Email sent successfully!');

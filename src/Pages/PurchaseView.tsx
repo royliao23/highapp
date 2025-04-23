@@ -18,6 +18,18 @@ import { useEffect, useState } from 'react';
 
 import { fetchJobDetails, fetchContractorDetails, fetchProjectDetails } from '../services/SupaEndPoints';
 
+
+const emailJsKey = process.env.REACT_APP_EMAILJS_PUBLIC_KEY;
+const emailJsServiceId = process.env.REACT_APP_SERVICE_ID;
+const emailJsTemplateId = process.env.REACT_APP_OTID;
+
+if ( !emailJsKey || !emailJsServiceId || !emailJsTemplateId) {
+  throw new Error("Missing environment variables. Check .env configuration.");
+}
+
+
+
+
 interface InvoiceShort { code: number; ref?: string; cost?: number; }
 interface Purchase {
   code: number;
@@ -127,10 +139,10 @@ function PurchaseView() {
   
       // Send email using EmailJS
       await emailjs.send(
-        'service_685ie7g',      // EmailJS service ID
-        'template_pvqd7ih',     // EmailJS template ID
+        emailJsServiceId as string,      // EmailJS service ID
+        emailJsTemplateId as string,    // EmailJS template ID
         templateParams,
-        '-IDuhdkou_DfXqc5d'          // EmailJS user ID
+        emailJsKey as string            // EmailJS user ID
       );
   
       alert('Email sent successfully!');
