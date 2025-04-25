@@ -38,9 +38,10 @@ interface Employee {
   employment_type: string | null,
   role: string | null,
   super_company_name: string | null,
-  super_account_no: string | null,
-  super_bsb: string | null,
-  super_account_name: string | null
+  super_fund_abn: string | null,
+  super_usi: string | null,
+  super_account_name: string | null,
+  super_member_no: string | null
 }
 
 interface Department {
@@ -66,9 +67,10 @@ interface EmployeeFormData {
   employment_type: string | null,
   role: string | null,
   super_company_name?: string | null,
-  super_account_no?: string | null,
-  super_bsb?: string | null,
-  super_account_name?: string | null
+  super_fund_abn?: string | null,
+  super_usi?: string | null,
+  super_account_name?: string | null,
+  super_member_no?: string | null
 }
 
 const EmployeeComponent = () => {
@@ -415,17 +417,25 @@ const EmployeeComponent = () => {
               />
               <TextField
                 fullWidth
-                label="Super BSB"
-                name="super_bsb"
-                value={formData.super_bsb || ""}
+                label="Super USI"
+                name="super_usi"
+                value={formData.super_usi || ""}
                 onChange={handleInputChange}
                 sx={{ mb: 2 }}
               />
               <TextField
                 fullWidth
-                label="Super Account Number"
-                name="super_account_no"
-                value={formData.super_account_no || ""}
+                label="Super Fund ABN"
+                name="super_fund_abn"
+                value={formData.super_fund_abn || ""}
+                onChange={handleInputChange}
+                sx={{ mb: 2 }}
+              />
+              <TextField
+                fullWidth
+                label="Super Member No"
+                name="super_member_no"
+                value={formData.super_member_no || ""}
                 onChange={handleInputChange}
                 sx={{ mb: 2 }}
               />
@@ -501,11 +511,14 @@ const EmployeeComponent = () => {
                             Super Account Name: {employee.super_account_name}
                           </Typography>
                           <Typography variant="body2" color="text.secondary">
-                            Super BSB: {employee.super_bsb}
+                            Super USI: {employee.super_usi}
                           </Typography>
                           <Typography variant="body2" color="text.secondary">
-                            Super Account Number: {employee.super_account_no}
+                            Super Fund ABN: {employee.super_fund_abn}
                           </Typography>
+                          <Typography variant="body2" color="text.secondary">
+                            Super Member No: {employee.super_member_no}
+                          </Typography>                     
                         </>
                       }
                     />
@@ -549,8 +562,9 @@ const EmployeeComponent = () => {
                 <TableCell>Employment Type</TableCell>
                 <TableCell>Super Company</TableCell>
                 <TableCell>Super Account Name</TableCell>
-                <TableCell>Super BSB</TableCell>
-                <TableCell>Super Account No</TableCell>
+                <TableCell>Super USI</TableCell>
+                <TableCell>Super Fund ABN</TableCell>
+                <TableCell>Super Member No</TableCell>
                 <TableCell>Role</TableCell>
                 <TableCell>Actions</TableCell>
               </TableRow>
@@ -582,9 +596,9 @@ const EmployeeComponent = () => {
                     <TableCell>{employee.role}</TableCell >
                     <TableCell>{employee.super_company_name}</TableCell>
                     <TableCell>{employee.super_account_name}</TableCell >
-                    <TableCell>{employee.super_bsb}</TableCell >
-                    <TableCell>{employee.super_account_no}</TableCell >
-
+                    <TableCell>{employee.super_usi}</TableCell >
+                    <TableCell>{employee.super_fund_abn}</TableCell >
+                    <TableCell>{employee.super_member_no}</TableCell >
                     <TableCell>
                       <Button
                         variant="contained"
