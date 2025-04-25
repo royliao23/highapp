@@ -148,7 +148,7 @@ const CloseButton = styled.button`
 
 // Inside the Contractor component...
 
-const Contractor: React.FC = () => {
+const Budget: React.FC = () => {
   const [contractors, setContractors] = useState<Contractor[]>([]);
   const [formData, setFormData] = useState<Omit<Contractor, "code">>({
     contact_person: "",
@@ -428,4 +428,4 @@ const Contractor: React.FC = () => {
   );
 };
 
-export default Contractor;
+export default Budget;

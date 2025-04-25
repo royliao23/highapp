@@ -57,6 +57,9 @@ const Nav: React.FC<NavProps> = ({ onLogout }) => {
           <li className="menu-item">
             <Link to="/category" className="menu-link" onClick={() => handleMenuClick()}>Category</Link>
           </li>
+          <li className="menu-item">
+            <Link to="/budget" className="menu-link" onClick={() => handleMenuClick()}>Budget</Link>
+          </li>
 
           {/* Hr Dropdown */}
           <li className={`menu-item dropdown ${isHrDropdownOpen ? "open" : ""}`}>
