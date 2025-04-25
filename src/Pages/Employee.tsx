@@ -15,7 +15,7 @@ import {
   ListItem,
   ListItemText,
   Divider,
-  Paper, TablePagination, TableContainer
+  Paper, TablePagination, 
 } from "@mui/material";
 import { supabase } from "../supabaseClient";
 
@@ -36,7 +36,11 @@ interface Employee {
   address: string | null;
   super_rate: number | null,
   employment_type: string | null,
-  role: string | null
+  role: string | null,
+  super_company_name: string | null,
+  super_account_no: string | null,
+  super_bsb: string | null,
+  super_account_name: string | null
 }
 
 interface Department {
@@ -60,7 +64,11 @@ interface EmployeeFormData {
   address: string | null;
   super_rate: number | null,
   employment_type: string | null,
-  role: string | null
+  role: string | null,
+  super_company_name?: string | null,
+  super_account_no?: string | null,
+  super_bsb?: string | null,
+  super_account_name?: string | null
 }
 
 const EmployeeComponent = () => {
@@ -389,6 +397,39 @@ const EmployeeComponent = () => {
                 </select>
 
               </Box>
+              <TextField
+                fullWidth
+                label="Super Company Name"
+                name="super_company_name"
+                value={formData.super_company_name || ""}
+                onChange={handleInputChange}
+                sx={{ mb: 2 }}
+              />
+              <TextField
+                fullWidth
+                label="Super Account Name"
+                name="super_account_name"
+                value={formData.super_account_name || ""}
+                onChange={handleInputChange}
+                sx={{ mb: 2 }}
+              />
+              <TextField
+                fullWidth
+                label="Super BSB"
+                name="super_bsb"
+                value={formData.super_bsb || ""}
+                onChange={handleInputChange}
+                sx={{ mb: 2 }}
+              />
+              <TextField
+                fullWidth
+                label="Super Account Number"
+                name="super_account_no"
+                value={formData.super_account_no || ""}
+                onChange={handleInputChange}
+                sx={{ mb: 2 }}
+              />
+              
               <Button type="submit" variant="contained" sx={{ mr: 2 }}>
                 {editingId ? "Update" : "Add"}
               </Button>
@@ -453,7 +494,18 @@ const EmployeeComponent = () => {
                           <Typography variant="body2" color="text.secondary">
                             Role: {employee.role}
                           </Typography>
-
+                          <Typography variant="body2" color="text.secondary">
+                            Super Company Name: {employee.super_company_name}
+                          </Typography>
+                          <Typography variant="body2" color="text.secondary">
+                            Super Account Name: {employee.super_account_name}
+                          </Typography>
+                          <Typography variant="body2" color="text.secondary">
+                            Super BSB: {employee.super_bsb}
+                          </Typography>
+                          <Typography variant="body2" color="text.secondary">
+                            Super Account Number: {employee.super_account_no}
+                          </Typography>
                         </>
                       }
                     />
@@ -488,13 +540,17 @@ const EmployeeComponent = () => {
                 <TableCell>Department</TableCell>
                 <TableCell>Salary</TableCell>
                 <TableCell>Position</TableCell>
-                <TableCell>bsb</TableCell>
+                <TableCell>BSB</TableCell>
                 <TableCell>Account Number</TableCell>
                 <TableCell>Account Name</TableCell>
                 <TableCell>Bank Name</TableCell>
                 <TableCell>Address</TableCell>
                 <TableCell>Super</TableCell>
                 <TableCell>Employment Type</TableCell>
+                <TableCell>Super Company</TableCell>
+                <TableCell>Super Account Name</TableCell>
+                <TableCell>Super BSB</TableCell>
+                <TableCell>Super Account No</TableCell>
                 <TableCell>Role</TableCell>
                 <TableCell>Actions</TableCell>
               </TableRow>
@@ -524,6 +580,10 @@ const EmployeeComponent = () => {
                     <TableCell>{employee.super_rate}</TableCell >
                     <TableCell>{employee.employment_type}</TableCell >
                     <TableCell>{employee.role}</TableCell >
+                    <TableCell>{employee.super_company_name}</TableCell>
+                    <TableCell>{employee.super_account_name}</TableCell >
+                    <TableCell>{employee.super_bsb}</TableCell >
+                    <TableCell>{employee.super_account_no}</TableCell >
 
                     <TableCell>
                       <Button
