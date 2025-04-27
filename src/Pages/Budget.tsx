@@ -2,9 +2,9 @@ import React, { useState, useEffect, ChangeEvent, FormEvent } from "react";
 import { supabase } from "../supabaseClient";
 import styled from "styled-components";
 import SearchBox from "../components/SearchBox";
-
-// Define the Contractor type based on the table schema
-interface Contractor {
+import { Job, Project,  } from "../models";
+// Define the jobbudget type based on the table schema
+interface jobbudgetold {
   code: number;
   contact_person: string;
   company_name: string;
@@ -14,6 +14,16 @@ interface Contractor {
   account_no: string;
   account_name: string;
   address: string;
+}
+
+interface JobBudget {
+  code?: number;
+  job_id?: number;  // Make optional
+  project_id?: number;  // Make optional
+  budget: number;
+  note: string;
+  job?: Job;
+  project?: Project;
 }
 
 // Styled Components for Styling
@@ -146,39 +156,71 @@ const CloseButton = styled.button`
   cursor: pointer;
 `;
 
-// Inside the Contractor component...
+// Inside the jobbudget component...
 
 const Budget: React.FC = () => {
-  const [contractors, setContractors] = useState<Contractor[]>([]);
-  const [formData, setFormData] = useState<Omit<Contractor, "code">>({
-    contact_person: "",
-    company_name: "",
-    phone_number: "",
-    email: "",
-    bsb: "",
-    account_no: "",
-    account_name: "",
-    address: "",
+  const [jobBudgets, setJobBudgets] = useState<JobBudget[]>([]);
+  const [jobs, setJobs] = useState<Job[]>([]);
+  const [projects, setProjects] = useState<Project[]>([]);
+  const [formData, setFormData] = useState<JobBudget>({
+    job_id: 0,
+    project_id: 0,
+    budget: 0,
+    note: "",
   });
-  const [editingCode, setEditingCode] = useState<number | null>(null); // Track which contractor is being edited
+  const [editingCode, setEditingCode] = useState<number | null>(null);
   const [isMobileView, setIsMobileView] = useState<boolean>(window.innerWidth < 1000);
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
   const [searchTerm, setSearchTerm] = useState<string>("");
 
-  const fetchContractors = async () => {
+  const fetchData = async () => {
     try {
-      const { data, error } = await supabase.from("contractor").select("*");
-      if (error) throw error;
-      setContractors(data || []);
+      // Fetch job budgets with related job and project data
+      const { data: budgetData, error: budgetError } = await supabase
+        .from("jobbudget")
+        .select(`
+          code,
+          job_id,
+          project_id,
+          budget,
+          note,
+          job:job_id (code, name),
+          project:project_id (code, project_name)
+        `);
+      
+      if (budgetError) throw budgetError;
+  
+      // Transform the data to match our interface
+      const transformedData = budgetData?.map((item: any) => ({
+        code: item.code,
+        job_id: item.job_id,
+        project_id: item.project_id,
+        budget: item.budget,
+        note: item.note,
+        job: item.job,
+        project: item.project
+      })) as JobBudget[] || [];
+  
+      // Fetch all jobs and projects for dropdowns
+      const { data: jobData, error: jobError } = await supabase.from("job").select("*");
+      const { data: projectData, error: projectError } = await supabase.from("project").select("*");
+  
+      if (jobError) throw jobError;
+      if (projectError) throw projectError;
+  
+      setJobBudgets(transformedData);
+      setJobs(jobData || []);
+      setProjects(projectData || []);
     } catch (error) {
-      console.error("Error fetching contractors:", error);
+      console.error("Error fetching data:", error);
     }
   };
+  
+    useEffect(() => {
+      fetchData();
+    }, []);
 
-  useEffect(() => {
-    fetchContractors();
-  }, []);
-
+ 
   useEffect(() => {
     if (isModalOpen) {
       document.body.classList.add("no-scroll");
@@ -200,115 +242,119 @@ const Budget: React.FC = () => {
     setSearchTerm(e.target.value.toLowerCase()); // Normalize search term for case-insensitive search
   };
 
-  const handleOpenModal = (contractor?: Contractor) => {
-    if (contractor) {
-      handleEdit(contractor);
+  const handleOpenModal = (jobBudget?: JobBudget) => {
+    if (jobBudget) {
+      setFormData({
+        code: jobBudget.code,
+        job_id: jobBudget.job_id || jobBudget.job?.code || 0,
+        project_id: jobBudget.project_id || jobBudget.project?.code || 0,
+        budget: jobBudget.budget,
+        note: jobBudget.note,
+      });
+      setEditingCode(jobBudget.code || null);
+    } else {
+      setFormData({
+        job_id: 0,
+        project_id: 0,
+        budget: 0,
+        note: "",
+      });
+      setEditingCode(null);
     }
     setIsModalOpen(true);
   };
-
   const handleCloseModal = () => {
-    setFormData({
-      contact_person: "",
-      company_name: "",
-      phone_number: "",
-      email: "",
-      bsb: "",
-      account_no: "",
-      account_name: "",
-      address: "",
-    });
-    setEditingCode(null);
     setIsModalOpen(false);
+    setEditingCode(null);
+    setFormData({
+      job_id: 0,
+      project_id: 0,
+      budget: 0,
+      note: "",
+    });
+  }
+  const handleDelete = async (code: number) => {
+    if (window.confirm("Are you sure you want to delete this job budget?")) {
+      try {
+        const { error } = await supabase.from("jobbudget").delete().eq("code", code);
+        if (error) throw error;
+        fetchData();
+      } catch (error) {
+        console.error("Error deleting job budget:", error);
+      }
+    }
   };
+
+
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
-
+  
     try {
+      const payload = {
+        job_id: formData.job_id,
+        project_id: formData.project_id,
+        budget: formData.budget,
+        note: formData.note,
+      };
+  
       if (editingCode !== null) {
-        // Update an existing contractor
+        // Update existing record
         const { error } = await supabase
-          .from("contractor")
-          .update(formData)
+          .from("jobbudget")
+          .update(payload)
           .eq("code", editingCode);
-
+        
         if (error) throw error;
-
-        // Clear editing state after updating
-        setEditingCode(null);
       } else {
-        // Add a new contractor
-        const { error } = await supabase.from("contractor").insert([formData]);
-
+        // Insert new record
+        const { error } = await supabase.from("jobbudget").insert([payload]);
         if (error) throw error;
       }
-
-      // Refresh the list and reset the form
-      fetchContractors();
+  
+      fetchData();
       handleCloseModal();
     } catch (error) {
-      console.error("Error saving contractor:", error);
+      console.error("Error saving job budget:", error);
     }
   };
 
-  const handleEdit = (contractor: Contractor) => {
-    setEditingCode(contractor.code);
+  const handleInputChange = (e: ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
+    const { name, value } = e.target;
     setFormData({
-      contact_person: contractor.contact_person,
-      company_name: contractor.company_name,
-      phone_number: contractor.phone_number,
-      email: contractor.email,
-      bsb: contractor.bsb,
-      account_no: contractor.account_no,
-      account_name: contractor.account_name,
-      address: contractor.address,
+      ...formData,
+      [name]: name === "budget" ? parseFloat(value) || 0 : value,
     });
   };
 
-  const handleDelete = async (code: number) => {
-    try {
-      const { error } = await supabase.from("contractor").delete().eq("code", code);
-      if (error) throw error;
-      fetchContractors(); // Refresh the list
-    } catch (error) {
-      console.error("Error deleting contractor:", error);
-    }
-  };
-
-  // Filter contractors dynamically based on the search term
-  const filteredContractors = contractors.filter((contractor) => {
+  // Filter job budgets based on search term
+  const filteredJobBudgets = jobBudgets.filter((jobBudget) => {
+    const jobName = jobBudget.job?.name?.toLowerCase() || "";
+    const projectName = jobBudget.project?.project_name?.toLowerCase() || "";
     return (
-      contractor.contact_person.toLowerCase().includes(searchTerm) ||
-      contractor.company_name.toLowerCase().includes(searchTerm) ||
-      contractor.email.toLowerCase().includes(searchTerm) ||
-      contractor.phone_number.includes(searchTerm)
+      jobName.includes(searchTerm.toLowerCase()) ||
+      projectName.includes(searchTerm.toLowerCase())
     );
   });
 
-  // Handle Form Input
-  const handleInputChange = (e: ChangeEvent<HTMLInputElement>) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
-  };
-
   return (
     <Container>
-      <Title>Contractor Management</Title>
+      <Title>Job Budget Management</Title>
       <ButtonRow>
         <SearchBox searchTerm={searchTerm} onSearchChange={handleSearchChange} />
-        <Button onClick={() => handleOpenModal()}>Add Contractor</Button>
+        <Button onClick={() => handleOpenModal()}>Add Job Budget</Button>
       </ButtonRow>
 
       {isMobileView ? (
         <List>
-          {filteredContractors.map((contractor) => (
-            <ListItem key={contractor.code}>
-              <strong>Contact Person:</strong> {contractor.contact_person} <br />
-              <strong>Company Name:</strong> {contractor.company_name} <br />
-              <strong>Phone Number:</strong> {contractor.phone_number} <br />
-              <strong>Email:</strong> {contractor.email} <br />
-              <Button onClick={() => handleOpenModal(contractor)}>Edit</Button>
-              <DeleteButton onClick={() => handleDelete(contractor.code)}>Delete</DeleteButton>
+          {filteredJobBudgets.map((jobBudget) => (
+            <ListItem key={jobBudget.code}>
+              <strong>Project:</strong> {jobBudget.project?.project_name} <br />
+              <strong>Job:</strong> {jobBudget.job?.name} <br />
+              <strong>Budget:</strong> {jobBudget.budget} <br />
+              <strong>Note:</strong> {jobBudget.note} <br />
+              <Button onClick={() => handleOpenModal(jobBudget)}>Edit</Button>
+              <DeleteButton onClick={() => handleDelete(jobBudget.code!)}>Delete</DeleteButton>
             </ListItem>
           ))}
         </List>
@@ -316,26 +362,23 @@ const Budget: React.FC = () => {
         <Table>
           <thead>
             <tr>
-              <Th>Contact Person</Th>
-              <Th>Company Name</Th>
-              <Th>Phone Number</Th>
-              <Th>Email</Th>
-              <Th>Edit</Th>
-              <Th>Delete</Th>
+              <Th>Project</Th>
+              <Th>Job</Th>
+              <Th>Budget</Th>
+              <Th>Note</Th>
+              <Th>Actions</Th>
             </tr>
           </thead>
           <tbody>
-            {filteredContractors.map((contractor) => (
-              <tr key={contractor.code}>
-                <Td>{contractor.contact_person}</Td>
-                <Td>{contractor.company_name}</Td>
-                <Td>{contractor.phone_number}</Td>
-                <Td>{contractor.email}</Td>
+            {filteredJobBudgets.map((jobBudget) => (
+              <tr key={jobBudget.code}>
+                <Td>{jobBudget.project?.project_name}</Td>
+                <Td>{jobBudget.job?.name}</Td>
+                <Td>{jobBudget.budget}</Td>
+                <Td>{jobBudget.note}</Td>
                 <Td>
-                  <Button onClick={() => handleOpenModal(contractor)}>Edit</Button>
-                </Td>
-                <Td>
-                  <DeleteButton onClick={() => handleDelete(contractor.code)}>Delete</DeleteButton>
+                  <Button onClick={() => handleOpenModal(jobBudget)}>Edit</Button>
+                  <DeleteButton onClick={() => handleDelete(jobBudget.code!)}>Delete</DeleteButton>
                 </Td>
               </tr>
             ))}
@@ -346,82 +389,59 @@ const Budget: React.FC = () => {
       <Modal show={isModalOpen}>
         <ModalContent>
           <CloseButton onClick={handleCloseModal}>&times;</CloseButton>
+          <h3>{editingCode ? "Edit Job Budget" : "Add Job Budget"}</h3>
           <Form onSubmit={handleSubmit}>
-            <Input
-              type="text"
-              name="contact_person"
-              value={formData.contact_person}
+            <label>Project</label>
+            <select
+              name="project_id"
+              value={formData.project_id}
               onChange={handleInputChange}
-              placeholder="Contact Person"
-              autoComplete="off"
               required
-            />
-            <Input
-              type="text"
-              name="company_name"
-              value={formData.company_name}
-              onChange={handleInputChange}
-              placeholder="Company Name"
-              autoComplete="off"
-              required
-            />
-            <Input
-              type="text"
-              name="phone_number"
-              value={formData.phone_number}
-              onChange={handleInputChange}
-              placeholder="Phone Number"
-              autoComplete="off"
-              required
-            />
-            <Input
-              type="email"
-              name="email"
-              value={formData.email}
-              onChange={handleInputChange}
-              placeholder="Email"
-              autoComplete="off"
-              required
-            />
-            <Input
-              type="text"
-              name="bsb"
-              value={formData.bsb}
-              onChange={handleInputChange}
-              placeholder="BSB"
-              autoComplete="off"
-              required
-            />
-            <Input
-              type="text"
-              name="account_no"
-              value={formData.account_no}
-              onChange={handleInputChange}
-              placeholder="Account Number"
-              autoComplete="off"
-              required
-            />
-            <Input
-              type="text"
-              name="account_name"
-              value={formData.account_name}
-              onChange={handleInputChange}
-              placeholder="Account Name"
-              autoComplete="off"
-              required
-            />
-            <Input
-              type="text"
-              name="address"
-              value={formData.address}
-              onChange={handleInputChange}
-              placeholder="Address"
-              autoComplete="off"
-              required
-            />
-            <Button type="submit">Save Contractor</Button>
-          </Form>
+            >
+              <option value="">Select Project</option>
+              {projects.map((project) => (
+                <option key={project.code} value={project.code}>
+                  {project.project_name}
+                </option>
+              ))}
+            </select>
 
+            <label>Job</label>
+            <select
+              name="job_id"
+              value={formData.job_id}
+              onChange={handleInputChange}
+              required
+            >
+              <option value="">Select Job</option>
+              {jobs.map((job) => (
+                <option key={job.code} value={job.code}>
+                  {job.name}
+                </option>
+              ))}
+            </select>
+
+            <label>Budget</label>
+            <Input
+              type="number"
+              name="budget"
+              value={formData.budget}
+              onChange={handleInputChange}
+              placeholder="Budget"
+              required
+            />
+
+            <label>Note</label>
+            <Input
+              type="text"
+              name="note"
+              value={formData.note}
+              onChange={handleInputChange}
+              placeholder="Note"
+            />
+
+            <Button type="submit">Save</Button>
+          </Form>
         </ModalContent>
       </Modal>
     </Container>
