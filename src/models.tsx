@@ -42,6 +42,16 @@ export interface Job {
   description: string;
 }
 
+export interface JobBudget {
+  code?: number;
+  job_id?: number;  // Make optional
+  project_id?: number;  // Make optional
+  budget: number;
+  note: string;
+  job?: Job;
+  project?: Project;
+}
+
 
 export interface InvoiceShort { code: number;ref?:string;cost?:number;}
 export interface Purchase {

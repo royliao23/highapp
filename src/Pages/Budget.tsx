@@ -2,29 +2,7 @@ import React, { useState, useEffect, ChangeEvent, FormEvent } from "react";
 import { supabase } from "../supabaseClient";
 import styled from "styled-components";
 import SearchBox from "../components/SearchBox";
-import { Job, Project,  } from "../models";
-// Define the jobbudget type based on the table schema
-interface jobbudgetold {
-  code: number;
-  contact_person: string;
-  company_name: string;
-  phone_number: string;
-  email: string;
-  bsb: string;
-  account_no: string;
-  account_name: string;
-  address: string;
-}
-
-interface JobBudget {
-  code?: number;
-  job_id?: number;  // Make optional
-  project_id?: number;  // Make optional
-  budget: number;
-  note: string;
-  job?: Job;
-  project?: Project;
-}
+import { Job, Project,  JobBudget} from "../models";
 
 // Styled Components for Styling
 const Container = styled.div`
@@ -116,7 +94,13 @@ const ListItem = styled.li`
   border-radius: 4px;
   background-color: #fff;
 `;
-
+const Dropdown = styled.select`
+  padding: 0.8rem;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  font-size: 1rem;
+  width: 90%;
+`;
 const Modal = styled.div<{ show: boolean }>`
   display: ${(props) => (props.show ? "flex" : "none")};
   position: fixed;
@@ -391,35 +375,35 @@ const Budget: React.FC = () => {
           <CloseButton onClick={handleCloseModal}>&times;</CloseButton>
           <h3>{editingCode ? "Edit Job Budget" : "Add Job Budget"}</h3>
           <Form onSubmit={handleSubmit}>
-            <label>Project</label>
-            <select
-              name="project_id"
-              value={formData.project_id}
-              onChange={handleInputChange}
-              required
-            >
-              <option value="">Select Project</option>
-              {projects.map((project) => (
-                <option key={project.code} value={project.code}>
-                  {project.project_name}
-                </option>
-              ))}
-            </select>
+            <Dropdown
+                name="project_id"
+                value={formData.project_id}
+                onChange={handleInputChange}
+              >
+                
+                <option value="">Select Project</option>
+                {projects.map((option) => (
+                  <option key={option.code} value={option.code}>
+                    {option.project_name}
+                  </option>
+                  
+                ))}
+            </Dropdown>
 
-            <label>Job</label>
-            <select
-              name="job_id"
-              value={formData.job_id}
-              onChange={handleInputChange}
-              required
-            >
-              <option value="">Select Job</option>
-              {jobs.map((job) => (
-                <option key={job.code} value={job.code}>
-                  {job.name}
-                </option>
-              ))}
-            </select>
+            <Dropdown
+                name="job_id"
+                value={formData.job_id}
+                onChange={handleInputChange}
+              >
+                
+                <option value="">Select Job</option>
+                {jobs.map((option) => (
+                  <option key={option.code} value={option.code}>
+                    {option.name}
+                  </option>
+                  
+                ))}
+            </Dropdown>
 
             <label>Budget</label>
             <Input
