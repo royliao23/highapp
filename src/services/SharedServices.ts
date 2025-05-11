@@ -70,6 +70,71 @@ export const getProjectData = async (): Promise<ProjectData[]> => {
   return Object.values(groupedData);
 };
 
+export const getJobCategoryData = async (projectId: number): Promise<ProjectData[]> => {
+  const { data, error } = await supabase
+    .from("jobby")
+    .select(`
+      cost,
+      pay(amount),
+      job!inner(
+        job_category_id,
+        categ!inner(name)
+      )
+    `)
+    .eq("project_id", projectId);
+
+  if (error) {
+    console.error(`Error fetching job category data for project ${projectId}:`, error);
+    return [];
+  }
+
+  const groupedData: Record<string, ProjectData> = (data as any[]).reduce((acc, item) => {
+    // Extract category name - adjust based on your actual data structure
+    let categoryName: string | undefined;
+    
+    // Check the console.log output to see the actual structure
+    if (Array.isArray(item.job)) {
+      // If job is an array, get first item's category name
+      categoryName = item.job[0]?.categ?.name;
+    } else if (item.job?.categ) {
+      // If job is an object with categ
+      categoryName = Array.isArray(item.job.categ) 
+        ? item.job.categ[0]?.name
+        : item.job.categ?.name;
+    }
+    
+    if (!categoryName) {
+      console.warn("Missing category name for item:", item);
+      return acc;
+    }
+
+    // Initialize category if not exists
+    if (!acc[categoryName]) {
+      acc[categoryName] = { 
+        name: categoryName, 
+        invoiced: 0, 
+        paid: 0 
+      };
+    }
+
+    // Add cost to invoiced
+    acc[categoryName].invoiced += Number(item.cost) || 0;
+
+    // Calculate pay amount
+    let payAmount = 0;
+    if (Array.isArray(item.pay)) {
+      payAmount = item.pay.reduce((sum:any, payItem:any) => sum + (Number(payItem.amount) || 0), 0);
+    } else if (item.pay?.amount) {
+      payAmount = Number(item.pay.amount) || 0;
+    }
+
+    acc[categoryName].paid += payAmount;
+
+    return acc;
+  }, {} as Record<string, ProjectData>);
+
+  return Object.values(groupedData);
+};
 
 
 export const getJobDataByProject = async (projectId: number) => {

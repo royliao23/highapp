@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { BarChart, Bar, XAxis, YAxis, Tooltip, Legend, ResponsiveContainer } from "recharts";
 import { Button, Card, Typography, Box, Stack, useMediaQuery } from "@mui/material";
-import { getProjectData, getJobDataByProject,getPayeeData, getAllProjectCodes } from "../services/SharedServices";
+import { getProjectData, getJobDataByProject,getPayeeData, getAllProjectCodes, getJobCategoryData } from "../services/SharedServices";
 
 
   
@@ -28,9 +28,15 @@ export default function ChartDashboard() {
     const fetchData = async () => {
       if (chartType === "project") {
         setProjData(await getProjectData());
-      } else if (chartType.startsWith("project-job")) {
+      } else if (chartType.startsWith("project-categ")) {
+        setProjData(await getJobCategoryData(selectedProject.code));
+        console.log("categ projData:",projData);
+      } 
+      else if (chartType.startsWith("project-job")) {
         setProjData(await getJobDataByProject(selectedProject.code));
-      } else {
+        console.log("categ projData:",projData);
+      } 
+      else {
         setProjData(await getPayeeData());
       }
       setProjList(await getAllProjectCodes());
@@ -63,7 +69,26 @@ export default function ChartDashboard() {
             <Button
               key={proj.project_name}
               variant={chartType === proj.project_name ? "contained" : "outlined"}
-              onClick={() => {setChartType(proj.code.toString()); setSelectedProject(proj);setChartType("project-job-"+proj.code.toString())}}
+              onClick={() => {
+                setChartType(proj.code.toString()); 
+                setSelectedProject(proj);
+                setChartType("project-job-"+proj.code.toString())}}
+            >
+              {proj.project_name}
+            </Button>
+          ))}
+        </Stack>
+        <Box sx={{ p: 1 }}></Box>
+        <Typography variant="h6" sx={{ mb: 2 }}>Project Category Status</Typography>
+        <Stack direction={isMobile ? "row" : "column"} spacing={1} justifyContent="center">
+          {projList.map((proj) => (
+            <Button
+              key={proj.project_name}
+              variant={chartType === proj.project_name ? "contained" : "outlined"}
+              onClick={() => {
+                setChartType(proj.code.toString()); 
+                setSelectedProject(proj);
+                setChartType("project-categ-"+proj.code.toString())}}
             >
               {proj.project_name}
             </Button>
