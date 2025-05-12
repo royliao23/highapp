@@ -311,6 +311,14 @@ const Budget: React.FC = () => {
     });
   };
 
+  const handleBudgetChange = (e:any) => {
+  const value = e.target.value;
+  // Allow empty string or valid numbers
+  if (value === '' || !isNaN(value)) {
+    setFormData({ ...formData, budget: value });
+  }
+};
+
   // Filter job budgets based on search term
   const filteredJobBudgets = jobBudgets.filter((jobBudget) => {
     const jobName = jobBudget.job?.name?.toLowerCase() || "";
@@ -405,12 +413,12 @@ const Budget: React.FC = () => {
                 ))}
             </Dropdown>
 
-            <label>Budget</label>
             <Input
               type="number"
               name="budget"
               value={formData.budget}
-              onChange={handleInputChange}
+              onChange={handleBudgetChange}
+              
               placeholder="Budget"
               required
             />
