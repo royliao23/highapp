@@ -7,6 +7,7 @@ type ProjectData = {
   name: string;
   invoiced: number;
   paid: number;
+  budget?: number;
 };
 
 type SupabaseResponseItem = {
@@ -51,7 +52,7 @@ export const getProjectData = async (): Promise<ProjectData[]> => {
     if (!projectName) return acc; // Skip if project name is missing
 
     if (!acc[projectName]) {
-      acc[projectName] = { name: projectName, invoiced: 0, paid: 0 };
+      acc[projectName] = { name: projectName, invoiced: 0, paid: 0, budget: 0 };
     }
 
     // Handle cost
@@ -141,29 +142,46 @@ export const getJobDataByProject = async (projectId: number) => {
   const { data, error } = await supabase
     .from("jobby")
     .select(`
-      job!inner(name),
+      job!inner(
+        name,
+        jobbudget!left(
+          budget
+        )
+      ),
       cost,
       pay(amount)
-    `).eq("project_id", projectId);
-    
+    `)
+    .eq("project_id", projectId);
 
   if (error) {
     console.error(`Error fetching jobs for project ${projectId}:`, error);
     return [];
   }
-  // Define a type for the accumulator object
-  const groupedData: Record<string, ProjectData> = (data as ProjectJobResponseItem[]).reduce((acc, item) => {
-    // Extract job name from the first element if it's an array
-    console.log("item:",item);
+
+  const groupedData: Record<string, ProjectData> = (data as any[]).reduce((acc, item) => {
+    // Extract job name
     const jobName = Array.isArray(item.job)
       ? item.job[0]?.name
       : item.job?.name;
 
-    
-    if (!jobName) return acc; // Skip if project name is missing
+    if (!jobName) return acc;
+
+    // Extract budget
+    let jobBudget = 0;
+    if (Array.isArray(item.job)) {
+      console.log("item.job:",item.job);
+      jobBudget = item.job[0]?.jobbudget[0]?.budget ?? 0;
+    } else {
+      jobBudget = item.job?.jobbudget[0]?.budget ?? 0
+    }
 
     if (!acc[jobName]) {
-      acc[jobName] = { name: jobName, invoiced: 0, paid: 0 };
+      acc[jobName] = { 
+        name: jobName, 
+        invoiced: 0, 
+        paid: 0,
+        budget: jobBudget 
+      };
     }
 
     // Handle cost
@@ -171,16 +189,16 @@ export const getJobDataByProject = async (projectId: number) => {
 
     // Handle pay amount
     const payAmount = Array.isArray(item.pay) 
-      ? item.pay.reduce((sum, payItem) => sum + (payItem.amount ?? 0), 0)
+      ? item.pay.reduce((sum:any, payItem:any) => sum + (payItem.amount ?? 0), 0)
       : item.pay?.amount ?? 0;
 
     acc[jobName].paid += payAmount;
-    console.log("acc:",acc);
+
     return acc;
   }, {} as Record<string, ProjectData>);
-
+  console.log("job groupedData:",groupedData);
+  console.log("Job Object.values(groupedData):",Object.values(groupedData));
   return Object.values(groupedData);
-  
 };
 
 export const getPayeeData = async () => {

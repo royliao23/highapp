@@ -19,8 +19,9 @@ export default function ChartDashboard() {
     }
 ]);
   const [projData, setProjData] = useState([
-    { name: "Job A", invoiced: 20000, paid: 18000 },
-    { name: "Job B", invoiced: 35000, paid: 32000 },
+    { name: "Job A", invoiced: 20000, paid: 18000  },
+    { name: "Job B", invoiced: 35000, paid: 32000  },
+
   ]);
   const isMobile = useMediaQuery("(max-width:1000px)");
 
@@ -114,6 +115,7 @@ export default function ChartDashboard() {
             <Legend />
             <Bar dataKey="invoiced" fill="#8884d8" name="Invoiced" />
             <Bar dataKey="paid" fill="#82ca9d" name="Paid" />
+            <Bar dataKey="budget" fill="#82ca5d" name="Budget" />
           </BarChart>
         </ResponsiveContainer>
       </Card>
