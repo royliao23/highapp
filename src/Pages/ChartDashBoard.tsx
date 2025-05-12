@@ -104,7 +104,7 @@ export default function ChartDashboard() {
           ? "Project Invoiced vs Paid"
           : chartType === "payee"
           ? "Payee Invoiced vs Paid"
-          : `Invoiced vs Paid for Project: ${selectedProject?.project_name || chartType}`}
+          : `Invoiced vs Paid vs budget for Project: ${selectedProject?.project_name } - ${ chartType.includes("project-categ") ? "Category" : "Job"}`}
       </Typography>
        
         <ResponsiveContainer width="100%" height={400}>

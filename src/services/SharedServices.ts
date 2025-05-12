@@ -79,7 +79,10 @@ export const getJobCategoryData = async (projectId: number): Promise<ProjectData
       pay(amount),
       job!inner(
         job_category_id,
-        categ!inner(name)
+        categ:categ!inner(name),
+        jobbudget!left(
+          budget
+        )
       )
     `)
     .eq("project_id", projectId);
@@ -90,44 +93,44 @@ export const getJobCategoryData = async (projectId: number): Promise<ProjectData
   }
 
   const groupedData: Record<string, ProjectData> = (data as any[]).reduce((acc, item) => {
-    // Extract category name - adjust based on your actual data structure
-    let categoryName: string | undefined;
-    
-    // Check the console.log output to see the actual structure
-    if (Array.isArray(item.job)) {
-      // If job is an array, get first item's category name
-      categoryName = item.job[0]?.categ?.name;
-    } else if (item.job?.categ) {
-      // If job is an object with categ
-      categoryName = Array.isArray(item.job.categ) 
-        ? item.job.categ[0]?.name
-        : item.job.categ?.name;
-    }
-    
-    if (!categoryName) {
+    // Extract job and category information
+    const job = Array.isArray(item.job) ? item.job[0] : item.job;
+    if (!job?.categ?.name) {
       console.warn("Missing category name for item:", item);
       return acc;
     }
 
-    // Initialize category if not exists
+    const categoryName = Array.isArray(job.categ) ? job.categ[0]?.name : job.categ?.name;
+    if (!categoryName) return acc;
+
+    // Extract budget - default to 0 if not found
+    let categoryBudget = 0;
+    if (job.jobbudget) {
+      const budgetEntry = Array.isArray(job.jobbudget) 
+        ? job.jobbudget[0] 
+        : job.jobbudget;
+      categoryBudget = Number(budgetEntry?.budget) || 0;
+    }
+
+    // Initialize or update category entry
     if (!acc[categoryName]) {
       acc[categoryName] = { 
         name: categoryName, 
         invoiced: 0, 
-        paid: 0 
+        paid: 0,
+        budget: categoryBudget 
       };
+    } else {
+      // Sum budgets if multiple jobs contribute to the same category
+      acc[categoryName].budget += categoryBudget;
     }
 
-    // Add cost to invoiced
+    // Add cost and payment amounts
     acc[categoryName].invoiced += Number(item.cost) || 0;
-
-    // Calculate pay amount
-    let payAmount = 0;
-    if (Array.isArray(item.pay)) {
-      payAmount = item.pay.reduce((sum:any, payItem:any) => sum + (Number(payItem.amount) || 0), 0);
-    } else if (item.pay?.amount) {
-      payAmount = Number(item.pay.amount) || 0;
-    }
+    
+    const payAmount = Array.isArray(item.pay)
+      ? item.pay.reduce((sum:any, payItem:any) => sum + (Number(payItem.amount) || 0), 0)
+      : Number(item.pay?.amount) || 0;
 
     acc[categoryName].paid += payAmount;
 
