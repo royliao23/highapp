@@ -4,7 +4,12 @@ import { supabase } from "../supabaseClient";
 import styled from "styled-components";
 import SearchBox from "../components/SearchBox";
 import Modal from "../components/Modal"; // Import the new Modal component
-
+import { 
+  fetchCategories, 
+  createCategory, 
+  updateCategory, 
+  deleteCategory 
+} from "../api"; 
 import { Categ } from "../models";
 
 // Styled Components for Styling
@@ -111,19 +116,51 @@ const Category: React.FC = () => {
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
   const [searchTerm, setSearchTerm] = useState<string>("");
 
-  const fetchCategories = async () => {
+  const fetchCategoriesData = async () => {
     try {
-      const { data, error } = await supabase.from("categ").select("*");
-      if (error) throw error;
+      const data = await fetchCategories();
       setCategories(data || []);
     } catch (error) {
-      console.error("Error fetching categorys:", error);
+      console.error("Error fetching categories:", error);
     }
   };
 
   useEffect(() => {
-    fetchCategories();
+    fetchCategoriesData();
   }, []);
+
+  // ... keep all other useEffect hooks as they are ...
+
+  const handleSubmit = async (e: FormEvent) => {
+    e.preventDefault();
+
+    try {
+      if (editingCode !== null) {
+        // Update an existing category
+        await updateCategory(editingCode, formData);
+        setEditingCode(null);
+      } else {
+        // Add a new category
+        await createCategory(formData);
+      }
+
+      // Refresh the list and reset the form
+      fetchCategoriesData();
+      handleCloseModal();
+    } catch (error) {
+      console.error("Error saving category:", error);
+    }
+  };
+
+  const handleDelete = async (code: number) => {
+    try {
+      await deleteCategory(code);
+      fetchCategoriesData(); // Refresh the list
+    } catch (error) {
+      console.error("Error deleting category:", error);
+    }
+  };
+
 
   useEffect(() => {
     if (isModalOpen) {
@@ -161,35 +198,6 @@ const Category: React.FC = () => {
     setIsModalOpen(false);
   };
 
-  const handleSubmit = async (e: FormEvent) => {
-    e.preventDefault();
-
-    try {
-      if (editingCode !== null) {
-        // Update an existing category
-        const { error } = await supabase
-          .from("categ")
-          .update(formData)
-          .eq("code", editingCode);
-
-        if (error) throw error;
-
-        // Clear editing state after updating
-        setEditingCode(null);
-      } else {
-        // Add a new category
-        const { error } = await supabase.from("categ").insert([formData]);
-
-        if (error) throw error;
-      }
-
-      // Refresh the list and reset the form
-      fetchCategories();
-      handleCloseModal();
-    } catch (error) {
-      console.error("Error saving category:", error);
-    }
-  };
 
   const handleEdit = (category: Categ) => {
     setEditingCode(category.code);
@@ -198,15 +206,7 @@ const Category: React.FC = () => {
     });
   };
 
-  const handleDelete = async (code: number) => {
-    try {
-      const { error } = await supabase.from("categ").delete().eq("code", code);
-      if (error) throw error;
-      fetchCategories(); // Refresh the list
-    } catch (error) {
-      console.error("Error deleting category:", error);
-    }
-  };
+ 
 
   // Filter categorys dynamically based on the search term
   const filteredCategories = categorys.filter((category) => {

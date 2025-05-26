@@ -14,3 +14,5 @@ if (!apiUrl || !supabaseKey) {
 export const supabase = createClient(apiUrl, supabaseKey);
 
 
+
+

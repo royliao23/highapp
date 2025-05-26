@@ -26,7 +26,7 @@ const Login: React.FC<LoginProps> = ({ onLoginSuccess }) => {
 
     try {
       const response = await axios.post(
-        `${process.env.REACT_APP_API_URL}/auth/v1/token?grant_type=password`,
+        `http://localhost:4000/auth/login`,
         { email: username, password },
         {
           headers: {
@@ -36,11 +36,11 @@ const Login: React.FC<LoginProps> = ({ onLoginSuccess }) => {
         }
       );
       console.log("Login response:", response.data);
-      localStorage.setItem("authToken", response.data.access_token);
+      localStorage.setItem("authToken", response.data.token);
       localStorage.setItem("username", username);
-      localStorage.setItem("email", response.data.user.email);
+      // localStorage.setItem("email", response.data.user.email);
       // localStorage.setItem("refreshToken", response.data.refresh_token);
-      localStorage.setItem("id", response.data.user.id);
+      // localStorage.setItem("id", response.data.user.id);
       // localStorage.setItem("user_metadata", JSON.stringify(response.data.user.user_metadata));
       onLoginSuccess(username);
       dispatch(loggedin(true));
