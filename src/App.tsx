@@ -44,6 +44,8 @@ const App: React.FC = () => {
   const handleLogout = () => {
     setIsLoggedIn(false);
     localStorage.removeItem("isLoggedIn");
+    localStorage.removeItem("username");
+    localStorage.removeItem("authToken");
   };
 
   return (

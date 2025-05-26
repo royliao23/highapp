@@ -4,7 +4,10 @@ import axios from "axios";
 import { useNavigate, Link } from "react-router-dom";
 import { useDispatch } from "react-redux";
 import { loggedin } from "../state/counter/counterSlice";
-
+const API_BASE_URL = process.env.REACT_APP_API_NODE;
+if (!API_BASE_URL) {
+  throw new Error("REACT_APP_API_NODE is not defined in .env");
+}
 interface LoginProps {
   onLoginSuccess: (username: string) => void;
 }
@@ -26,7 +29,7 @@ const Login: React.FC<LoginProps> = ({ onLoginSuccess }) => {
 
     try {
       const response = await axios.post(
-        `http://localhost:4000/auth/login`,
+        `${API_BASE_URL}/auth/login`,
         { email: username, password },
         {
           headers: {

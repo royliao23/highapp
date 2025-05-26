@@ -1,8 +1,11 @@
 // api.ts
 import { Categ } from './models'; // Adjust the import path as necessary
-const API_BASE_URL = process.env.REACT_APP_API_NODE || 'http://localhost:4000/high';
+const API_BASE_URL = process.env.REACT_APP_API_NODE;
+if (!API_BASE_URL) {
+  throw new Error("REACT_APP_API_NODE is not defined in .env");
+}
 export const fetchCategories = async () => {
-  const response = await fetch(`${API_BASE_URL}/categ`, {
+  const response = await fetch(`${API_BASE_URL}/high/categ`, {
     headers: {
       'Authorization': `Bearer ${localStorage.getItem('authToken')}`
     }
