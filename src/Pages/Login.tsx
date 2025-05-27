@@ -30,7 +30,10 @@ const Login: React.FC<LoginProps> = ({ onLoginSuccess }) => {
     try {
       const response = await axios.post(
         `${API_BASE_URL}/auth/login`,
-        { email: username, password },
+        {
+          "username": username,
+          "password": password,
+        },
         {
           headers: {
             apikey: process.env.REACT_APP_API_KEY,

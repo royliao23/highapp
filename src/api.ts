@@ -16,7 +16,7 @@ export const fetchCategories = async () => {
 };
 
 export const createCategory = async (categoryData: Omit<Categ, "code">) => {
-  const response = await fetch(`${API_BASE_URL}/categ`, {
+  const response = await fetch(`${API_BASE_URL}/high/categ`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
@@ -29,7 +29,7 @@ export const createCategory = async (categoryData: Omit<Categ, "code">) => {
 };
 
 export const updateCategory = async (code: number, categoryData: Omit<Categ, "code">) => {
-  const response = await fetch(`${API_BASE_URL}/categ/${code}`, {
+  const response = await fetch(`${API_BASE_URL}/high/categ/${code}`, {
     method: 'PUT',
     headers: {
       'Content-Type': 'application/json',
@@ -42,10 +42,10 @@ export const updateCategory = async (code: number, categoryData: Omit<Categ, "co
 };
 
 export const deleteCategory = async (code: number) => {
-  const response = await fetch(`${API_BASE_URL}/categ/${code}`, {
+  const response = await fetch(`${API_BASE_URL}/high/categ/${code}`, {
     method: 'DELETE',
     headers: {
-      'Authorization': `Bearer ${localStorage.getItem('authTtoken')}`
+      'Authorization': `Bearer ${localStorage.getItem('authToken')}`
     }
   });
   if (!response.ok) throw new Error('Error deleting category');
