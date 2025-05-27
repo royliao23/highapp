@@ -4,6 +4,7 @@ import styled from "styled-components";
 import SearchBox from "../components/SearchBox";
 import Modal from "../components/Modal"; // Import the reusable Modal component
 import { Project } from "../models";
+import { createProject, deleteProject, fetchProjects, updateProject } from "../api";
 // Define the project type based on the table schema
 
 // Styled Components for Styling
@@ -113,19 +114,50 @@ const ProjectComp: React.FC = () => {
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
   const [searchTerm, setSearchTerm] = useState<string>("");
 
-  const fetchProjects = async () => {
-    try {
-      const { data, error } = await supabase.from("project").select("*");
-      if (error) throw error;
-      setProjects(data || []);
-    } catch (error) {
-      console.error("Error fetching projects:", error);
-    }
-  };
-
-  useEffect(() => {
-    fetchProjects();
-  }, []);
+  const fetchProjectsData = async () => {
+      try {
+        const data = await fetchProjects();
+        setProjects(data || []);
+      } catch (error) {
+        console.error("Error fetching categories:", error);
+      }
+    };
+  
+    useEffect(() => {
+      fetchProjectsData();
+    }, []);
+  
+    // ... keep all other useEffect hooks as they are ...
+  
+    const handleSubmit = async (e: FormEvent) => {
+      e.preventDefault();
+  
+      try {
+        if (editingCode !== null) {
+          // Update an existing category
+          await updateProject(editingCode, formData);
+          setEditingCode(null);
+        } else {
+          // Add a new category
+          await createProject(formData);
+        }
+  
+        // Refresh the list and reset the form
+        fetchProjectsData();
+        handleCloseModal();
+      } catch (error) {
+        console.error("Error saving category:", error);
+      }
+    };
+  
+    const handleDelete = async (project:any) => {
+      try {
+        await deleteProject(project.id);
+        fetchProjectsData(); // Refresh the list
+      } catch (error) {
+        console.error("Error deleting category:", error);
+      }
+    };
 
   useEffect(() => {
     if (isModalOpen) {
@@ -167,54 +199,15 @@ const ProjectComp: React.FC = () => {
     setIsModalOpen(false);
   };
 
-  const handleSubmit = async (e: FormEvent) => {
-    e.preventDefault();
-
-    try {
-      if (editingCode !== null) {
-        // Update an existing project
-        const { error } = await supabase
-          .from("project")
-          .update(formData)
-          .eq("code", editingCode);
-
-        if (error) throw error;
-
-        // Clear editing state after updating
-        setEditingCode(null);
-      } else {
-        // Add a new project
-        const { error } = await supabase.from("project").insert([formData]);
-
-        if (error) throw error;
-      }
-
-      // Refresh the list and reset the form
-      fetchProjects();
-      handleCloseModal();
-    } catch (error) {
-      console.error("Error saving project:", error);
-    }
-  };
-
-  const handleEdit = (project: Project) => {
-    setEditingCode(project.code);
+  
+  const handleEdit = (project: any) => {
+    setEditingCode(project.id);
     setFormData({
       project_name: project.project_name,
       manager: project.manager,
       description: project.description,
       status: project.status,
     });
-  };
-
-  const handleDelete = async (code: number) => {
-    try {
-      const { error } = await supabase.from("project").delete().eq("code", code);
-      if (error) throw error;
-      fetchProjects(); // Refresh the list
-    } catch (error) {
-      console.error("Error deleting project:", error);
-    }
   };
 
   // Filter projects dynamically based on the search term
@@ -250,7 +243,7 @@ const ProjectComp: React.FC = () => {
               <strong>Description:</strong> {project.description} <br />
               <strong>Status:</strong> {project.status} <br />
               <Button onClick={() => handleOpenModal(project)}>Edit</Button>
-              <DeleteButton onClick={() => handleDelete(project.code)}>Delete</DeleteButton>
+              <DeleteButton onClick={() => handleDelete(project)}>Delete</DeleteButton>
             </ListItem>
           ))}
         </List>

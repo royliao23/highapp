@@ -1,9 +1,57 @@
 // api.ts
-import { Categ } from './models'; // Adjust the import path as necessary
+import { Categ, Project } from './models'; // Adjust the import path as necessary
 const API_BASE_URL = process.env.REACT_APP_API_NODE;
 if (!API_BASE_URL) {
   throw new Error("REACT_APP_API_NODE is not defined in .env");
 }
+export const fetchProjects = async () => {
+  const response = await fetch(`${API_BASE_URL}/high/projects`, {
+    headers: {
+      'Authorization': `Bearer ${localStorage.getItem('authToken')}`
+    }
+  });
+  if (!response.ok) throw new Error('Error fetching projects');
+  const data = await response.json();
+  return data.projects; // Assuming your Express API returns { sales: [...] }
+};
+
+export const createProject = async (projectData: Omit<Project, "code">) => {
+  const response = await fetch(`${API_BASE_URL}/high/projects`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${localStorage.getItem('authToken')}`
+    },
+    body: JSON.stringify(projectData)
+  });
+  if (!response.ok) throw new Error('Error creating project');
+  return await response.json();
+};
+
+export const updateProject = async (code: number, projectData: Omit<Project, "code">) => {
+  const response = await fetch(`${API_BASE_URL}/high/projects/${code}`, {
+    method: 'PUT',
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${localStorage.getItem('authToken')}`
+    },
+    body: JSON.stringify(projectData)
+  });
+  if (!response.ok) throw new Error('Error updating project');
+  return await response.json();
+};
+
+export const deleteProject = async (code: number) => {
+  const response = await fetch(`${API_BASE_URL}/high/projects/${code}`, {
+    method: 'DELETE',
+    headers: {
+      'Authorization': `Bearer ${localStorage.getItem('authToken')}`
+    }
+  });
+  if (!response.ok) throw new Error('Error deleting project');
+  return await response.json();
+};
+
 export const fetchCategories = async () => {
   const response = await fetch(`${API_BASE_URL}/high/categ`, {
     headers: {
