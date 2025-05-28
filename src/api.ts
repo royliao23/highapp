@@ -1,9 +1,11 @@
 // api.ts
-import { Categ, Contractor, Project } from './models'; // Adjust the import path as necessary
+import { Categ, Contractor, Project, Job } from './models'; // Adjust the import path as necessary
 const API_BASE_URL = process.env.REACT_APP_API_NODE;
 if (!API_BASE_URL) {
   throw new Error("REACT_APP_API_NODE is not defined in .env");
 }
+
+// Project
 export const fetchProjects = async () => {
   const response = await fetch(`${API_BASE_URL}/high/projects`, {
     headers: {
@@ -51,6 +53,7 @@ export const deleteProject = async (code: number) => {
   if (!response.ok) throw new Error('Error deleting project');
   return await response.json();
 };
+
 //Contractor
 
 export const fetchContractors = async () => {
@@ -151,3 +154,50 @@ export const deleteCategory = async (code: number) => {
   if (!response.ok) throw new Error('Error deleting category');
   return await response.json();
 };
+
+// Job
+export const fetchJobs = async () => {
+  const response = await fetch(`${API_BASE_URL}/high/job`, {
+    headers: {
+      'Authorization': `Bearer ${localStorage.getItem('authToken')}`
+    }
+  });
+  if (!response.ok) throw new Error('Error fetching jobs');
+  const data = await response.json();
+  return data.jobs; // Assuming your Express API returns { jobs: [...] }
+};
+export const createJob = async (jobData: Omit<Job, "code">) => {
+  const response = await fetch(`${API_BASE_URL}/high/job`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${localStorage.getItem('authToken')}`
+    },
+    body: JSON.stringify(jobData)
+  });
+  if (!response.ok) throw new Error('Error creating job');
+  return await response.json();
+};  
+
+export const updateJob = async (code: number, jobData: Omit<Job, "code">) => {
+  const response = await fetch(`${API_BASE_URL}/high/job/${code}`, {
+    method: 'PUT',
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${localStorage.getItem('authToken')}`
+    },
+    body: JSON.stringify(jobData)
+  });
+  if (!response.ok) throw new Error('Error updating job');
+  return await response.json();
+};
+export const deleteJob = async (code: number) => {
+  const response = await fetch(`${API_BASE_URL}/high/job/${code}`, {
+    method: 'DELETE',
+    headers: {
+      'Authorization': `Bearer ${localStorage.getItem('authToken')}`
+    }
+  });
+  if (!response.ok) throw new Error('Error deleting job');
+  return await response.json();
+}
