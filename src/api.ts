@@ -1,5 +1,5 @@
 // api.ts
-import { Categ, Project } from './models'; // Adjust the import path as necessary
+import { Categ, Contractor, Project } from './models'; // Adjust the import path as necessary
 const API_BASE_URL = process.env.REACT_APP_API_NODE;
 if (!API_BASE_URL) {
   throw new Error("REACT_APP_API_NODE is not defined in .env");
@@ -51,6 +51,58 @@ export const deleteProject = async (code: number) => {
   if (!response.ok) throw new Error('Error deleting project');
   return await response.json();
 };
+//Contractor
+
+export const fetchContractors = async () => {
+  const response = await fetch(`${API_BASE_URL}/high/contractor`, {
+    headers: {
+      'Authorization': `Bearer ${localStorage.getItem('authToken')}`
+    }
+  });
+  if (!response.ok) throw new Error('Error fetching contractors');
+  const data = await response.json();
+  return data; // Assuming your Express API returns { sales: [...] }
+};
+
+export const createContractor = async (contractorData: Omit<Contractor, "code">) => {
+  const response = await fetch(`${API_BASE_URL}/high/contractor`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${localStorage.getItem('authToken')}`
+    },
+    body: JSON.stringify(contractorData)
+  });
+  if (!response.ok) throw new Error('Error creating contractor');
+  return await response.json();
+};
+
+export const updateContractor = async (code: number, contractorData: Omit<Contractor, "code">) => {
+  const response = await fetch(`${API_BASE_URL}/high/contractor/${code}`, {
+    method: 'PUT',
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${localStorage.getItem('authToken')}`
+    },
+    body: JSON.stringify(contractorData)
+  });
+  if (!response.ok) throw new Error('Error updating contractor');
+  return await response.json();
+};
+
+export const deleteContractor = async (code: number) => {
+  const response = await fetch(`${API_BASE_URL}/high/contractor/${code}`, {
+    method: 'DELETE',
+    headers: {
+      'Authorization': `Bearer ${localStorage.getItem('authToken')}`
+    }
+  });
+  if (!response.ok) throw new Error('Error deleting project');
+  return await response.json();
+};
+
+
+//Category
 
 export const fetchCategories = async () => {
   const response = await fetch(`${API_BASE_URL}/high/categ`, {

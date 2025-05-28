@@ -1,12 +1,12 @@
 import React, { useState, useEffect, ChangeEvent, FormEvent } from "react";
-import { supabase } from "../supabaseClient";
+// import { supabase } from "../supabaseClient";
 import styled from "styled-components";
 import SearchBox from "../components/SearchBox";
 import Modal from "../components/Modal";
 import { PaginationContainer } from "../StyledComponent";
 import { Contractor } from "../models";
 
-
+import { createContractor, deleteContractor, fetchContractors, updateContractor } from "../api";
 // Styled Components for Styling
 const Container = styled.div`
   max-width: 1500px;
@@ -125,18 +125,20 @@ const ContractorComp: React.FC = () => {
     setCurrentPage(newPage);
   };
   
-  const fetchContractors = async () => {
-    try {
-      const { data, error } = await supabase.from("contractor").select("*");
-      if (error) throw error;
-      setContractors(data || []);
-    } catch (error) {
-      console.error("Error fetching contractors:", error);
-    }
-  };
+  
+const loadContractors = async () => {
+  try {
+    const data = await fetchContractors();
+    console.log("Contractors fetched:", data);
+    setContractors(data || []);
+    console.log("Contractors state updated:", contractors);
+  } catch (error) {
+    console.error("Error fetching contractors:", error);
+  }
+};
 
   useEffect(() => {
-    fetchContractors();
+    loadContractors();
   }, []);
 
   useEffect(() => {
@@ -186,34 +188,23 @@ const ContractorComp: React.FC = () => {
   };
 
   const handleSubmit = async (e: FormEvent) => {
-    e.preventDefault();
-
-    try {
-      if (editingCode !== null) {
-        // Update an existing contractor
-        const { error } = await supabase
-          .from("contractor")
-          .update(formData)
-          .eq("code", editingCode);
-
-        if (error) throw error;
-
-        // Clear editing state after updating
-        setEditingCode(null);
-      } else {
-        // Add a new contractor
-        const { error } = await supabase.from("contractor").insert([formData]);
-
-        if (error) throw error;
-      }
-
-      // Refresh the list and reset the form
-      fetchContractors();
-      handleCloseModal();
-    } catch (error) {
-      console.error("Error saving contractor:", error);
+  e.preventDefault();
+  try {
+    if (editingCode !== null) {
+      // Update contractor
+      await updateContractor(editingCode, formData);
+      setEditingCode(null);
+    } else {
+      // Create contractor
+      await createContractor(formData);
     }
-  };
+    loadContractors();
+    fetchContractors();
+    handleCloseModal();
+  } catch (error) {
+    console.error("Error saving contractor:", error);
+  }
+};
 
   const handleEdit = (contractor: Contractor) => {
     setEditingCode(contractor.code);
@@ -232,14 +223,14 @@ const ContractorComp: React.FC = () => {
   };
 
   const handleDelete = async (code: number) => {
-    try {
-      const { error } = await supabase.from("contractor").delete().eq("code", code);
-      if (error) throw error;
-      fetchContractors(); // Refresh the list
-    } catch (error) {
-      console.error("Error deleting contractor:", error);
-    }
-  };
+  try {
+    await deleteContractor(code);
+    loadContractors();
+    fetchContractors();
+  } catch (error) {
+    console.error("Error deleting contractor:", error);
+  }
+};
 
   // Filter contractors dynamically based on the search term
   const filteredContractors = contractors.filter((contractor) => {
