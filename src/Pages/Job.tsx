@@ -6,7 +6,8 @@ import JobModal from "../components/JobModal";
 import { fetchJobService } from "../services/SupaEndPoints";
 import { PaginationContainer } from "../StyledComponent";
 import { Job } from "../models";
-
+import { createJob, deleteJob, fetchJobs as fetchJobsApi, updateJob, fetchCategories, createCategory, updateCategory } from "../api";
+import { data } from "react-router-dom";
 // (Existing styled-components code...)
 const Container = styled.div`
   max-width: 1500px;
@@ -125,16 +126,19 @@ const JobComp: React.FC = () => {
   }, []);
 
   const fetchJobs = async () => {
-    const jobData = await fetchJobService();
+    const jobData = await fetchJobsApi();
     if (jobData) setJobs(jobData);
   };
 
-  const fetchCategories = async () => {
+  const fetchCategoriesData = async () => {
     try {
-      const { data, error } = await supabase.from("categ").select("*");
-      if (error) throw error;
+      const categoryData = await fetchCategories();
+      if (!categoryData) {
+        console.error("No categories found");
+        return;
+      }
 
-      const transformedData = data.map((item) => ({
+      const transformedData = categoryData.map((item:any) => ({
         value: item.code,
         label: item.name,
       }));
@@ -147,7 +151,7 @@ const JobComp: React.FC = () => {
 
   useEffect(() => {
     fetchJobs();
-    fetchCategories();
+    fetchCategoriesData();
   }, []);
 
   const handleOpenModal = (job?: Job) => {
@@ -176,13 +180,13 @@ const JobComp: React.FC = () => {
 
     try {
       if (editingCode !== null) {
-        await supabase
-          .from("job")
-          .update(formData)
-          .eq("code", editingCode);
-      } else {
-        await supabase.from("job").insert([formData]);
-      }
+            // Update contractor
+            await updateJob(editingCode, formData);
+            setEditingCode(null);
+          } else {
+            // Create contractor
+            await createJob(formData);
+          }
       fetchJobs();
       handleCloseModal();
     } catch (error) {
@@ -201,40 +205,41 @@ const JobComp: React.FC = () => {
 
   const handleDelete = async (code: number) => {
     try {
-      const { error } = await supabase.from("job").delete().eq("code", code);
-      if (error) throw error;
+      await deleteJob(code);
       fetchJobs(); // Refresh the list
     } catch (error) {
       console.error("Error deleting job:", error);
     }
   };
 
-  // Function to handle adding a new category
   const handleAddCategory = async (newCategory: { value: number; label: string }) => {
-    try {
-      // Save the new category to the database
-      const { data, error } = await supabase
-        .from("categ")
-        .insert([{ name: newCategory.label }])
-        .select();
+  try {
+    const result = await createCategory({
+      name: newCategory.label,
+    });
 
-      if (error) throw error;
+    const { error } = result;
+    if (error) throw error;
 
-      // Update the jobCategoryOptions state with the new category
-      if (data && data.length > 0) {
-        const addedCategory = data[0];
-        setJobCategoryOptions((prevOptions) => [
-          ...prevOptions,
-          { value: addedCategory.code, label: addedCategory.name },
-        ]);
-      }
+    if (result && result.length > 0) {
+      const addedCategory = result[0]; // from backend: { code, name }
 
-      // Refresh the categories list
-      fetchCategories();
-    } catch (error) {
-      console.error("Error adding category:", error);
+      // Use backend-generated ID
+      const newOption = { value: addedCategory.code, label: addedCategory.name };
+
+      setJobCategoryOptions((prevOptions) => [
+        ...prevOptions,
+        newOption,
+      ]);
+
+      fetchCategories(); // Optional, if you want to refresh from the backend
     }
-  };
+
+  } catch (error) {
+    console.error("Error adding category:", error);
+  }
+};
+
 
   // Filter jobs dynamically based on the search term
   const filteredJobs = jobs.filter((job) => {

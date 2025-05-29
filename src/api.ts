@@ -164,7 +164,7 @@ export const fetchJobs = async () => {
   });
   if (!response.ok) throw new Error('Error fetching jobs');
   const data = await response.json();
-  return data.jobs; // Assuming your Express API returns { jobs: [...] }
+  return data; // Assuming your Express API returns { jobs: [...] }
 };
 export const createJob = async (jobData: Omit<Job, "code">) => {
   const response = await fetch(`${API_BASE_URL}/high/job`, {
