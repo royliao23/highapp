@@ -1,5 +1,5 @@
 // api.ts
-import { Categ, Contractor, Project, Job } from './models'; // Adjust the import path as necessary
+import { Categ, Contractor, Project, Job, Purchase } from './models'; // Adjust the import path as necessary
 const API_BASE_URL = process.env.REACT_APP_API_NODE;
 if (!API_BASE_URL) {
   throw new Error("REACT_APP_API_NODE is not defined in .env");
@@ -201,3 +201,51 @@ export const deleteJob = async (code: number) => {
   if (!response.ok) throw new Error('Error deleting job');
   return await response.json();
 }
+
+// purchase_order
+export const fetchPO = async () => {
+  const response = await fetch(`${API_BASE_URL}/high/po`, {
+    headers: {
+      'Authorization': `Bearer ${localStorage.getItem('authToken')}`
+    }
+  });
+  if (!response.ok) throw new Error('Error fetching po');
+  const data = await response.json();
+  return data; // Assuming your Express API returns { jobs: [...] }
+};
+export const createPO = async (poData: Omit<any, "code">) => {
+  const response = await fetch(`${API_BASE_URL}/high/po`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${localStorage.getItem('authToken')}`
+    },
+    body: JSON.stringify(poData)
+  });
+  if (!response.ok) throw new Error('Error creating po');
+  return await response.json();
+};  
+
+export const updatePO = async (code: number, poData: Omit<any, "code">) => {
+  const response = await fetch(`${API_BASE_URL}/high/po/${code}`, {
+    method: 'PUT',
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${localStorage.getItem('authToken')}`
+    },
+    body: JSON.stringify(poData)
+  });
+  if (!response.ok) throw new Error('Error updating job');
+  return await response.json();
+};
+export const deletePO = async (code: number) => {
+  const response = await fetch(`${API_BASE_URL}/high/po/${code}`, {
+    method: 'DELETE',
+    headers: {
+      'Authorization': `Bearer ${localStorage.getItem('authToken')}`
+    }
+  });
+  if (!response.ok) throw new Error('Error deleting job');
+  return await response.json();
+}
+

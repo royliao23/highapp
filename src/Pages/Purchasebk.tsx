@@ -9,8 +9,6 @@ import { fetchInvoiceDetails, fetchJobService } from "../services/SupaEndPoints"
 import { Purchase, Contractor } from "../models";
 import { useNavigationService } from "../services/SharedServices";
 import { PaginationContainer } from "../StyledComponent";
-import { createPO,updatePO,fetchPO,deletePO, fetchCategories as fc,fetchJobs as fj,fetchProjects as fp } from "../api";
-
 // Styled Components for Styling
 const Container = styled.div`
   max-width: 1500px;
@@ -210,20 +208,20 @@ const PurchaseComp: React.FC = () => {
   };
 
   const fetchJobCategories = async () => {
-      try {
-        const { data, error } = await supabase.from("categ").select("*");
-        if (error) throw error;
-  
-        const transformedData = data.map((item) => ({
-          value: item.code,
-          label: item.name,
-        }));
-  
-        setJobCategoryOptions(transformedData);
-      } catch (error) {
-        console.error("Error fetching job categories:", error);
-      }
-    };
+    try {
+      const { data, error } = await supabase.from("categ").select("*");
+      if (error) throw error;
+
+      const transformedData = data.map((item) => ({
+        value: item.code,
+        label: item.name,
+      }));
+
+      setJobCategoryOptions(transformedData);
+    } catch (error) {
+      console.error("Error fetching job categories:", error);
+    }
+  };
 
   useEffect(() => {
     fetchJobCategories();
@@ -285,21 +283,18 @@ const PurchaseComp: React.FC = () => {
 
   const fetchPurchases = async () => {
     try {
-      const { data, error } = await fetchPO();
+      const { data, error } = await supabase
+        .from("purchase_order")
+        .select(`
+        *,
+        invoice:jobby (code, cost, ref),
+        job_name:job (code, name)
+      `);
       if (error) throw error;
-      console.log("Fetched purchases:", data);
       setPurchases(data || []);
     } catch (error) {
       console.error("Error fetching purchases:", error);
     }
-    try {
-        const data = await fetchPO();
-        console.log("PO fetched:", data);
-        setPurchases(data || []);
-        console.log("Purchases state updated:", purchases);
-      } catch (error) {
-        console.error("Error fetching purchases:", error);
-      }
   };
   const [projectOptions, setProjectOptions] = useState([
     { value: 0, label: "" },
@@ -461,15 +456,21 @@ const PurchaseComp: React.FC = () => {
 
       if (editingCode !== null) {
         // Update an existing purchase
-        const { error } = await updatePO(editingCode, payload); // Use the payload without `invoice`
-          
+        const { error } = await supabase
+          .from("purchase_order")
+          .update(payload) // Use the payload without `invoice`
+          .eq("code", editingCode);
+
         if (error) throw error;
         alert("Purchase updated successfully");
         // Clear editing state after updating
         setEditingCode(null);
       } else {
         // Add a new purchase
-        const { error } = await createPO(payload); // Use the payload without `invoice`
+        const { error } = await supabase
+          .from("purchase_order")
+          .insert([payload]); // Use the payload without `invoice`
+
         if (error) throw error;
         alert("Purchase added successfully");
       }
@@ -521,7 +522,7 @@ const PurchaseComp: React.FC = () => {
 
   const handleDelete = async (code: number) => {
     try {
-      const { error } = await deletePO(code);
+      const { error } = await supabase.from("purchase_order").delete().eq("code", code);
       if (error) throw error;
       fetchPurchases(); // Refresh the list
     } catch (error) {
@@ -902,7 +903,7 @@ const PurchaseComp: React.FC = () => {
               ).toFixed(2)}
             </div>
 
-            <Button onClick={handleSubmit}>Save Purchase</Button>
+            <Button onClick={handleSubmit}>Save purchase</Button>
 
             {(formData.invoice || []).reduce((total, inv) => total + (inv.cost || 0), 0) < originalCost && (
               <Button
