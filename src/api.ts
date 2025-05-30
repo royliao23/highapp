@@ -115,7 +115,7 @@ export const fetchCategories = async () => {
   });
   if (!response.ok) throw new Error('Error fetching categories');
   const data = await response.json();
-  return data.sales; // Assuming your Express API returns { sales: [...] }
+  return data; // Assuming your Express API returns { sales: [...] }
 };
 
 export const createCategory = async (categoryData: Omit<Categ, "code">) => {
