@@ -9,7 +9,7 @@ import { fetchInvoiceDetails, fetchJobService } from "../services/SupaEndPoints"
 import { Purchase, Contractor } from "../models";
 import { useNavigationService } from "../services/SharedServices";
 import { PaginationContainer } from "../StyledComponent";
-import { createPO,updatePO,fetchPO,deletePO, fetchCategories as fc,fetchJobs as fj,fetchProjects as fp } from "../api";
+import { createPO,updatePO,fetchPO,deletePO, fetchCategories as fc, createCategory as ccateg, fetchJobs as fj, createJob as cj, fetchProjects as fp, fetchContractors as ft, createContractor as cc } from "../api";
 
 // Styled Components for Styling
 const Container = styled.div`
@@ -208,22 +208,21 @@ const PurchaseComp: React.FC = () => {
   const handlePageChange = (newPage: number) => {
     setCurrentPage(newPage);
   };
-
   const fetchJobCategories = async () => {
       try {
-        const { data, error } = await supabase.from("categ").select("*");
-        if (error) throw error;
-  
-        const transformedData = data.map((item) => ({
+        const data = await fc();
+        const transformedData = data.map((item:any) => ({
           value: item.code,
           label: item.name,
         }));
   
         setJobCategoryOptions(transformedData);
       } catch (error) {
-        console.error("Error fetching job categories:", error);
+        console.error("Error fetching categories:", error);
       }
     };
+  
+    
 
   useEffect(() => {
     fetchJobCategories();
@@ -261,25 +260,15 @@ const PurchaseComp: React.FC = () => {
     e.preventDefault();
 
     try {
-      if (editingJobCode !== null) {
-        // Update existing job
-        const { error } = await supabase
-          .from("job")
-          .update(formJobData)
-          .eq("code", editingJobCode); // Assuming 'code' is the ID field
-
-        if (error) throw error;
-      } else {
-        // Insert new job
-        const { error } = await supabase.from("job").insert([formJobData]);
-        if (error) throw error;
+      
+        const data = await cj(formJobData)
+        if (data.error) throw data.error;
+        handleJobCloseModal();
+        fetchJobs();
       }
 
-      // Close the modal and refresh job list
-      handleJobCloseModal();
-      fetchJobs(); // Assuming you have this function to refresh job data
-    } catch (error) {
-      console.error("Error saving job:", error);
+    catch (error) {
+      console.error("Error adding job:", error);
     }
   };
 
@@ -305,25 +294,39 @@ const PurchaseComp: React.FC = () => {
     { value: 0, label: "" },
   ]);
 
+  // const fetchProjects = async () => {
+  //   try {
+  //     const { data, error } = await supabase.from("project").select("*");
+  //     if (error) throw error;
+
+  //     // Transform data into { value, label } format
+  //     const transformedData = data.map((item) => ({
+  //       value: item.code, // Assuming `id` is the unique identifier
+  //       label: item.project_name, // Assuming `name` is the category name
+  //     }));
+
+  //     console.log("Fetched projects:", transformedData);
+
+  //     // Update the state with fetched categories
+  //     setProjectOptions(transformedData);
+  //   } catch (error) {
+  //     console.error("Error fetching projects:", error);
+  //   }
+  // };
+
   const fetchProjects = async () => {
-    try {
-      const { data, error } = await supabase.from("project").select("*");
-      if (error) throw error;
-
-      // Transform data into { value, label } format
-      const transformedData = data.map((item) => ({
-        value: item.code, // Assuming `id` is the unique identifier
-        label: item.project_name, // Assuming `name` is the category name
-      }));
-
-      console.log("Fetched projects:", transformedData);
-
-      // Update the state with fetched categories
-      setProjectOptions(transformedData);
-    } catch (error) {
-      console.error("Error fetching projects:", error);
-    }
-  };
+      try {
+        const data = await fp();
+        const transformedData = data.map((item:any) => ({
+          value: item.id,
+          label: item.project_name,
+        }));
+  
+        setProjectOptions(transformedData);
+      } catch (error) {
+        console.error("Error fetching projects:", error);
+      }
+    };
 
   useEffect(() => {
     fetchProjects();
@@ -335,11 +338,10 @@ const PurchaseComp: React.FC = () => {
 
   const fetchContractors = async () => {
     try {
-      const { data, error } = await supabase.from("contractor").select("*");
-      if (error) throw error;
-
+      const data = await ft();
+      
       // Transform data into { value, label } format
-      const transformedData = data.map((item) => ({
+      const transformedData = data.map((item:any) => ({
         value: item.code, // Assuming `id` is the unique identifier
         label: item.company_name, // Assuming `name` is the category name
       }));
@@ -353,6 +355,8 @@ const PurchaseComp: React.FC = () => {
     }
   };
 
+  
+
   useEffect(() => {
     fetchContractors();
   }, []);
@@ -363,9 +367,9 @@ const PurchaseComp: React.FC = () => {
 
   const fetchJobs = async () => {
     try {
-      const jobData = await fetchJobService();
+      const jobData = await fj();
       // Transform data into { value, label } format
-      const transformedData = jobData?.map((item) => ({
+      const transformedData = jobData?.map((item:any) => ({
         value: item.code,
         label: item.name,
       }));
@@ -486,9 +490,8 @@ const PurchaseComp: React.FC = () => {
     e.preventDefault();
 
     try {
-      const { error } = await supabase.from("contractor").insert([formContractorData]);
-      if (error) throw error;
-
+      const data = await cc(formContractorData);
+      if (data.error) throw data.error;
       // Refresh the list and reset the form
       fetchContractors();
       handleContractorCloseModal();
@@ -568,32 +571,30 @@ const PurchaseComp: React.FC = () => {
     }));
   };
 
-  const fetchCategories = async () => {
-    try {
-      const { data, error } = await supabase.from("categ").select("*");
-      if (error) throw error;
+  // const fetchCategories = async () => {
+  //   try {
+  //     const { data, error } = await supabase.from("categ").select("*");
+  //     if (error) throw error;
 
-      const transformedData = data.map((item) => ({
-        value: item.code,
-        label: item.name,
-      }));
+  //     const transformedData = data.map((item) => ({
+  //       value: item.code,
+  //       label: item.name,
+  //     }));
 
-      setJobCategoryOptions(transformedData);
-    } catch (error) {
-      console.error("Error fetching categories:", error);
-    }
-  };
+  //     setJobCategoryOptions(transformedData);
+  //   } catch (error) {
+  //     console.error("Error fetching categories:", error);
+  //   }
+  // };
 
   // Function to handle adding a new category
   const handleAddCategory = async (newCategory: { value: number; label: string }) => {
     try {
       // Save the new category to the database
-      const { data, error } = await supabase
-        .from("categ")
-        .insert([{ name: newCategory.label }])
-        .select();
-
-      if (error) throw error;
+      const data = await ccateg({ name: newCategory.label });
+      if (data.error) {
+        throw data.error;
+      }
 
       // Update the jobCategoryOptions state with the new category
       if (data && data.length > 0) {
@@ -605,7 +606,7 @@ const PurchaseComp: React.FC = () => {
       }
 
       // Refresh the categories list
-      fetchCategories();
+      fetchJobCategories();
     } catch (error) {
       console.error("Error adding category:", error);
     }
