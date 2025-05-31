@@ -10,8 +10,6 @@ import { useNavigationService } from "../services/SharedServices";
 import { fetchPayDetails, fetchPurchaseDetails } from "../services/SupaEndPoints";
 import * as XLSX from 'xlsx';
 import { PaginationContainer } from "../StyledComponent";
-import { createInvoice, updateInvoice, deleteInvoice, fetchInvoice, fetchInNPay, fetchCategories as fc, createCategory as ccateg, fetchJobs as fj, createJob as cj, fetchProjects as fp, fetchContractors as ft, createContractor as cc } from "../api";
-import { da } from "date-fns/locale";
 // Styled Components for Styling
 const Container = styled.div`
   max-width: 1500px;
@@ -306,24 +304,23 @@ const InvoiceComp: React.FC = () => {
 
   const fetchInvoices = async () => {
     try {
-      const data = await fetchInNPay()
+      const { data, error } = await supabase
+        .from("jobby")
+        .select("*, pay(*)")
+        .order("code", { ascending: false });
   
-      if (data.error) {
-        throw data.error;
-      }
+      if (error) throw error;
   
-      const invoicesWithPaid = data.map((invoice: any) => ({
-      ...invoice,
-      paid: invoice.pay?.reduce((sum: number, payment: any) => sum + payment.amount, 0) || 0,
-      outstanding: (invoice.cost || 0) - (invoice.pay?.reduce((sum: number, payment: any) => sum + payment.amount, 0) || 0)
-    }));
-
-    setInvoices(invoicesWithPaid);
-  } catch (error) {
-    console.error("Error fetching invoices:", error);
-    
-  }
-    
+      const invoicesWithPaid = data.map((invoice) => ({
+        ...invoice,
+        paid: invoice.pay?.reduce((sum:number, payment:any) => sum + payment.amount, 0) || 0,
+        outstanding: (invoice.cost || 0) - (invoice.pay?.reduce((sum:number, p:any) => sum + p.amount, 0) || 0),
+      }));
+  
+      setInvoices(invoicesWithPaid);
+    } catch (error) {
+      console.error("Error fetching Invoices:", error);
+    }
   };
   
   const [projectOptions, setProjectOptions] = useState([
@@ -331,18 +328,24 @@ const InvoiceComp: React.FC = () => {
   ]);
 
   const fetchProjects = async () => {
-        try {
-          const data = await fp();
-          const transformedData = data.map((item:any) => ({
-            value: item.id,
-            label: item.project_name,
-          }));
-    
-          setProjectOptions(transformedData);
-        } catch (error) {
-          console.error("Error fetching projects:", error);
-        }
-      };
+    try {
+      const { data, error } = await supabase.from("project").select("*");
+      if (error) throw error;
+
+      // Transform data into { value, label } format
+      const transformedData = data.map((item) => ({
+        value: item.code, // Assuming `id` is the unique identifier
+        label: item.project_name, // Assuming `name` is the category name
+      }));
+
+      console.log("Fetched projects:", transformedData);
+
+      // Update the state with fetched categories
+      setProjectOptions(transformedData);
+    } catch (error) {
+      console.error("Error fetching projects:", error);
+    }
+  };
 
   useEffect(() => {
     fetchProjects();
@@ -353,23 +356,24 @@ const InvoiceComp: React.FC = () => {
   ]);
 
   const fetchContractors = async () => {
-      try {
-        const data = await ft();
-        
-        // Transform data into { value, label } format
-        const transformedData = data.map((item:any) => ({
-          value: item.code, // Assuming `id` is the unique identifier
-          label: item.company_name, // Assuming `name` is the category name
-        }));
-  
-        console.log("Fetched contractors:", transformedData);
-  
-        // Update the state with fetched categories
-        setContractorOptions(transformedData);
-      } catch (error) {
-        console.error("Error fetching contractors:", error);
-      }
-    };
+    try {
+      const { data, error } = await supabase.from("contractor").select("*");
+      if (error) throw error;
+
+      // Transform data into { value, label } format
+      const transformedData = data.map((item) => ({
+        value: item.code, // Assuming `id` is the unique identifier
+        label: item.company_name, // Assuming `name` is the category name
+      }));
+
+      console.log("Fetched contractors:", transformedData);
+
+      // Update the state with fetched categories
+      setContractorOptions(transformedData);
+    } catch (error) {
+      console.error("Error fetching contractors:", error);
+    }
+  };
 
   useEffect(() => {
     fetchContractors();
@@ -380,22 +384,24 @@ const InvoiceComp: React.FC = () => {
   ]);
 
   const fetchJobs = async () => {
-      try {
-        const jobData = await fj();
-        // Transform data into { value, label } format
-        const transformedData = jobData?.map((item:any) => ({
-          value: item.code,
-          label: item.name,
-        }));
-  
-        console.log("Fetched jobs:", transformedData);
-  
-        // Update the state with fetched categories
-        setJobOptions(transformedData || []);
-      } catch (error) {
-        console.error("Error fetching jobs:", error);
-      }
-    };
+    try {
+      const { data, error } = await supabase.from("job").select("*");
+      if (error) throw error;
+
+      // Transform data into { value, label } format
+      const transformedData = data.map((item) => ({
+        value: item.code,
+        label: item.name,
+      }));
+
+      console.log("Fetched jobs:", transformedData);
+
+      // Update the state with fetched categories
+      setJobOptions(transformedData);
+    } catch (error) {
+      console.error("Error fetching jobs:", error);
+    }
+  };
 
   useEffect(() => {
     fetchJobs();
@@ -433,6 +439,8 @@ const InvoiceComp: React.FC = () => {
     }
     setIsModalOpen(true);
   };
+
+
 
   const handleCloseModal = () => {
     setFormData({
@@ -475,35 +483,36 @@ const InvoiceComp: React.FC = () => {
     try {
       if (editingCode !== null) {
         // Update an existing Invoice
-        const data  = await updateInvoice(editingCode, formData);
-        if (data.error) {
+        const { data, error } = await supabase
+          .from("jobby")
+          .update(formData)
+          .eq("code", editingCode)
+          .select() // This forces returning the updated record;
+        
+        if (error) {throw error} else if (data.length > 0) {
+          alert('Update succeeded.')
+        } else {
           alert('Only current month transactions are allowed to be updated or there are no matching rows')
-          throw data.error;
         }
-        alert("Invoice updated successfully");
         
         // Clear editing state after updating
         setEditingCode(null);
       } else {
         // Add a new Invoice
-        const data = await createInvoice(formData);
+        const { error } = await supabase.from("jobby").insert([formData]);
 
-        if (data.error) {
-          alert('failed to add Invoice, please check the data or try again later')
+        if (error) throw error;
         alert("Invoice added successfully");
         
       }
 
       // Refresh the list and reset the form
-      
-    } 
-    fetchInvoices();
-    handleCloseModal();
-  }
-    catch (error) {
-        console.error("Error saving Invoice:", error);
-      };
-  }
+      fetchInvoices();
+      handleCloseModal();
+    } catch (error) {
+      console.error("Error saving Invoice:", error);
+    }
+  };
 
   const handleContractorSubmit = async (e: FormEvent) => {
     e.preventDefault();
@@ -541,12 +550,12 @@ const InvoiceComp: React.FC = () => {
 
   const handleDelete = async (code: number) => {
     try {
-      const data = await deleteInvoice(code);
-      if (data.error) {
-        alert('cannot delete Invoice, please check the data or try again later')
-        throw data.error;
+      const { data,error } = await supabase.from("jobby").delete().eq("code", code).select();
+      if (error) {throw error} else if (data.length > 0) {
+        alert('Deletion succeeded.')
+      } else {
+        alert('Only current month transactions are allowed to be deleted or there are no matching rows')
       }
-      alert("Invoice deleted successfully");
       fetchInvoices(); // Refresh the list
     } catch (error) {
       console.error("Error deleting Invoice:", error);
@@ -597,16 +606,18 @@ const InvoiceComp: React.FC = () => {
 
   const fetchCategories = async () => {
     try {
-            const data = await fc();
-            const transformedData = data.map((item:any) => ({
-              value: item.code,
-              label: item.name,
-            }));
-      
-            setJobCategoryOptions(transformedData);
-          } catch (error) {
-            console.error("Error fetching categories:", error);
-          }
+      const { data, error } = await supabase.from("categ").select("*");
+      if (error) throw error;
+
+      const transformedData = data.map((item) => ({
+        value: item.code,
+        label: item.name,
+      }));
+
+      setJobCategoryOptions(transformedData);
+    } catch (error) {
+      console.error("Error fetching categories:", error);
+    }
   };
 
   // Function to handle adding a new category
@@ -651,7 +662,7 @@ const exportToCSV = () => {
             invoice.contact,
             projectOptions.find(option => option.value === invoice.project_id)?.label || "Unknown",
             jobOptions.find(option => option.value === invoice.job_id)?.label || "Unknown",
-            invoice.cost?.toFixed(2),
+            invoice.cost.toFixed(2),
             contractorOptions.find(option => option.value === invoice.by_id)?.label || "Unknown",
             invoice.ref,
             invoice.po_id,
@@ -767,7 +778,7 @@ const exportToExcel = () => {
               <strong>Contact Person:</strong> {Invoice.contact} <br />
               <strong>Project:</strong> {projectOptions.find((option) => option.value === Invoice.project_id)?.label || "Unknown"} <br />
               <strong>Supplier Name:</strong> {contractorOptions.find((option) => option.value === Invoice.by_id)?.label || "Unknown"} <br />
-              <strong>Price:</strong> {(Invoice.cost)?.toFixed(2)} <br />
+              <strong>Price:</strong> {(Invoice.cost).toFixed(2)} <br />
               <strong>Job:</strong> {jobOptions.find((option) => option.value === Invoice.job_id)?.label || "Unknown"} <br />
               <strong>PO:</strong> <span className="text-blue-500" onClick={async () => {
                   try {
@@ -784,7 +795,7 @@ const exportToExcel = () => {
               {Invoice.pay && Invoice.pay.length > 0
                 ? Invoice.pay.map((p: any, index: number) => 
                     <span key={p.code} className="invoiceList">
-                      ${p.amount?.toFixed(2)}
+                      ${p.amount.toFixed(2)}
                       <button
                         onClick={async () => {
                           try {
@@ -844,7 +855,7 @@ const exportToExcel = () => {
                 <Td>{Invoice.contact}</Td>
                 <Td>{projectOptions.find((option) => option.value === Invoice.project_id)?.label || "Unknown"}</Td>
                 <Td>{jobOptions.find((option) => option.value === Invoice.job_id)?.label || "Unknown"}</Td>
-                <Td>{(Invoice.cost)?.toFixed(2)}</Td>
+                <Td>{(Invoice.cost).toFixed(2)}</Td>
                 <Td>{contractorOptions.find((option) => option.value === Invoice.by_id)?.label || "Unknown"}</Td>
                 <Td>{Invoice.ref}</Td>
                 <Td><span className="text-blue-500" onClick={async () => {
@@ -860,7 +871,7 @@ const exportToExcel = () => {
                 {Invoice.pay && Invoice.pay.length > 0
                 ? Invoice.pay.map((p: any, index: number) => 
                     <span key={p.code} className="invoiceList">
-                      ${p.amount?.toFixed(2)}
+                      ${p.amount.toFixed(2)}
                       <button 
                         onClick={async () => {
                           try {

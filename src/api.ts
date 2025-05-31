@@ -1,4 +1,5 @@
 // api.ts
+import { useState } from 'react';
 import { Categ, Contractor, Project, Job, Purchase } from './models'; // Adjust the import path as necessary
 const API_BASE_URL = process.env.REACT_APP_API_NODE;
 if (!API_BASE_URL) {
@@ -246,6 +247,64 @@ export const deletePO = async (code: number) => {
     }
   });
   if (!response.ok) throw new Error('Error deleting job');
+  return await response.json();
+}
+
+// jobby
+export const fetchInvoice = async () => {
+  const response = await fetch(`${API_BASE_URL}/high/invoice`, {
+    headers: {
+      'Authorization': `Bearer ${localStorage.getItem('authToken')}`
+    }
+  });
+  if (!response.ok) throw new Error('Error fetching invoice');
+  const data = await response.json();
+  return data; // Assuming your Express API returns { jobs: [...] }
+};
+
+export const fetchInNPay = async () => {
+  const response = await fetch(`${API_BASE_URL}/high/invoice/invnpay`, {
+    headers: {
+      'Authorization': `Bearer ${localStorage.getItem('authToken')}`
+    }
+  });
+  if (!response.ok) throw new Error('Error fetching invoice');
+  const data = await response.json();
+  return data; // Assuming your Express API returns { jobs: [...] }
+};
+export const createInvoice = async (poData: Omit<any, "code">) => {
+  const response = await fetch(`${API_BASE_URL}/high/invoice`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${localStorage.getItem('authToken')}`
+    },
+    body: JSON.stringify(poData)
+  });
+  if (!response.ok) throw new Error('Error creating invoice');
+  return await response.json();
+};  
+
+export const updateInvoice = async (code: number, poData: Omit<any, "code">) => {
+  const response = await fetch(`${API_BASE_URL}/high/invoice/${code}`, {
+    method: 'PUT',
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${localStorage.getItem('authToken')}`
+    },
+    body: JSON.stringify(poData)
+  });
+  if (!response.ok) throw new Error('Error updating invoice');
+  return await response.json();
+};
+export const deleteInvoice = async (code: number) => {
+  const response = await fetch(`${API_BASE_URL}/high/invoice/${code}`, {
+    method: 'DELETE',
+    headers: {
+      'Authorization': `Bearer ${localStorage.getItem('authToken')}`
+    }
+  });
+  if (!response.ok) throw new Error('Error deleting invoice');
   return await response.json();
 }
 
