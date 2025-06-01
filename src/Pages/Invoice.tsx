@@ -214,6 +214,11 @@ const InvoiceComp: React.FC = () => {
   const [searchTerm, setSearchTerm] = useState<string>("");
   const [currentPage, setCurrentPage] = useState<number>(1);
   const [itemsPerPage] = useState<number>(10);
+  const [editingJobCode, setEditingJobCode] = useState<number | null>(null);
+  const [jobCategoryOptions, setJobCategoryOptions] = useState([
+    { value: 0, label: "" },
+  ]); 
+
   const handlePageChange = (newPage: number) => {
     setCurrentPage(newPage);
   };
@@ -226,29 +231,10 @@ const InvoiceComp: React.FC = () => {
     job_category_id: 0, // Or whatever your data structure requires
     description: "",
   });
-  const [editingJobCode, setEditingJobCode] = useState<number | null>(null);
-  const [jobCategoryOptions, setJobCategoryOptions] = useState([
-    { value: 0, label: "" },
-  ]);  // For the dropdown in the job modal
-
-  const fetchJobCategories = async () => {
-    try {
-      const { data, error } = await supabase.from("categ").select("*");
-      if (error) throw error;
-
-      const transformedData = data.map((item) => ({
-        value: item.code,
-        label: item.name,
-      }));
-
-      setJobCategoryOptions(transformedData);
-    } catch (error) {
-      console.error("Error fetching job categories:", error);
-    }
-  };
+  
 
   useEffect(() => {
-    fetchJobCategories();
+    fetchCategories();
   }, []);
 
 
@@ -282,18 +268,10 @@ const InvoiceComp: React.FC = () => {
     e.preventDefault();
 
     try {
-      if (editingJobCode !== null) {
-        // Update existing job
-        const { error } = await supabase
-          .from("job")
-          .update(formJobData)
-          .eq("code", editingJobCode); // Assuming 'code' is the ID field
-
-        if (error) throw error;
-      } else {
-        // Insert new job
-        const { error } = await supabase.from("job").insert([formJobData]);
-        if (error) throw error;
+      const data = await cj(formJobData);
+      if (data.error) {
+        alert('failed to add job, please check the data or try again later')
+        throw data.error;
       }
 
       // Close the modal and refresh job list
@@ -509,8 +487,11 @@ const InvoiceComp: React.FC = () => {
     e.preventDefault();
 
     try {
-        const { error } = await supabase.from("contractor").insert([formContractorData]);
-        if (error) throw error;
+        const data = await cc(formContractorData);
+        if (data.error) {
+          alert('failed to add contractor, please check the data or try again later')
+          throw data.error;
+        }
       // Refresh the list and reset the form
       fetchContractors();
       handleContractorCloseModal();
@@ -612,14 +593,11 @@ const InvoiceComp: React.FC = () => {
   // Function to handle adding a new category
   const handleAddCategory = async (newCategory: { value: number; label: string }) => {
     try {
-      // Save the new category to the database
-      const { data, error } = await supabase
-        .from("categ")
-        .insert([{ name: newCategory.label }])
-        .select();
-
-      if (error) throw error;
-
+      
+      const data = await ccateg({ name: newCategory.label });
+      if (data.error) {
+        alert('failed to add category, please check the data or try again later')
+      }
       // Update the jobCategoryOptions state with the new category
       if (data && data.length > 0) {
         const addedCategory = data[0];
@@ -784,7 +762,7 @@ const exportToExcel = () => {
               {Invoice.pay && Invoice.pay.length > 0
                 ? Invoice.pay.map((p: any, index: number) => 
                     <span key={p.code} className="invoiceList">
-                      ${p.amount?.toFixed(2)}
+                      {p.amount?'$'+p.amount.toFixed(2):0}
                       <button
                         onClick={async () => {
                           try {
@@ -801,7 +779,7 @@ const exportToExcel = () => {
                         }}
                         className="text-blue-500 cursor-pointer"
                       >
-                        pay#{p.code}
+                        {p.code?'pay#'+p.code:''}
                       </button>
                     </span>
                   )
@@ -877,7 +855,7 @@ const exportToExcel = () => {
                         }}
                         className="text-blue-500 cursor-pointer"
                       >
-                        pay#:{p.code}
+                        {p.code}
                       </button>
                     </span>
                   )
