@@ -9,7 +9,7 @@ import { fetchInvoiceDetails, fetchJobService } from "../services/SupaEndPoints"
 import { Purchase, Contractor } from "../models";
 import { useNavigationService } from "../services/SharedServices";
 import { PaginationContainer } from "../StyledComponent";
-import { createPO,updatePO,fetchPO,deletePO, fetchCategories as fc, createCategory as ccateg, fetchJobs as fj, createJob as cj, fetchProjects as fp, fetchContractors as ft, createContractor as cc } from "../api";
+import { createPO,updatePO,fetchPO,deletePO, fetchCategories as fc, createCategory as ccateg, fetchJobs as fj, createJob as cj, fetchProjects as fp, fetchContractors as ft, createContractor as cc, createInvoice } from "../api";
 
 // Styled Components for Styling
 const Container = styled.div`
@@ -273,14 +273,7 @@ const PurchaseComp: React.FC = () => {
   };
 
   const fetchPurchases = async () => {
-    try {
-      const { data, error } = await fetchPO();
-      if (error) throw error;
-      console.log("Fetched purchases:", data);
-      setPurchases(data || []);
-    } catch (error) {
-      console.error("Error fetching purchases:", error);
-    }
+    
     try {
         const data = await fetchPO();
         console.log("PO fetched:", data);
@@ -294,25 +287,6 @@ const PurchaseComp: React.FC = () => {
     { value: 0, label: "" },
   ]);
 
-  // const fetchProjects = async () => {
-  //   try {
-  //     const { data, error } = await supabase.from("project").select("*");
-  //     if (error) throw error;
-
-  //     // Transform data into { value, label } format
-  //     const transformedData = data.map((item) => ({
-  //       value: item.code, // Assuming `id` is the unique identifier
-  //       label: item.project_name, // Assuming `name` is the category name
-  //     }));
-
-  //     console.log("Fetched projects:", transformedData);
-
-  //     // Update the state with fetched categories
-  //     setProjectOptions(transformedData);
-  //   } catch (error) {
-  //     console.error("Error fetching projects:", error);
-  //   }
-  // };
 
   const fetchProjects = async () => {
       try {
@@ -621,8 +595,8 @@ const PurchaseComp: React.FC = () => {
       return;
     }
     try {
-      const { error } = await supabase.from("jobby").insert([invoicePayload]);
-      if (error) throw error;
+      const data = await createInvoice(invoicePayload);
+      if (data.error) throw data.error;
       // Refresh the list and reset the form
       setTimeout(() => {
         alert("Invoice created successfully");
