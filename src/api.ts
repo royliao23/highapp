@@ -214,6 +214,17 @@ export const fetchPO = async () => {
   const data = await response.json();
   return data; // Assuming your Express API returns { jobs: [...] }
 };
+
+export const fetchPoandInv = async (code: number) => {
+  const response = await fetch(`${API_BASE_URL}/high/po/inv/${code}`, {
+    headers: {
+      'Authorization': `Bearer ${localStorage.getItem('authToken')}`
+    }
+  });
+  if (!response.ok) throw new Error('Error fetching po');
+  const data = await response.json();
+  return data; // Assuming your Express API returns { jobs: [...] }
+};
 export const createPO = async (poData: Omit<any, "code">) => {
   const response = await fetch(`${API_BASE_URL}/high/po`, {
     method: 'POST',

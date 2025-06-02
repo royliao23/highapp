@@ -16,7 +16,7 @@ import {
   Button,
 } from '@mui/material';
 
-import { fetchJobDetails, fetchContractorDetails, fetchProjectDetails } from '../services/SupaEndPoints';
+import { fetchJobDetails, fetchContractorDetails, fetchProjectDetails } from '../services/DetailService';
 import { useEffect, useState } from 'react';
 import { Pay } from '../models';
 interface Project {
@@ -111,7 +111,9 @@ function InvoiceView() {
 
   const fetchJobs = async () => {
     const jobData = await fetchJobDetails(invoice.job_id);
+    console.log("job data:", jobData);
     if (jobData) setJobDetails(jobData);
+    console.log("job details:", jobDetails);
   };
 
   const fetchContractors = async () => {

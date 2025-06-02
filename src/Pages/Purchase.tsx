@@ -5,11 +5,11 @@ import SearchBox from "../components/SearchBox";
 import Dropdown from "../components/Dropdown";
 import JobModalComp from "../components/JobModal";
 import ContractorModal from "../components/Modal";
-import { fetchInvoiceDetails, fetchJobService } from "../services/SupaEndPoints";
+// import { fetchInvoiceDetails, fetchJobService } from "../services/SupaEndPoints";
 import { Purchase, Contractor } from "../models";
 import { useNavigationService } from "../services/SharedServices";
 import { PaginationContainer } from "../StyledComponent";
-import { createPO,updatePO,fetchPO,deletePO, fetchCategories as fc, createCategory as ccateg, fetchJobs as fj, createJob as cj, fetchProjects as fp, fetchContractors as ft, createContractor as cc, createInvoice } from "../api";
+import { createPO,updatePO,fetchPO,deletePO, fetchCategories as fc, createCategory as ccateg, fetchJobs as fj, createJob as cj, fetchProjects as fp, fetchContractors as ft, createContractor as cc, createInvoice, fetchPoandInv } from "../api";
 
 // Styled Components for Styling
 const Container = styled.div`
@@ -684,7 +684,7 @@ const PurchaseComp: React.FC = () => {
               <strong>Invoices:</strong>{purchase.invoice?.map((inv, index) => (
                 <span className="invoiceList text-blue-500" key={index} onClick={async () => {
                   try {
-                    const invoice: any = await fetchInvoiceDetails(inv.code || 0); // Await the Promise
+                    const invoice: any = await fetchPoandInv(inv.code || 0); // Await the Promise
                     handleViewInvoice(invoice);
                   } catch (error) {
                     console.error("Error fetching purchase details:", error);
@@ -732,7 +732,7 @@ const PurchaseComp: React.FC = () => {
                   {purchase.invoice?.map((inv, index) => (
                     <span className="invoiceList" key={index} onClick={async () => {
                       try {
-                        const invoice: any = await fetchInvoiceDetails(inv.code || 0); // Await the Promise
+                        const invoice: any = await fetchPoandInv(inv.code || 0); // Await the Promise
                         handleViewInvoice(invoice);
                       } catch (error) {
                         console.error("Error fetching purchase details:", error);

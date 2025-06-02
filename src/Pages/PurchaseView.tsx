@@ -16,7 +16,7 @@ import {
 
 import { useEffect, useState } from 'react';
 
-import { fetchJobDetails, fetchContractorDetails, fetchProjectDetails } from '../services/SupaEndPoints';
+import { fetchJobDetails, fetchContractorDetails, fetchProjectDetails } from '../services/DetailService';
 
 
 const emailJsKey = process.env.REACT_APP_EMAILJS_PUBLIC_KEY;
