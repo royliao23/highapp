@@ -15,7 +15,7 @@ import {
   Button,
 } from '@mui/material';
 
-import { fetchJobDetails, fetchContractorDetails, fetchProjectDetails } from '../services/SupaEndPoints';
+import { fetchJobDetails, fetchContractorDetails, fetchProjectDetails } from '../services/DetailService';
 import { useEffect, useState } from 'react';
 
 interface Project {
@@ -131,7 +131,7 @@ if ( !emailJsKey || !emailJsServiceId || !emailJsTemplateId) {
   };
 
   const fetchContractors = async () => {
-    const contractorData = await fetchContractorDetails(pay.jobby.by_id.code);
+    const contractorData = await fetchContractorDetails(pay.jobby.by_id.code ?? pay.jobby.by_id);
     if (contractorData) setContractorDetails(contractorData);
   };
 

@@ -35,30 +35,14 @@ export const fetchContractorDetails = async (code: number) => { const response =
   return data; 
 };
 
-export const fetchPurchaseDetails = async (purchaseId: number) => {
-  try {
-    const { data, error } = await supabase.from("purchase_order").select("*").eq("code", purchaseId);
-    if (error) throw error;
-
-    return data.length > 0
-      ? {
-          code: data[0].code,
-          job_id: data,
-          by_id: data[0].by_id,
-          project_id: data,
-          ref: data[0].ref,
-          cost: data[0].cost,
-          contact: data[0].contact,
-          create_at:  data[0].create_at,
-          updated_at: data[0].updated_at,
-          due_at: data[0].due_at,
-          description: data[0].description,
-        }
-      : null;
-  } catch (error) {
-    console.error("Error fetching the purchase details:", error);
-    return null;
-  }
+export const fetchPurchaseDetails = async (code: number) => { const response = await fetch(`${API_BASE_URL}/high/po/${code}`, {
+    headers: {
+      'Authorization': `Bearer ${localStorage.getItem('authToken')}`
+    }
+  });
+  if (!response.ok) throw new Error('Error fetching po details');
+  const data = await response.json();
+  return data.po; 
 };
 
 export const fetchInvoiceDetails = async (invoiceId: number) => {
@@ -84,23 +68,14 @@ export const fetchInvoiceDetails = async (invoiceId: number) => {
   }
 };
 
-export const fetchPayDetails = async (payId: number) => {
-  try {
-    const { data, error } = await supabase
-      .from("pay")
-      .select("*, jobby(*)")
-      .eq("code", payId);
-
-    if (error) throw error;
-    if (data.length === 0) return null;
-    const pay = data[0];
-    return {
-      pay
-    };
-  } catch (error) {
-    console.error("Error fetching invoice details:", error);
-    return null;
-  }
+export const fetchPayDetails = async (code: number) => { const response = await fetch(`${API_BASE_URL}/high/pay/${code}`, {
+    headers: {
+      'Authorization': `Bearer ${localStorage.getItem('authToken')}`
+    }
+  });
+  if (!response.ok) throw new Error('Error fetching pay details');
+  const data = await response.json();
+  return data; 
 };
 
 

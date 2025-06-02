@@ -7,7 +7,9 @@ import JobModalComp from "../components/JobModal";
 import ContractorModal from "../components/Modal";
 import { Invoice, Contractor } from "../models";
 import { useNavigationService } from "../services/SharedServices";
-import { fetchPayDetails, fetchPurchaseDetails } from "../services/SupaEndPoints";
+import { fetchPurchaseDetails, fetchPayDetails } from "../services/DetailService";
+// import { fetchPayDetails, fetchPurchaseDetails } from "../services/SupaEndPoints";
+
 import * as XLSX from 'xlsx';
 import { PaginationContainer } from "../StyledComponent";
 import { createInvoice, updateInvoice, deleteInvoice, fetchInvoice, fetchInNPay, fetchCategories as fc, createCategory as ccateg, fetchJobs as fj, createJob as cj, fetchProjects as fp, fetchContractors as ft, createContractor as cc } from "../api";
@@ -762,14 +764,14 @@ const exportToExcel = () => {
               {Invoice.pay && Invoice.pay.length > 0
                 ? Invoice.pay.map((p: any, index: number) => 
                     <span key={p.code} className="invoiceList">
-                      {p.amount?'$'+p.amount.toFixed(2):0}
+                      {p.amount?'$'+p.amount?.toFixed(2):0}
                       <button
                         onClick={async () => {
                           try {
                             const pay:any = await fetchPayDetails(p.code); // Await the Promise
-                            console.log("Pay before view:", pay.pay);
+                            console.log("Pay before view:", pay);
                             if (pay) {
-                              handleViewPay(pay.pay);
+                              handleViewPay(pay);
                             } else {
                               console.error(`Pay record not found for pay code: ${p.code}`);
                             }
@@ -784,7 +786,7 @@ const exportToExcel = () => {
                     </span>
                   )
                 : ""}<br />
-                <strong>Outstanding:</strong> $ {Invoice.outstanding?.toFixed(2)} <br />
+                <strong>Outstanding:</strong> $ {Invoice?.outstanding?.toFixed(2)} <br />
                   {/* {(
                     Invoice.cost -
                     (Invoice.pay?.reduce((sum: number, p: any) => sum + p.amount, 0) || 0)
@@ -843,9 +845,9 @@ const exportToExcel = () => {
                         onClick={async () => {
                           try {
                             const pay:any = await fetchPayDetails(p.code); // Await the Promise
-                            console.log("Pay before view:", pay.pay);
+                            console.log("Pay before view:", pay);
                             if (pay) {
-                              handleViewPay(pay.pay);
+                              handleViewPay(pay);
                             } else {
                               console.error(`Pay record not found for pay code: ${p.code}`);
                             }

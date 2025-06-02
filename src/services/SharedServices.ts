@@ -277,7 +277,7 @@ export const useNavigationService = () => {
   };
 
   const handleViewPay = (pay: Pay) => {
-    console.log(pay);
+    console.log("view pay:",pay);
     navigate(`/pay/${pay.code}`, { state: { pay } });
   };
   return {
