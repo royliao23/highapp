@@ -1,13 +1,14 @@
 import React, { useState, useEffect, ChangeEvent, FormEvent } from "react";
-import { supabase } from "../supabaseClient";
+// import { supabase } from "../supabaseClient";
 import styled from "styled-components";
 import SearchBox from "../components/SearchBox";
 import Dropdown from "../components/Dropdown";
 import StringDropdown from "../components/StringDropdown";
 import { Pay, Contractor, } from "../models";
 import { useNavigationService } from "../services/SharedServices";
-import { fetchInvoiceDetails } from "../services/SupaEndPoints";
+import { fetchInvoiceDetails, fetchInvoicePayDetails } from "../services/DetailService";
 import { PaginationContainer } from "../StyledComponent";
+import { createPay,updatePay,fetchPay,deletePay,fetchPayNInv, fetchInNPay, updateInvoiceStatus } from "../api";
 
 // Styled Components for Styling
 const Container = styled.div`
@@ -189,11 +190,10 @@ const PayComp: React.FC = () => {
   
   const fetchPays = async () => {
     try {
-        const { data, error } = await supabase
-        .from("pay")
-        .select("*, jobby(*,by_id: contractor (*))") // Fetch all columns from pay and related invoice details
-        .order("code", { ascending: false });
-      if (error) throw error;
+        const data = await fetchPay(); // Fetch Pays and related invoice details
+      
+        // .select("*, jobby(*,by_id: contractor (*))") // Fetch all columns from pay and related invoice details
+      if (data.error) throw data.error;
       setPays(data || []);
     } catch (error) {
       console.error("Error fetching Pays:", error);
@@ -207,15 +207,20 @@ const PayComp: React.FC = () => {
 
   const fetchInvoiceOptions = async () => {
     try {
-        const { data, error } = await supabase
-            .from("jobby")
-            .select("*, pay(*)") // Fetch invoices with payments
-            .order("code", { ascending: false });
+        const data  = await fetchInNPay(); // Fetch invoices with payments
+            // .from("jobby")
+            // .select("*, pay(*)") // Fetch invoices with payments
+            // .order("code", { ascending: false });
 
-        if (error) throw error;
+        if (data.error) throw data.error;
+        if (!data || data.length === 0) {
+          // Handle empty data case
+          setInvoiceOptions([{ value: 0, label: "No invoices found" }]);
+          return;
+        }
 
         // Transform data into { value, label } format
-        const transformedData = data.map((item) => {
+        const transformedData = data.map((item: any) => {
             // Calculate total paid amount
             const totalPaid = item.pay?.reduce((sum:number, p:any) => sum + p.amount, 0) || 0;
             
@@ -299,20 +304,22 @@ const PayComp: React.FC = () => {
 
     try {
         // Fetch the invoice details to get the total cost and total paid amount
-        const { data: invoiceData, error: invoiceError } = await supabase
-            .from("jobby")
-            .select("cost, pay(*)")
-            .eq("code", formData.invoice_id)
-            .single(); // Fetch only one record
+        // const { data: invoiceData, error: invoiceError } = await supabase
+        //     .from("jobby")
+        //     .select("cost, pay(*)")
+        //     .eq("code", formData.invoice_id)
+        //     .single(); // Fetch only one record
 
-        if (invoiceError) throw invoiceError;
-        if (!invoiceData) throw new Error("Invoice not found.");
+        // if (invoiceError) throw invoiceError;
+        // if (!invoiceData) throw new Error("Invoice not found.");
+
+        const invoiceData = await fetchInvoicePayDetails(formData.invoice_id); // Fetch invoice details by ID
 
         // Calculate total paid amount
-        let totalPaid = invoiceData.pay?.reduce((sum, p) => sum + p.amount, 0) || 0;
+        let totalPaid = invoiceData.pay?.reduce((sum:number, p:any) => sum + p.amount, 0) || 0;
         if (editingCode !== null) {
           // If editing, subtract the current payment from totalPaid
-          const currentPay = invoiceData.pay?.find(p => p.code === editingCode);
+          const currentPay = invoiceData.pay?.find((p: any) => p.code === editingCode);
           if (currentPay) {
               totalPaid -= currentPay.amount; // Exclude the existing amount from balance calculation
           }
@@ -329,43 +336,36 @@ const PayComp: React.FC = () => {
 
         if (editingCode !== null) {
             // Update an existing Pay
-            const { data, error } = await supabase
-                .from("pay")
-                .update(formData)
-                .eq("code", editingCode).select();
+            const data = await updatePay(editingCode, formData); // Update Pay by code
 
-                if (error) {throw error} else if (data.length > 0) {
-                  alert('Update succeeded.')
-                } else {
-                  alert('Only current month transactions are allowed to be updated or there are no matching rows')
-                }
-                fetchPays(); // Refresh the list
+            if (data.error) { throw data.error }
+            alert('Update succeeded.')
+            
+            fetchPays(); // Refresh the list
 
             setEditingCode(null);
+            handleCloseModal(); // Close the modal
         } else {
             // Add a new Pay
-            const { error } = await supabase.from("pay").insert([formData]);
-            if (error) throw error;
+            const data = await createPay(formData); // Create a new Pay
+            if (data.error) { throw data.error } else if (data.length > 0) {
+      
             // Update the invoice status to "paid"
-        const { error: updateError } = await supabase
-              .from("jobby")
-              .update({ status: "paid" })  // Corrected update syntax
-              .eq("code", formData.invoice_id);
-
-          if (updateError) {
-              console.error("Error updating invoice status:", updateError);
-              alert("Failed to update invoice status!");
-              return;
-          }
-        }
-
-        // Refresh the list and reset the form
-        fetchPays();
-        handleCloseModal();
-        fetchInvoiceOptions(); // Refresh the invoice options
-    } catch (error) {
-        console.error("Error saving Pay:", error);
-    }
+            const invoiceUpdate = await updateInvoiceStatus(formData.invoice_id, { status: "paid" });
+            if (invoiceUpdate.error) {
+                console.error("Error updating invoice status:", invoiceUpdate.error);
+                alert("Failed to update invoice status!");
+                return;
+            }
+            } else {
+            // Refresh the list and reset the form
+            fetchPays();
+            handleCloseModal();
+            fetchInvoiceOptions(); // Refresh the invoice options
+            } } }
+            catch (error) {
+                  console.error("Error saving Pay:", error);
+              }
 };
 
 
@@ -385,8 +385,8 @@ const PayComp: React.FC = () => {
 
   const handleDelete = async (code: number) => {
     try {
-      const { data, error } = await supabase.from("pay").delete().eq("code", code).select();
-      if (error) {throw error} else if (data.length > 0) {
+      const data  = await deletePay(code); // Delete Pay by code
+      if (data.error) {throw data.error} else if (data.length > 0) {
         alert('Deletion succeeded.')
       } else {
         alert('Only current month transactions are allowed to be deleted or there are no matching rows')

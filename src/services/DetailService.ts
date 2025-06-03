@@ -45,30 +45,40 @@ export const fetchPurchaseDetails = async (code: number) => { const response = a
   return data.po; 
 };
 
-export const fetchInvoiceDetails = async (invoiceId: number) => {
+export const fetchInvoiceDetails =  async (code: number) => { 
   try {
-    const { data, error } = await supabase
-      .from("jobby")
-      .select("*, pay(*)")
-      .eq("code", invoiceId);
+  const response = await fetch(`${API_BASE_URL}/high/invoice/singleinvpay/${code}`, {
+    headers: {
+      'Authorization': `Bearer ${localStorage.getItem('authToken')}`
+    }
+  });
+  if (!response.ok) throw new Error('Error fetching po details');
+  const invoice = await response.json();
+  if (invoice.error) throw new Error('Error fetching invoice details');
+  
+  const paid = invoice.pay?.reduce((sum:number, payment:any) => sum + payment.amount, 0) || 0;
 
-    if (error) throw error;
-    if (data.length === 0) return null;
-
-    const invoice = data[0];
-    const paid = invoice.pay?.reduce((sum:number, payment:any) => sum + payment.amount, 0) || 0;
-
-    return {
+  return {
       ...invoice,
       paid,  // Ensure 'paid' is part of the returned object
     };
-  } catch (error) {
-    console.error("Error fetching invoice details:", error);
-    return null;
-  }
+} catch (error) {
+  console.error("Error fetching invoice details:", error);}
+}
+
+export const fetchInvoicePayDetails = async (invoiceId: number) => {
+  const response = await fetch(`${API_BASE_URL}/high/invoice/singleinvpay/${invoiceId}`, {
+    headers: {
+      'Authorization': `Bearer ${localStorage.getItem('authToken')}`
+    }
+  });
+  if (!response.ok) throw new Error('Error fetching invoice and payment details');
+  const data = await response.json();
+  return data; 
 };
 
-export const fetchPayDetails = async (code: number) => { const response = await fetch(`${API_BASE_URL}/high/pay/${code}`, {
+export const fetchPayDetails = async (code: number) => {
+  const response = await fetch(`${API_BASE_URL}/high/pay/${code}`, {
     headers: {
       'Authorization': `Bearer ${localStorage.getItem('authToken')}`
     }

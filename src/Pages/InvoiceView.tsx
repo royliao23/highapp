@@ -157,7 +157,7 @@ function InvoiceView() {
           <Box sx={{ textAlign: 'right' }}>
             <Typography variant="body1">Invoice #: {invoice.code}</Typography>
             <Typography variant="body1">Create Date: {createDate.toLocaleDateString()}</Typography>
-            <Typography variant="body1">Due Date: {dueDate ? new Date(dueDate).toLocaleDateString() : ''}</Typography>
+            <Typography variant="body1">Due Date: {dueDate ? new Date(dueDate).toLocaleDateString('en-GB') : ''}</Typography>
             <Typography variant="body1">Amount: ${(invoice.cost).toFixed(2)}</Typography>
           </Box>
         </Box>

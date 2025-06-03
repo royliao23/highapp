@@ -308,6 +308,18 @@ export const updateInvoice = async (code: number, poData: Omit<any, "code">) => 
   if (!response.ok) throw new Error('Error updating invoice');
   return await response.json();
 };
+export const updateInvoiceStatus = async (code: number, poData: any) => {
+  const response = await fetch(`${API_BASE_URL}/high/invoice/status/${code}`, {
+    method: 'PUT',
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${localStorage.getItem('authToken')}`
+    },
+    body: JSON.stringify(poData)
+  });
+  if (!response.ok) throw new Error('Error updating invoice status');
+  return await response.json();
+};
 export const deleteInvoice = async (code: number) => {
   const response = await fetch(`${API_BASE_URL}/high/invoice/${code}`, {
     method: 'DELETE',
@@ -316,6 +328,64 @@ export const deleteInvoice = async (code: number) => {
     }
   });
   if (!response.ok) throw new Error('Error deleting invoice');
+  return await response.json();
+}
+
+// pay
+export const fetchPay = async () => {
+  const response = await fetch(`${API_BASE_URL}/high/pay`, {
+    headers: {
+      'Authorization': `Bearer ${localStorage.getItem('authToken')}`
+    }
+  });
+  if (!response.ok) throw new Error('Error fetching pay');
+  const data = await response.json();
+  return data; // Assuming your Express API returns { jobs: [...] }
+};
+
+export const fetchPayNInv = async () => {
+  const response = await fetch(`${API_BASE_URL}/high/pay/invnpay`, {
+    headers: {
+      'Authorization': `Bearer ${localStorage.getItem('authToken')}`
+    }
+  });
+  if (!response.ok) throw new Error('Error fetching pay and invoice');
+  const data = await response.json();
+  return data; // Assuming your Express API returns { jobs: [...] }
+};
+export const createPay = async (payData: Omit<any, "code">) => {
+  const response = await fetch(`${API_BASE_URL}/high/pay`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${localStorage.getItem('authToken')}`
+    },
+    body: JSON.stringify(payData)
+  });
+  if (!response.ok) throw new Error('Error creating pay');
+  return await response.json();
+};  
+
+export const updatePay = async (code: number, payData: Omit<any, "code">) => {
+  const response = await fetch(`${API_BASE_URL}/high/pay/${code}`, {
+    method: 'PUT',
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${localStorage.getItem('authToken')}`
+    },
+    body: JSON.stringify(payData)
+  });
+  if (!response.ok) throw new Error('Error updating pay');
+  return await response.json();
+};
+export const deletePay = async (code: number) => {
+  const response = await fetch(`${API_BASE_URL}/high/pay/${code}`, {
+    method: 'DELETE',
+    headers: {
+      'Authorization': `Bearer ${localStorage.getItem('authToken')}`
+    }
+  });
+  if (!response.ok) throw new Error('Error deleting pay');
   return await response.json();
 }
 
