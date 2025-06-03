@@ -5,7 +5,6 @@ import SearchBox from "../components/SearchBox";
 import Dropdown from "../components/Dropdown";
 import JobModalComp from "../components/JobModal";
 import ContractorModal from "../components/Modal";
-// import { fetchInvoiceDetails, fetchJobService } from "../services/SupaEndPoints";
 import { Purchase, Contractor } from "../models";
 import { useNavigationService } from "../services/SharedServices";
 import { PaginationContainer } from "../StyledComponent";

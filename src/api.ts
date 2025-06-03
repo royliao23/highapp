@@ -1,6 +1,7 @@
 // api.ts
 import { useState } from 'react';
 import { Categ, Contractor, Project, Job, Purchase } from './models'; // Adjust the import path as necessary
+import axios from 'axios';
 const API_BASE_URL = process.env.REACT_APP_API_NODE;
 if (!API_BASE_URL) {
   throw new Error("REACT_APP_API_NODE is not defined in .env");
@@ -388,4 +389,88 @@ export const deletePay = async (code: number) => {
   if (!response.ok) throw new Error('Error deleting pay');
   return await response.json();
 }
+
+//jobbudget
+// CREATE
+export const createJobBudget = async (budgetData: {
+  job_id: number;
+  project_id: number;
+  budget: number;
+  note?: string;
+}) => {
+  try {
+    const response = await axios.post(`${API_BASE_URL}/high/jobbudgets`, budgetData, {
+      headers: {
+        'Authorization': `Bearer ${localStorage.getItem('authToken')}`
+      }
+    });
+    return response.data;
+  } catch (error) {
+    console.error('Error creating job budget:', error);
+    throw error;
+  }
+};
+
+export const getJobBudgets = async () => {
+  try {
+    const response = await axios.get(`${API_BASE_URL}/high/jobbudgets`, {
+      headers: {
+        'Authorization': `Bearer ${localStorage.getItem('authToken')}`
+      }
+    });
+    return response.data;
+  } catch (error) {
+    console.error('Error fetching job budget:', error);
+    throw error;
+  }
+};
+
+// READ (Single)
+export const getJobBudget = async (budgetId: number) => {
+  try {
+    const response = await axios.get(`${API_BASE_URL}/high/jobbudgets/${budgetId}`, {
+      headers: {
+        'Authorization': `Bearer ${localStorage.getItem('authToken')}`
+      }
+    });
+    return response.data;
+  } catch (error) {
+    console.error('Error fetching job budget:', error);
+    throw error;
+  }
+};
+
+// UPDATE
+export const updateJobBudget = async (budgetId: number, updateData: {
+  job_id?: number;
+  project_id?: number;
+  budget?: number;
+  note?: string;
+}) => {
+  try {
+    const response = await axios.put(`${API_BASE_URL}/high/jobbudgets/${budgetId}`, updateData, {
+      headers: {
+        'Authorization': `Bearer ${localStorage.getItem('authToken')}`
+      }
+    });
+    return response.data;
+  } catch (error) {
+    console.error('Error updating job budget:', error);
+    throw error;
+  }
+};
+
+// DELETE
+export const deleteJobBudget = async (budgetId: number) => {
+  try {
+    await axios.delete(`${API_BASE_URL}/high/jobbudgets/${budgetId}`, {
+      headers: {
+        'Authorization': `Bearer ${localStorage.getItem('authToken')}`
+      }
+    });
+  } catch (error) {
+    console.error('Error deleting job budget:', error);
+    throw error;
+  }
+};
 

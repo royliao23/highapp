@@ -88,19 +88,6 @@ export const fetchPayDetails = async (code: number) => {
   return data; 
 };
 
-
-
-
-export const fetchJobService = async () => {
-    try {
-      const { data, error } = await supabase.from("job").select("*");
-      if (error) throw error;
-      return data;
-    } catch (error) {
-      console.error("Error fetching jobs:", error);
-    }
-  };
-
 export const fetchInvoicesForPeriod = async (startDate: Date, endDate: Date) => {
   try {
     const { data, error } = await supabase

@@ -1,8 +1,9 @@
 import React, { useState, useEffect, ChangeEvent, FormEvent } from "react";
-import { supabase } from "../supabaseClient";
+// import { supabase } from "../supabaseClient";
 import styled from "styled-components";
 import SearchBox from "../components/SearchBox";
 import { Job, Project,  JobBudget} from "../models";
+import { getJobBudget,getJobBudgets, createJobBudget,updateJobBudget, deleteJobBudget, fetchJobs,fetchProjects } from "../api";
 
 // Styled Components for Styling
 const Container = styled.div`
@@ -160,20 +161,10 @@ const Budget: React.FC = () => {
   const fetchData = async () => {
     try {
       // Fetch job budgets with related job and project data
-      const { data: budgetData, error: budgetError } = await supabase
-        .from("jobbudget")
-        .select(`
-          code,
-          job_id,
-          project_id,
-          budget,
-          note,
-          job:job_id (code, name),
-          project:project_id (code, project_name)
-        `);
-      
-      if (budgetError) throw budgetError;
-  
+      const budgetData = await getJobBudgets();
+
+      if (budgetData.error) throw budgetData.error;
+
       // Transform the data to match our interface
       const transformedData = budgetData?.map((item: any) => ({
         code: item.code,
@@ -186,12 +177,12 @@ const Budget: React.FC = () => {
       })) as JobBudget[] || [];
   
       // Fetch all jobs and projects for dropdowns
-      const { data: jobData, error: jobError } = await supabase.from("job").select("*");
-      const { data: projectData, error: projectError } = await supabase.from("project").select("*");
-  
-      if (jobError) throw jobError;
-      if (projectError) throw projectError;
-  
+      const jobData = await fetchJobs();
+      const projectData = await fetchProjects();
+
+      if (jobData.error) throw jobData.error;
+      if (projectData.error) throw projectData.error;
+
       setJobBudgets(transformedData);
       setJobs(jobData || []);
       setProjects(projectData || []);
@@ -260,8 +251,8 @@ const Budget: React.FC = () => {
   const handleDelete = async (code: number) => {
     if (window.confirm("Are you sure you want to delete this job budget?")) {
       try {
-        const { error } = await supabase.from("jobbudget").delete().eq("code", code);
-        if (error) throw error;
+        await deleteJobBudget(code);
+        console.log("Job budget deleted successfully");
         fetchData();
       } catch (error) {
         console.error("Error deleting job budget:", error);
@@ -276,23 +267,19 @@ const Budget: React.FC = () => {
   
     try {
       const payload = {
-        job_id: formData.job_id,
-        project_id: formData.project_id,
+        job_id: formData.job_id ?? 0,
+        project_id: formData.project_id ?? 0,
         budget: formData.budget,
         note: formData.note,
       };
   
       if (editingCode !== null) {
         // Update existing record
-        const { error } = await supabase
-          .from("jobbudget")
-          .update(payload)
-          .eq("code", editingCode);
-        
+        const { error } = await updateJobBudget(editingCode, payload);
         if (error) throw error;
       } else {
         // Insert new record
-        const { error } = await supabase.from("jobbudget").insert([payload]);
+        const { error } = await createJobBudget(payload);
         if (error) throw error;
       }
   
@@ -310,6 +297,17 @@ const Budget: React.FC = () => {
       [name]: name === "budget" ? parseFloat(value) || 0 : value,
     });
   };
+
+  const handleSelectChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+  const { name, value } = e.target;
+  console.log("projects:", projects);
+  console.log("jobs:", jobs);
+  console.log("handleSelectChange value:",value, "name:",name, "formData:", formData,"target:", e.target);
+  setFormData(prev => ({
+    ...prev,
+    [name]: value
+  }));
+};
 
   const handleBudgetChange = (e:any) => {
   const value = e.target.value;
@@ -386,12 +384,12 @@ const Budget: React.FC = () => {
             <Dropdown
                 name="project_id"
                 value={formData.project_id}
-                onChange={handleInputChange}
+                onChange={handleSelectChange}
               >
                 
                 <option value="">Select Project</option>
-                {projects.map((option) => (
-                  <option key={option.code} value={option.code}>
+                {projects.map((option:any) => (
+                  <option key={option.id} value={option.id}>
                     {option.project_name}
                   </option>
                   

@@ -3,7 +3,6 @@ import { supabase } from "../supabaseClient";
 import styled from "styled-components";
 import SearchBox from "../components/SearchBox";
 import JobModal from "../components/JobModal";
-import { fetchJobService } from "../services/SupaEndPoints";
 import { PaginationContainer } from "../StyledComponent";
 import { Job } from "../models";
 import { createJob, deleteJob, fetchJobs as fetchJobsApi, updateJob, fetchCategories, createCategory, updateCategory } from "../api";
