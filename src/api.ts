@@ -474,3 +474,27 @@ export const deleteJobBudget = async (budgetId: number) => {
   }
 };
 
+//Company
+export const fetchCompany = async () => {
+  const response = await fetch(`${API_BASE_URL}/high/company`, {
+    headers: {
+      'Authorization': `Bearer ${localStorage.getItem('authToken')}`
+    }
+  });
+  if (!response.ok) throw new Error('Error fetching company');
+  const data = await response.json();
+  return data; // Assuming your Express API returns { jobs: [...] }
+};
+export const updateCompany = async (companyData: Omit<any, "code">) => {
+  const response = await fetch(`${API_BASE_URL}/high/company/${companyData.id}`, {
+    method: 'put',
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${localStorage.getItem('authToken')}`
+    },
+    body: JSON.stringify(companyData)
+  });
+  if (!response.ok) throw new Error('Error updating company');
+  return await response.json();
+};
+

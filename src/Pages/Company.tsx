@@ -1,8 +1,9 @@
 import React, { useState, useEffect, ChangeEvent, FormEvent } from "react";
-import { supabase } from "../supabaseClient";
+// import { supabase } from "../supabaseClient";
 import styled from "styled-components";
 import Modal from "../components/Modal"; // Import the Modal component
 import { Company as CompanyI } from "../models";
+import { fetchCompany, updateCompany } from "../api";
 // Styled Components
 const Container = styled.div`
   max-width: 800px;
@@ -66,18 +67,18 @@ const Company: React.FC = () => {
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
 
   // Fetch company data
-  const fetchCompany = async () => {
+  const loadCompany = async () => {
     try {
-      const { data, error } = await supabase.from("company").select("*").single();
-      if (error) throw error;
-      setCompany(data);
+      const data = await fetchCompany();
+      setCompany(data[0] || null); // Assuming fetchCompany returns an array
+      setFormData(data[0] || null); // Pre-fill form data
     } catch (error) {
       console.error("Error fetching company:", error);
     }
   };
 
   useEffect(() => {
-    fetchCompany();
+    loadCompany();
   }, []);
 
   // Open modal for editing
@@ -106,7 +107,8 @@ const Company: React.FC = () => {
     if (!formData) return;
 
     try {
-      const { error } = await supabase.from("company").update(formData).eq("id", formData.id);
+      const data = await updateCompany(formData);
+      const { error } = data;
       if (error) throw error;
       setCompany(formData);
       handleCloseModal();
