@@ -498,3 +498,93 @@ export const updateCompany = async (companyData: Omit<any, "code">) => {
   return await response.json();
 };
 
+//department
+export const fetchDepartment = async () => {
+  const response = await fetch(`${API_BASE_URL}/high/department`, {
+    headers: {
+      'Authorization': `Bearer ${localStorage.getItem('authToken')}`
+    }
+  });
+  if (!response.ok) throw new Error('Error fetching department');
+  const data = await response.json();
+  return data; // Assuming your Express API returns { jobs: [...] }
+};
+export const createDepartment = async (departmentData: Omit<any, "code">) => {
+  const response = await fetch(`${API_BASE_URL}/high/department`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${localStorage.getItem('authToken')}`
+    },
+    body: JSON.stringify(departmentData)
+  });
+  if (!response.ok) throw new Error('Error creating department');
+  return await response.json();
+};
+export const updateDepartment = async (code: number, departmentData: Omit<any, "code">) => {
+  const response = await fetch(`${API_BASE_URL}/high/department/${code}`, {
+    method: 'PUT',
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${localStorage.getItem('authToken')}`
+    },
+    body: JSON.stringify(departmentData)
+  });
+  if (!response.ok) throw new Error('Error updating department');
+  return await response.json();
+};
+export const deleteDepartment = async (code: number) => {
+  const response = await fetch(`${API_BASE_URL}/high/department/${code}`, {
+    method: 'DELETE',
+    headers: {
+      'Authorization': `Bearer ${localStorage.getItem('authToken')}`
+    }
+  });
+  if (!response.ok) throw new Error('Error deleting department');
+};
+
+//Employee
+export const fetchEmployee = async () => {
+  const response = await fetch(`${API_BASE_URL}/high/employee/all`, {
+    headers: {
+      'Authorization': `Bearer ${localStorage.getItem('authToken')}`
+    }
+  });
+  if (!response.ok) throw new Error('Error fetching employee');
+  const data = await response.json();
+  return data; // Assuming your Express API returns { jobs: [...] }
+}
+
+export const createEmployee = async (employeeData: Omit<any, "code">) => {
+  const response = await fetch(`${API_BASE_URL}/high/employee`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${localStorage.getItem('authToken')}`
+    },
+    body: JSON.stringify(employeeData)
+  });
+  if (!response.ok) throw new Error('Error creating employee');
+  return await response.json();
+};
+export const updateEmployee = async (code: number, employeeData: Omit<any, "code">) => {
+  const response = await fetch(`${API_BASE_URL}/high/employee/${code}`, {
+    method: 'PUT',
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${localStorage.getItem('authToken')}`
+    },
+    body: JSON.stringify(employeeData)
+  });
+  if (!response.ok) throw new Error('Error updating employee');
+  return await response.json();
+};
+export const deleteEmployee = async (code: number) => {
+  const response = await fetch(`${API_BASE_URL}/high/employee/${code}`, {
+    method: 'DELETE',
+    headers: {
+      'Authorization': `Bearer ${localStorage.getItem('authToken')}`
+    }
+  });
+  if (!response.ok) throw new Error('Error deleting employee');
+};

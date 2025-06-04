@@ -17,7 +17,8 @@ import {
   Divider,
   Paper, TablePagination, 
 } from "@mui/material";
-import { supabase } from "../supabaseClient";
+// import { supabase } from "../supabaseClient";
+import { createEmployee, updateEmployee, fetchEmployee, deleteEmployee, fetchDepartment } from "../api";
 
 interface Employee {
   id: number;
@@ -107,26 +108,37 @@ const EmployeeComponent = () => {
     fetchDepartments();
   }, []);
 
-  const fetchEmployees = async () => {
-    const { data, error } = await supabase
-      .from("employee")
-      .select("*, department(*)");
-    if (error) console.error("Error fetching employees:", error);
-    else
+  const fetchEmployees = async () => {   
+    try
+    {
+      const data = await fetchEmployee();
       setEmployees(
         (data || []).map((employee: any) => ({
           ...employee,
-          department: employee.department?.id,
+          department: employee.department_info?.id,
         }))
       );
+    }
+    catch (error) {
+      console.error("Error fetching employees:", error);
+    }
   };
 
   const fetchDepartments = async () => {
-    const { data, error } = await supabase.from("department").select("*");
-    if (error) console.error("Error fetching departments:", error);
-    else setDepartments(data || []);
+    try
+    {
+      const data = await fetchDepartment();
+      setDepartments(
+        (data || []).map((department: any) => ({
+          ...department,
+        }))
+      );
+    }
+    catch (error) {
+      console.error("Error fetching departments:", error);
+    }
   };
-
+    
   const handleInputChange = (
     e: ChangeEvent<HTMLInputElement | { name?: string; value: unknown }>
   ) => {
@@ -150,9 +162,17 @@ const EmployeeComponent = () => {
       };
 
       if (editingId !== null) {
-        await supabase.from("employee").update(payload).eq("id", editingId);
+        try {
+          await updateEmployee(editingId, payload);
+        } catch (error) {
+          console.error("Error updating employee:", error);
+        }
       } else {
-        await supabase.from("employee").insert([payload]);
+        try {
+          await createEmployee(payload);
+        } catch (error) {
+          console.error("Error creating employee:", error);
+        }
       }
 
       fetchEmployees();
@@ -169,8 +189,8 @@ const EmployeeComponent = () => {
   };
 
   const handleDelete = async (id: number) => {
-    await supabase.from("employee").delete().eq("id", id);
-    fetchEmployees();
+    await deleteEmployee(id);
+    setEmployees((prevEmployees) => prevEmployees.filter((employee) => employee.id !== id));
   };
 
   const handleCloseModal = () => {

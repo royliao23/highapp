@@ -17,8 +17,9 @@ import {
     Divider,
     Paper, TablePagination, TableContainer
 } from "@mui/material";
-import { supabase } from "../supabaseClient";
-
+// import { supabase } from "../supabaseClient";
+import { createDepartment, updateDepartment, fetchDepartment, deleteDepartment } from "../api";
+import { da } from "date-fns/locale";
 interface Department {
     id: number;
     department_name: string;
@@ -57,9 +58,13 @@ const DepartmentComponent = () => {
 
 
     const fetchDepartments = async () => {
-        const { data, error } = await supabase.from("department").select("*");
-        if (error) console.error("Error fetching departments:", error);
-        else setDepartments(data || []);
+        const data = await fetchDepartment();
+
+        if (data.error) {
+            console.error("Error fetching departments:", data.error);
+        } else {
+            setDepartments(data || []);
+        }
     };
 
 
@@ -78,9 +83,9 @@ const DepartmentComponent = () => {
 
 
             if (editingId !== null) {
-                await supabase.from("department").update(formData).eq("id", editingId);
+                await updateDepartment(editingId, formData);
             } else {
-                await supabase.from("department").insert([formData]);
+                await createDepartment(formData);
             }
             fetchDepartments();
             handleCloseModal();
@@ -96,7 +101,8 @@ const DepartmentComponent = () => {
     };
 
     const handleDelete = async (id: number) => {
-        await supabase.from("department").delete().eq("id", id);
+        await deleteDepartment(id);
+        setDepartments(departments.filter((dept) => dept.id !== id));
         fetchDepartments();
     };
 
