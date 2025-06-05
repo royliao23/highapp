@@ -46,6 +46,7 @@ const App: React.FC = () => {
     localStorage.removeItem("isLoggedIn");
     localStorage.removeItem("username");
     localStorage.removeItem("authToken");
+    localStorage.removeItem("id");
   };
 
   return (

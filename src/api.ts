@@ -552,6 +552,7 @@ export const fetchEmployee = async () => {
   });
   if (!response.ok) throw new Error('Error fetching employee');
   const data = await response.json();
+  console.log("Employee data:", data);
   return data; // Assuming your Express API returns { jobs: [...] }
 }
 
@@ -587,4 +588,95 @@ export const deleteEmployee = async (code: number) => {
     }
   });
   if (!response.ok) throw new Error('Error deleting employee');
+};
+//user role
+export const fetchUserRole = async () => {
+  const response = await fetch(`${API_BASE_URL}/high/userrole`, {
+    headers: {
+      'Authorization': `Bearer ${localStorage.getItem('authToken')}`
+    }
+  });
+  if (!response.ok) throw new Error('Error fetching user role');
+  const data = await response.json();
+  return data;
+};
+
+export const updateUserRole = async (roleData: { id: number; role: string }) => {
+  const response = await fetch(`${API_BASE_URL}/high/userrole/${roleData.id}`, {
+    method: 'PUT',
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${localStorage.getItem('authToken')}`
+    },
+    body: JSON.stringify(roleData)
+  });
+  if (!response.ok) throw new Error('Error updating user role');
+  return await response.json();
+};
+
+export const deleteUserRole = async (id: number) => {
+  const response = await fetch(`${API_BASE_URL}/high/userrole/${id}`, {
+    method: 'DELETE',
+    headers: {
+      'Authorization': `Bearer ${localStorage.getItem('authToken')}`
+    }
+  });
+  if (!response.ok) throw new Error('Error deleting user role');
+};
+export const createUserRole = async (roleData: { role: string }) => {
+  const response = await fetch(`${API_BASE_URL}/high/userrole`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${localStorage.getItem('authToken')}`
+    },
+    body: JSON.stringify(roleData)
+  });
+  if (!response.ok) throw new Error('Error creating user role');
+  return await response.json();
+};
+
+//payroll
+export const fetchPayroll = async () => {
+  const response = await fetch(`${API_BASE_URL}/high/payroll`, {
+    headers: {
+      'Authorization': `Bearer ${localStorage.getItem('authToken')}`
+    }
+  });
+  if (!response.ok) throw new Error('Error fetching payroll');
+  const data = await response.json();
+  return data; // Assuming your Express API returns { jobs: [...] }
+};
+export const createPayroll = async (payrollData: Omit<any, "code">) => {
+  const response = await fetch(`${API_BASE_URL}/high/payroll`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${localStorage.getItem('authToken')}`
+    },
+    body: JSON.stringify(payrollData)
+  });
+  if (!response.ok) throw new Error('Error creating payroll');
+  return await response.json();
+};
+export const updatePayroll = async (code: number, payrollData: Omit<any, "code">) => {
+  const response = await fetch(`${API_BASE_URL}/high/payroll/${code}`, {
+    method: 'PUT',
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${localStorage.getItem('authToken')}`
+    },
+    body: JSON.stringify(payrollData)
+  });
+  if (!response.ok) throw new Error('Error updating payroll');
+  return await response.json();
+};
+export const deletePayroll = async (code: number) => {
+  const response = await fetch(`${API_BASE_URL}/high/payroll/${code}`, {
+    method: 'DELETE',
+    headers: {
+      'Authorization': `Bearer ${localStorage.getItem('authToken')}`
+    }
+  });
+  if (!response.ok) throw new Error('Error deleting payroll');
 };

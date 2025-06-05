@@ -88,6 +88,18 @@ export const fetchPayDetails = async (code: number) => {
   return data; 
 };
 
+export const fetchSingleUserRole = async (code: number) => {
+  const response = await fetch(`${API_BASE_URL}/high/userrole/${code}`, {
+    headers: {
+      'Authorization': `Bearer ${localStorage.getItem('authToken')}`
+    }
+  });
+  if (!response.ok) throw new Error('Error fetching user role');
+  const data = await response.json();
+  return data; 
+};
+
+
 export const fetchInvoicesForPeriod = async (startDate: Date, endDate: Date) => {
   try {
     const { data, error } = await supabase

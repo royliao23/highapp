@@ -46,7 +46,7 @@ const Login: React.FC<LoginProps> = ({ onLoginSuccess }) => {
       localStorage.setItem("username", username);
       // localStorage.setItem("email", response.data.user.email);
       // localStorage.setItem("refreshToken", response.data.refresh_token);
-      // localStorage.setItem("id", response.data.user.id);
+      localStorage.setItem("id", response.data.user.id);
       // localStorage.setItem("user_metadata", JSON.stringify(response.data.user.user_metadata));
       onLoginSuccess(username);
       dispatch(loggedin(true));

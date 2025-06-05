@@ -26,8 +26,9 @@ import {
   Modal,
 
 } from "@mui/material";
-
-import { supabase } from "../supabaseClient";
+import { fetchCompany as fcompany, fetchPayroll, updatePayroll, deletePayroll, createPayroll, fetchEmployee as fetchEmployeesApi } from "../api";
+import { fetchSingleUserRole } from "../services/DetailService";
+// import { supabase } from "../supabaseClient";
 import { Company } from "../models";
 
 interface Employee {
@@ -39,6 +40,7 @@ interface Employee {
   salary?: number;
   position?: string;
   super_rate?: number;
+  employee?:any
 }
 
 // Define Payroll Data Interface
@@ -111,34 +113,6 @@ const PayrollDashboard: React.FC = () => {
   const [company, setCompany] = useState<Company | null>(null);
   const [role, setRole] = useState<string>("");
   
-  const fetchCompany = async () => {
-      try {
-        const { data, error } = await supabase.from("company").select("*").single();
-        if (error) throw error;
-        setCompany(data);
-        
-      } catch (error) {
-        console.error("Error fetching company:", error);
-      }
-      const id=localStorage.getItem("id")
-      const { data, error } = await supabase
-        .from("user_role")
-        .select("*")
-        .eq('user_id', id)  // Critical for RLS!
-        .maybeSingle();           // Use `maybeSingle` if the role might not exist
-
-      if (error) {
-        console.error("Error fetching role:", error);
-        return;
-      }
-      console.log("User role:", data?.role);
-      setRole(data?.role || "");
-          };
-  
-  useEffect(() => {
-    
-    fetchCompany();
-  }, []);
   // Handle Tab Change
   const handleTabChange = (_event: React.SyntheticEvent, newValue: number) => {
     setTabValue(newValue);
@@ -149,7 +123,7 @@ const PayrollDashboard: React.FC = () => {
     const computedOvertime15 = overtime15 * (selectedEmployee.salary ? selectedEmployee.salary / 38 * 1.5 : 34.5);
     const computedOvertime20 = overtime20 * (selectedEmployee.salary ? selectedEmployee.salary / 38 * 2 : 46);
     const computedHours = baseHour + overtime15 + overtime20;
-    const computedGrossPay = parseFloat((computedBasePay + computedOvertime15 + computedOvertime20 + bonus + holidayPay + others).toFixed(2));
+    const computedGrossPay = parseFloat((computedBasePay + computedOvertime15 + computedOvertime20 + bonus + holidayPay + others)?.toFixed(2));
     setPayPeriod(from_date + " -- " + to_date)
     setBasePay(computedBasePay);
     setHours(computedHours);
@@ -194,40 +168,73 @@ const PayrollDashboard: React.FC = () => {
     link.click();
   };
   const fetchpayRolls1 = async () => {
-    let { data, error } = await supabase.from("payroll").select("*, employee(*)");
-    if (!error) setPayrollData(data || []);
+    try {
+      let data = await fetchPayroll();
+      return data;
+    } catch (error) {
+      console.error("Error fetching payroll:", error);
+      return []
+    }
+  };
+  const fetchPayrolls = async () => {
+        const data = await fetchpayRolls1();
+        if (data && !data.error) {
+          setPayrollData(data);
+        } else {
+          console.error("Error fetching payroll data:", data?.error);
+        }
+      };
+  
+  const fetchCompany = async () => {
+      try {
+        const data = await fcompany();
+        if (!data) throw new Error("Company not found");
+        if (data.error) throw new Error(data.error);
+        setCompany(data[0] || null);
+        
+      } catch (error) {
+        console.error("Error fetching company:", error);
+      }
+  }
+
+  const fetchEmployees = async () => {
+    
+    const dataEmp = await fetchEmployeesApi();
+    if (dataEmp.error) {
+      throw dataEmp.error;
+    }
+    setEmployees(dataEmp || []);
   };
   useEffect(() => {
     const fetchData = async () => {
       // 1. Get the current user's role
-      const { data: { user } } = await supabase.auth.getUser();
-      const { data: roleData, error: roleError } = await supabase
-        .from("user_role")
-        .select("role")
-        .eq("user_id", localStorage.getItem("id"))
-        .single();
+      const id=localStorage.getItem("id")
+      try {
+      const roleData= await fetchSingleUserRole(parseInt(id || "0"));
+      if (roleData.error) {
+        console.error("Error fetching user role:", roleData.error);
+        return;
+      }
+      console.log("User role:", roleData?.role);
+      setRole(roleData?.role || "");
+    } catch (error) {
+      console.error("Error fetching user role:", error);
+    }
+      
   
-      if (roleError || !roleData || roleData.role !== "hr") {
+      if (role !== "hr") {
         console.log("Access denied: User is not HR");
         return; // Exit if role is not "hr"
       }
   
       // 2. Only fetch if role === "hr"
-      const fetchPayrolls = async () => {
-        const { data, error } = await supabase.from("payroll").select("*, employee(*)");
-        if (!error) setPayrollData(data || []);
-      };
-  
-      const fetchEmployees = async () => {
-        const { data, error } = await supabase.from("employee").select("*");
-        if (!error) setEmployees(data || []);
-      };
-  
-      await Promise.all([fetchPayrolls(), fetchEmployees()]);
+      
+
+      await Promise.all([fetchPayrolls(), fetchEmployees(), fetchCompany()]);
     };
-  
+
     fetchData();
-  }, []);
+  }, [role]);
 
   const calculateAustralianTax = (weeklyGrossPay:number) => {
     const annualGrossPay = weeklyGrossPay * 52; // Approximate annual income
@@ -255,9 +262,10 @@ const PayrollDashboard: React.FC = () => {
     const tax:number = calculateAustralianTax(grossPay);
     console.log(tax);
     const superAmount = parseFloat(
-      (grossPay * (selectedEmployee.super_rate ? selectedEmployee.super_rate : 0.1)).toFixed(2)
+      (grossPay * (selectedEmployee?.employee?.super_rate ? selectedEmployee.employee.super_rate : 0.1))?.toFixed(2)
     );
-    const net_pay = parseFloat((grossPay - tax).toFixed(2));
+    console.log(`Superannuation: $${superAmount}, selectedEmployee: ${JSON.stringify(selectedEmployee)}`);
+    const net_pay = parseFloat((grossPay - tax)?.toFixed(2));
 
     const newPayroll = {
       employee_id: selectedEmployee.id,
@@ -277,10 +285,10 @@ const PayrollDashboard: React.FC = () => {
       note:note
     };
 
-    const { data, error } = await supabase.from("payroll").insert([newPayroll]);
+    const data = await createPayroll(newPayroll);
 
-    if (error) {
-      console.error("Error adding payroll:", error);
+    if (data.error) {
+      console.error("Error adding payroll:", data.error);
       alert("Failed to add payroll!");
     } else {
       alert("Payroll added successfully!");
@@ -297,6 +305,7 @@ const PayrollDashboard: React.FC = () => {
       setNote("");
       setFrom_date("");
       setTo_date("");
+      fetchPayrolls();
     }
   };
   
@@ -456,16 +465,16 @@ const PayrollDashboard: React.FC = () => {
                           </TableCell>
                           <TableCell>{payroll.employee?.name}</TableCell>
                           <TableCell>{payroll.period}</TableCell>
-                          <TableCell>${payroll.gross_pay.toFixed(2)}</TableCell>
+                          <TableCell>${payroll.gross_pay?.toFixed(2)}</TableCell>
                           <TableCell>{payroll.base_hour}</TableCell>
                           <TableCell>{payroll.overtime_15}</TableCell>
                           <TableCell>{payroll.overtime_20}</TableCell>
                           <TableCell>{payroll.bonus}</TableCell>
                           <TableCell>{payroll.other_pay}</TableCell>
-                          <TableCell>${payroll.tax.toFixed(2)}</TableCell>
-                          <TableCell>${payroll.super.toFixed(2)}</TableCell>
-                          <TableCell>${payroll.net_pay.toFixed(2)}</TableCell>
-                          <TableCell>${payroll.holiday_pay.toFixed(2)}</TableCell>
+                          <TableCell>${payroll.tax?.toFixed(2)}</TableCell>
+                          <TableCell>${payroll.super?.toFixed(2)}</TableCell>
+                          <TableCell>${payroll.net_pay?.toFixed(2)}</TableCell>
+                          <TableCell>${payroll.holiday_pay?.toFixed(2)}</TableCell>
                           <TableCell>{payroll.note}</TableCell>
                           
                         </TableRow>
@@ -650,12 +659,12 @@ const PayrollDashboard: React.FC = () => {
               {/* Total Hours and Gross Pay Summary */}
               <Grid item xs={12} sm={6}>
                 <Typography variant="body1">
-                  <h3>Total Hours: {hours.toFixed(2)}</h3>
+                  <h3>Total Hours: {hours?.toFixed(2)}</h3>
                 </Typography>
               </Grid>
               <Grid item xs={12} sm={6}>
                 <Typography variant="body1">
-                <h3>Total Gross Pay: ${grossPay.toFixed(2)}</h3>
+                <h3>Total Gross Pay: ${grossPay?.toFixed(2)}</h3>
                 </Typography>
               </Grid>
 
@@ -688,7 +697,7 @@ const PayrollDashboard: React.FC = () => {
               <Typography variant="subtitle2" align="right">ABN: {company?.abn}</Typography>
               <Typography variant="body1"><strong>Pay Slip For:</strong> {selectedPayroll.employee.name}</Typography>
               {/* <Typography variant="body1"><strong>Annual Salary:</strong> ${selectedPayroll.annualSalary.toFixed(2)}</Typography> */}
-              <Typography variant="body1"><strong>Hourly Rate:</strong> {selectedPayroll.employee.salary ? (selectedPayroll.employee.salary / 38).toFixed(2) : 'no entry'}</Typography>
+              <Typography variant="body1"><strong>Hourly Rate:</strong> {selectedPayroll.employee.salary ? (selectedPayroll.employee.salary / 38)?.toFixed(2) : 'no entry'}</Typography>
               <Typography variant="body1"><strong>Pay Period:</strong>{selectedPayroll.period}</Typography>
               <Typography variant="h6" align="center" color="primary">Don't worry, be happy!</Typography>
 
@@ -706,25 +715,25 @@ const PayrollDashboard: React.FC = () => {
                   <TableBody>
                       <TableRow>
                         <TableCell>This Pay</TableCell>
-                        <TableCell>${selectedPayroll.gross_pay.toFixed(2) || "-"}</TableCell>
-                        <TableCell>${selectedPayroll.net_pay.toFixed(2) || "-"}</TableCell>
-                        <TableCell>${selectedPayroll.super.toFixed(2) || "-"}</TableCell>
-                        <TableCell>${`${selectedPayroll.tax.toFixed(2) || "-"}` }</TableCell>
+                        <TableCell>${selectedPayroll.gross_pay?.toFixed(2) || "-"}</TableCell>
+                        <TableCell>${selectedPayroll.net_pay?.toFixed(2) || "-"}</TableCell>
+                        <TableCell>${selectedPayroll.super?.toFixed(2) || "-"}</TableCell>
+                        <TableCell>${`${selectedPayroll.tax?.toFixed(2) || "-"}` }</TableCell>
                       </TableRow>
                       <TableRow>
                         <TableCell>Ytd </TableCell>
-                        <TableCell>${ytd.gross_total.toFixed(2) || "-"}</TableCell>
-                        <TableCell>${ytd.net_total.toFixed(2) || "-"}</TableCell>
-                        <TableCell>${ytd.super_total.toFixed(2) || "-"}</TableCell>
-                        <TableCell>${`${ytd.tax_total.toFixed(2) || "-"}` }</TableCell>
+                        <TableCell>${ytd.gross_total?.toFixed(2) || "-"}</TableCell>
+                        <TableCell>${ytd.net_total?.toFixed(2) || "-"}</TableCell>
+                        <TableCell>${ytd.super_total?.toFixed(2) || "-"}</TableCell>
+                        <TableCell>${`${ytd.tax_total?.toFixed(2) || "-"}` }</TableCell>
                       </TableRow>
-                    
+
                   </TableBody>
                 </Table>
               </TableContainer>
 
-              <Typography variant="h6" align="right">Gross Pay: ${selectedPayroll.gross_pay.toFixed(2)}</Typography>
-              <Typography variant="h6" align="right">Net Pay: ${selectedPayroll.net_pay.toFixed(2)}</Typography>
+              <Typography variant="h6" align="right">Gross Pay: ${selectedPayroll.gross_pay?.toFixed(2)}</Typography>
+              <Typography variant="h6" align="right">Net Pay: ${selectedPayroll.net_pay?.toFixed(2)}</Typography>
 
               {/* Buttons (Hidden When Printing) */}
             <Box mt={2} display="flex" justifyContent="space-between" className="no-print">
