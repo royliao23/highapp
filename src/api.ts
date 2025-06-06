@@ -1,7 +1,10 @@
 // api.ts
 import { useState } from 'react';
+import authAxios from './authAxios';
+import { authFetch } from './authFetch';
 import { Categ, Contractor, Project, Job, Purchase } from './models'; // Adjust the import path as necessary
-import axios from 'axios';
+//import { getValidAccessToken } from './authService';
+// import axios from 'axios';
 const API_BASE_URL = process.env.REACT_APP_API_NODE;
 if (!API_BASE_URL) {
   throw new Error("REACT_APP_API_NODE is not defined in .env");
@@ -9,7 +12,7 @@ if (!API_BASE_URL) {
 
 // Project
 export const fetchProjects = async () => {
-  const response = await fetch(`${API_BASE_URL}/high/projects`, {
+  const response = await authFetch(`${API_BASE_URL}/high/projects`, {
     headers: {
       'Authorization': `Bearer ${localStorage.getItem('authToken')}`
     }
@@ -20,7 +23,7 @@ export const fetchProjects = async () => {
 };
 
 export const createProject = async (projectData: Omit<Project, "code">) => {
-  const response = await fetch(`${API_BASE_URL}/high/projects`, {
+  const response = await authFetch(`${API_BASE_URL}/high/projects`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
@@ -33,7 +36,7 @@ export const createProject = async (projectData: Omit<Project, "code">) => {
 };
 
 export const updateProject = async (code: number, projectData: Omit<Project, "code">) => {
-  const response = await fetch(`${API_BASE_URL}/high/projects/${code}`, {
+  const response = await authFetch(`${API_BASE_URL}/high/projects/${code}`, {
     method: 'PUT',
     headers: {
       'Content-Type': 'application/json',
@@ -46,7 +49,7 @@ export const updateProject = async (code: number, projectData: Omit<Project, "co
 };
 
 export const deleteProject = async (code: number) => {
-  const response = await fetch(`${API_BASE_URL}/high/projects/${code}`, {
+  const response = await authFetch(`${API_BASE_URL}/high/projects/${code}`, {
     method: 'DELETE',
     headers: {
       'Authorization': `Bearer ${localStorage.getItem('authToken')}`
@@ -59,7 +62,7 @@ export const deleteProject = async (code: number) => {
 //Contractor
 
 export const fetchContractors = async () => {
-  const response = await fetch(`${API_BASE_URL}/high/contractor`, {
+  const response = await authFetch(`${API_BASE_URL}/high/contractor`, {
     headers: {
       'Authorization': `Bearer ${localStorage.getItem('authToken')}`
     }
@@ -70,7 +73,7 @@ export const fetchContractors = async () => {
 };
 
 export const createContractor = async (contractorData: Omit<Contractor, "code">) => {
-  const response = await fetch(`${API_BASE_URL}/high/contractor`, {
+  const response = await authFetch(`${API_BASE_URL}/high/contractor`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
@@ -83,7 +86,7 @@ export const createContractor = async (contractorData: Omit<Contractor, "code">)
 };
 
 export const updateContractor = async (code: number, contractorData: Omit<Contractor, "code">) => {
-  const response = await fetch(`${API_BASE_URL}/high/contractor/${code}`, {
+  const response = await authFetch(`${API_BASE_URL}/high/contractor/${code}`, {
     method: 'PUT',
     headers: {
       'Content-Type': 'application/json',
@@ -96,7 +99,7 @@ export const updateContractor = async (code: number, contractorData: Omit<Contra
 };
 
 export const deleteContractor = async (code: number) => {
-  const response = await fetch(`${API_BASE_URL}/high/contractor/${code}`, {
+  const response = await authFetch(`${API_BASE_URL}/high/contractor/${code}`, {
     method: 'DELETE',
     headers: {
       'Authorization': `Bearer ${localStorage.getItem('authToken')}`
@@ -110,7 +113,7 @@ export const deleteContractor = async (code: number) => {
 //Category
 
 export const fetchCategories = async () => {
-  const response = await fetch(`${API_BASE_URL}/high/categ`, {
+  const response = await authFetch(`${API_BASE_URL}/high/categ`, {
     headers: {
       'Authorization': `Bearer ${localStorage.getItem('authToken')}`
     }
@@ -121,7 +124,7 @@ export const fetchCategories = async () => {
 };
 
 export const createCategory = async (categoryData: Omit<Categ, "code">) => {
-  const response = await fetch(`${API_BASE_URL}/high/categ`, {
+  const response = await authFetch(`${API_BASE_URL}/high/categ`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
@@ -134,7 +137,7 @@ export const createCategory = async (categoryData: Omit<Categ, "code">) => {
 };
 
 export const updateCategory = async (code: number, categoryData: Omit<Categ, "code">) => {
-  const response = await fetch(`${API_BASE_URL}/high/categ/${code}`, {
+  const response = await authFetch(`${API_BASE_URL}/high/categ/${code}`, {
     method: 'PUT',
     headers: {
       'Content-Type': 'application/json',
@@ -147,7 +150,7 @@ export const updateCategory = async (code: number, categoryData: Omit<Categ, "co
 };
 
 export const deleteCategory = async (code: number) => {
-  const response = await fetch(`${API_BASE_URL}/high/categ/${code}`, {
+  const response = await authFetch(`${API_BASE_URL}/high/categ/${code}`, {
     method: 'DELETE',
     headers: {
       'Authorization': `Bearer ${localStorage.getItem('authToken')}`
@@ -159,7 +162,7 @@ export const deleteCategory = async (code: number) => {
 
 // Job
 export const fetchJobs = async () => {
-  const response = await fetch(`${API_BASE_URL}/high/job`, {
+  const response = await authFetch(`${API_BASE_URL}/high/job`, {
     headers: {
       'Authorization': `Bearer ${localStorage.getItem('authToken')}`
     }
@@ -169,7 +172,7 @@ export const fetchJobs = async () => {
   return data; // Assuming your Express API returns { jobs: [...] }
 };
 export const createJob = async (jobData: Omit<Job, "code">) => {
-  const response = await fetch(`${API_BASE_URL}/high/job`, {
+  const response = await authFetch(`${API_BASE_URL}/high/job`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
@@ -182,7 +185,7 @@ export const createJob = async (jobData: Omit<Job, "code">) => {
 };  
 
 export const updateJob = async (code: number, jobData: Omit<Job, "code">) => {
-  const response = await fetch(`${API_BASE_URL}/high/job/${code}`, {
+  const response = await authFetch(`${API_BASE_URL}/high/job/${code}`, {
     method: 'PUT',
     headers: {
       'Content-Type': 'application/json',
@@ -194,7 +197,7 @@ export const updateJob = async (code: number, jobData: Omit<Job, "code">) => {
   return await response.json();
 };
 export const deleteJob = async (code: number) => {
-  const response = await fetch(`${API_BASE_URL}/high/job/${code}`, {
+  const response = await authFetch(`${API_BASE_URL}/high/job/${code}`, {
     method: 'DELETE',
     headers: {
       'Authorization': `Bearer ${localStorage.getItem('authToken')}`
@@ -206,7 +209,7 @@ export const deleteJob = async (code: number) => {
 
 // purchase_order
 export const fetchPO = async () => {
-  const response = await fetch(`${API_BASE_URL}/high/po`, {
+  const response = await authFetch(`${API_BASE_URL}/high/po`, {
     headers: {
       'Authorization': `Bearer ${localStorage.getItem('authToken')}`
     }
@@ -217,7 +220,7 @@ export const fetchPO = async () => {
 };
 
 export const fetchPoandInv = async (code: number) => {
-  const response = await fetch(`${API_BASE_URL}/high/po/inv/${code}`, {
+  const response = await authFetch(`${API_BASE_URL}/high/po/inv/${code}`, {
     headers: {
       'Authorization': `Bearer ${localStorage.getItem('authToken')}`
     }
@@ -227,7 +230,7 @@ export const fetchPoandInv = async (code: number) => {
   return data; // Assuming your Express API returns { jobs: [...] }
 };
 export const createPO = async (poData: Omit<any, "code">) => {
-  const response = await fetch(`${API_BASE_URL}/high/po`, {
+  const response = await authFetch(`${API_BASE_URL}/high/po`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
@@ -240,7 +243,7 @@ export const createPO = async (poData: Omit<any, "code">) => {
 };  
 
 export const updatePO = async (code: number, poData: Omit<any, "code">) => {
-  const response = await fetch(`${API_BASE_URL}/high/po/${code}`, {
+  const response = await authFetch(`${API_BASE_URL}/high/po/${code}`, {
     method: 'PUT',
     headers: {
       'Content-Type': 'application/json',
@@ -252,7 +255,7 @@ export const updatePO = async (code: number, poData: Omit<any, "code">) => {
   return await response.json();
 };
 export const deletePO = async (code: number) => {
-  const response = await fetch(`${API_BASE_URL}/high/po/${code}`, {
+  const response = await authFetch(`${API_BASE_URL}/high/po/${code}`, {
     method: 'DELETE',
     headers: {
       'Authorization': `Bearer ${localStorage.getItem('authToken')}`
@@ -264,7 +267,7 @@ export const deletePO = async (code: number) => {
 
 // jobby
 export const fetchInvoice = async () => {
-  const response = await fetch(`${API_BASE_URL}/high/invoice`, {
+  const response = await authFetch(`${API_BASE_URL}/high/invoice`, {
     headers: {
       'Authorization': `Bearer ${localStorage.getItem('authToken')}`
     }
@@ -275,7 +278,7 @@ export const fetchInvoice = async () => {
 };
 
 export const fetchInNPay = async () => {
-  const response = await fetch(`${API_BASE_URL}/high/invoice/invnpay`, {
+  const response = await authFetch(`${API_BASE_URL}/high/invoice/invnpay`, {
     headers: {
       'Authorization': `Bearer ${localStorage.getItem('authToken')}`
     }
@@ -285,7 +288,7 @@ export const fetchInNPay = async () => {
   return data; // Assuming your Express API returns { jobs: [...] }
 };
 export const createInvoice = async (poData: Omit<any, "code">) => {
-  const response = await fetch(`${API_BASE_URL}/high/invoice`, {
+  const response = await authFetch(`${API_BASE_URL}/high/invoice`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
@@ -298,7 +301,7 @@ export const createInvoice = async (poData: Omit<any, "code">) => {
 };  
 
 export const updateInvoice = async (code: number, poData: Omit<any, "code">) => {
-  const response = await fetch(`${API_BASE_URL}/high/invoice/${code}`, {
+  const response = await authFetch(`${API_BASE_URL}/high/invoice/${code}`, {
     method: 'PUT',
     headers: {
       'Content-Type': 'application/json',
@@ -310,7 +313,7 @@ export const updateInvoice = async (code: number, poData: Omit<any, "code">) => 
   return await response.json();
 };
 export const updateInvoiceStatus = async (code: number, poData: any) => {
-  const response = await fetch(`${API_BASE_URL}/high/invoice/status/${code}`, {
+  const response = await authFetch(`${API_BASE_URL}/high/invoice/status/${code}`, {
     method: 'PUT',
     headers: {
       'Content-Type': 'application/json',
@@ -322,7 +325,7 @@ export const updateInvoiceStatus = async (code: number, poData: any) => {
   return await response.json();
 };
 export const deleteInvoice = async (code: number) => {
-  const response = await fetch(`${API_BASE_URL}/high/invoice/${code}`, {
+  const response = await authFetch(`${API_BASE_URL}/high/invoice/${code}`, {
     method: 'DELETE',
     headers: {
       'Authorization': `Bearer ${localStorage.getItem('authToken')}`
@@ -334,7 +337,7 @@ export const deleteInvoice = async (code: number) => {
 
 // pay
 export const fetchPay = async () => {
-  const response = await fetch(`${API_BASE_URL}/high/pay`, {
+  const response = await authFetch(`${API_BASE_URL}/high/pay`, {
     headers: {
       'Authorization': `Bearer ${localStorage.getItem('authToken')}`
     }
@@ -345,7 +348,7 @@ export const fetchPay = async () => {
 };
 
 export const fetchPayNInv = async () => {
-  const response = await fetch(`${API_BASE_URL}/high/pay/invnpay`, {
+  const response = await authFetch(`${API_BASE_URL}/high/pay/invnpay`, {
     headers: {
       'Authorization': `Bearer ${localStorage.getItem('authToken')}`
     }
@@ -355,7 +358,7 @@ export const fetchPayNInv = async () => {
   return data; // Assuming your Express API returns { jobs: [...] }
 };
 export const createPay = async (payData: Omit<any, "code">) => {
-  const response = await fetch(`${API_BASE_URL}/high/pay`, {
+  const response = await authFetch(`${API_BASE_URL}/high/pay`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
@@ -368,7 +371,7 @@ export const createPay = async (payData: Omit<any, "code">) => {
 };  
 
 export const updatePay = async (code: number, payData: Omit<any, "code">) => {
-  const response = await fetch(`${API_BASE_URL}/high/pay/${code}`, {
+  const response = await authFetch(`${API_BASE_URL}/high/pay/${code}`, {
     method: 'PUT',
     headers: {
       'Content-Type': 'application/json',
@@ -380,7 +383,7 @@ export const updatePay = async (code: number, payData: Omit<any, "code">) => {
   return await response.json();
 };
 export const deletePay = async (code: number) => {
-  const response = await fetch(`${API_BASE_URL}/high/pay/${code}`, {
+  const response = await authFetch(`${API_BASE_URL}/high/pay/${code}`, {
     method: 'DELETE',
     headers: {
       'Authorization': `Bearer ${localStorage.getItem('authToken')}`
@@ -399,7 +402,7 @@ export const createJobBudget = async (budgetData: {
   note?: string;
 }) => {
   try {
-    const response = await axios.post(`${API_BASE_URL}/high/jobbudgets`, budgetData, {
+    const response = await authAxios.post(`${API_BASE_URL}/high/jobbudgets`, budgetData, {
       headers: {
         'Authorization': `Bearer ${localStorage.getItem('authToken')}`
       }
@@ -413,7 +416,12 @@ export const createJobBudget = async (budgetData: {
 
 export const getJobBudgets = async () => {
   try {
-    const response = await axios.get(`${API_BASE_URL}/high/jobbudgets`, {
+    // const token = await getValidAccessToken(); // Ensure you always get the latest token
+    // if (!token) {
+    //   throw new Error('No valid token available');
+    // }
+
+    const response = await authAxios.get(`${API_BASE_URL}/high/jobbudgets`, {
       headers: {
         'Authorization': `Bearer ${localStorage.getItem('authToken')}`
       }
@@ -425,10 +433,11 @@ export const getJobBudgets = async () => {
   }
 };
 
+
 // READ (Single)
 export const getJobBudget = async (budgetId: number) => {
   try {
-    const response = await axios.get(`${API_BASE_URL}/high/jobbudgets/${budgetId}`, {
+    const response = await authAxios.get(`${API_BASE_URL}/high/jobbudgets/${budgetId}`, {
       headers: {
         'Authorization': `Bearer ${localStorage.getItem('authToken')}`
       }
@@ -448,7 +457,7 @@ export const updateJobBudget = async (budgetId: number, updateData: {
   note?: string;
 }) => {
   try {
-    const response = await axios.put(`${API_BASE_URL}/high/jobbudgets/${budgetId}`, updateData, {
+    const response = await authAxios.put(`${API_BASE_URL}/high/jobbudgets/${budgetId}`, updateData, {
       headers: {
         'Authorization': `Bearer ${localStorage.getItem('authToken')}`
       }
@@ -463,7 +472,7 @@ export const updateJobBudget = async (budgetId: number, updateData: {
 // DELETE
 export const deleteJobBudget = async (budgetId: number) => {
   try {
-    await axios.delete(`${API_BASE_URL}/high/jobbudgets/${budgetId}`, {
+    await authAxios.delete(`${API_BASE_URL}/high/jobbudgets/${budgetId}`, {
       headers: {
         'Authorization': `Bearer ${localStorage.getItem('authToken')}`
       }
@@ -476,7 +485,7 @@ export const deleteJobBudget = async (budgetId: number) => {
 
 //Company
 export const fetchCompany = async () => {
-  const response = await fetch(`${API_BASE_URL}/high/company`, {
+  const response = await authFetch(`${API_BASE_URL}/high/company`, {
     headers: {
       'Authorization': `Bearer ${localStorage.getItem('authToken')}`
     }
@@ -486,7 +495,7 @@ export const fetchCompany = async () => {
   return data; // Assuming your Express API returns { jobs: [...] }
 };
 export const updateCompany = async (companyData: Omit<any, "code">) => {
-  const response = await fetch(`${API_BASE_URL}/high/company/${companyData.id}`, {
+  const response = await authFetch(`${API_BASE_URL}/high/company/${companyData.id}`, {
     method: 'put',
     headers: {
       'Content-Type': 'application/json',
@@ -500,7 +509,7 @@ export const updateCompany = async (companyData: Omit<any, "code">) => {
 
 //department
 export const fetchDepartment = async () => {
-  const response = await fetch(`${API_BASE_URL}/high/department`, {
+  const response = await authFetch(`${API_BASE_URL}/high/department`, {
     headers: {
       'Authorization': `Bearer ${localStorage.getItem('authToken')}`
     }
@@ -510,7 +519,7 @@ export const fetchDepartment = async () => {
   return data; // Assuming your Express API returns { jobs: [...] }
 };
 export const createDepartment = async (departmentData: Omit<any, "code">) => {
-  const response = await fetch(`${API_BASE_URL}/high/department`, {
+  const response = await authFetch(`${API_BASE_URL}/high/department`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
@@ -522,7 +531,7 @@ export const createDepartment = async (departmentData: Omit<any, "code">) => {
   return await response.json();
 };
 export const updateDepartment = async (code: number, departmentData: Omit<any, "code">) => {
-  const response = await fetch(`${API_BASE_URL}/high/department/${code}`, {
+  const response = await authFetch(`${API_BASE_URL}/high/department/${code}`, {
     method: 'PUT',
     headers: {
       'Content-Type': 'application/json',
@@ -534,7 +543,7 @@ export const updateDepartment = async (code: number, departmentData: Omit<any, "
   return await response.json();
 };
 export const deleteDepartment = async (code: number) => {
-  const response = await fetch(`${API_BASE_URL}/high/department/${code}`, {
+  const response = await authFetch(`${API_BASE_URL}/high/department/${code}`, {
     method: 'DELETE',
     headers: {
       'Authorization': `Bearer ${localStorage.getItem('authToken')}`
@@ -545,7 +554,7 @@ export const deleteDepartment = async (code: number) => {
 
 //Employee
 export const fetchEmployee = async () => {
-  const response = await fetch(`${API_BASE_URL}/high/employee/all`, {
+  const response = await authFetch(`${API_BASE_URL}/high/employee/all`, {
     headers: {
       'Authorization': `Bearer ${localStorage.getItem('authToken')}`
     }
@@ -557,7 +566,7 @@ export const fetchEmployee = async () => {
 }
 
 export const createEmployee = async (employeeData: Omit<any, "code">) => {
-  const response = await fetch(`${API_BASE_URL}/high/employee`, {
+  const response = await authFetch(`${API_BASE_URL}/high/employee`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
@@ -569,7 +578,7 @@ export const createEmployee = async (employeeData: Omit<any, "code">) => {
   return await response.json();
 };
 export const updateEmployee = async (code: number, employeeData: Omit<any, "code">) => {
-  const response = await fetch(`${API_BASE_URL}/high/employee/${code}`, {
+  const response = await authFetch(`${API_BASE_URL}/high/employee/${code}`, {
     method: 'PUT',
     headers: {
       'Content-Type': 'application/json',
@@ -581,7 +590,7 @@ export const updateEmployee = async (code: number, employeeData: Omit<any, "code
   return await response.json();
 };
 export const deleteEmployee = async (code: number) => {
-  const response = await fetch(`${API_BASE_URL}/high/employee/${code}`, {
+  const response = await authFetch(`${API_BASE_URL}/high/employee/${code}`, {
     method: 'DELETE',
     headers: {
       'Authorization': `Bearer ${localStorage.getItem('authToken')}`
@@ -591,7 +600,7 @@ export const deleteEmployee = async (code: number) => {
 };
 //user role
 export const fetchUserRole = async () => {
-  const response = await fetch(`${API_BASE_URL}/high/userrole`, {
+  const response = await authFetch(`${API_BASE_URL}/high/userrole`, {
     headers: {
       'Authorization': `Bearer ${localStorage.getItem('authToken')}`
     }
@@ -602,7 +611,7 @@ export const fetchUserRole = async () => {
 };
 
 export const updateUserRole = async (roleData: { id: number; role: string }) => {
-  const response = await fetch(`${API_BASE_URL}/high/userrole/${roleData.id}`, {
+  const response = await authFetch(`${API_BASE_URL}/high/userrole/${roleData.id}`, {
     method: 'PUT',
     headers: {
       'Content-Type': 'application/json',
@@ -615,7 +624,7 @@ export const updateUserRole = async (roleData: { id: number; role: string }) => 
 };
 
 export const deleteUserRole = async (id: number) => {
-  const response = await fetch(`${API_BASE_URL}/high/userrole/${id}`, {
+  const response = await authFetch(`${API_BASE_URL}/high/userrole/${id}`, {
     method: 'DELETE',
     headers: {
       'Authorization': `Bearer ${localStorage.getItem('authToken')}`
@@ -624,7 +633,7 @@ export const deleteUserRole = async (id: number) => {
   if (!response.ok) throw new Error('Error deleting user role');
 };
 export const createUserRole = async (roleData: { role: string }) => {
-  const response = await fetch(`${API_BASE_URL}/high/userrole`, {
+  const response = await authFetch(`${API_BASE_URL}/high/userrole`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
@@ -638,7 +647,7 @@ export const createUserRole = async (roleData: { role: string }) => {
 
 //payroll
 export const fetchPayroll = async () => {
-  const response = await fetch(`${API_BASE_URL}/high/payroll`, {
+  const response = await authFetch(`${API_BASE_URL}/high/payroll`, {
     headers: {
       'Authorization': `Bearer ${localStorage.getItem('authToken')}`
     }
@@ -648,7 +657,7 @@ export const fetchPayroll = async () => {
   return data; // Assuming your Express API returns { jobs: [...] }
 };
 export const createPayroll = async (payrollData: Omit<any, "code">) => {
-  const response = await fetch(`${API_BASE_URL}/high/payroll`, {
+  const response = await authFetch(`${API_BASE_URL}/high/payroll`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
@@ -660,7 +669,7 @@ export const createPayroll = async (payrollData: Omit<any, "code">) => {
   return await response.json();
 };
 export const updatePayroll = async (code: number, payrollData: Omit<any, "code">) => {
-  const response = await fetch(`${API_BASE_URL}/high/payroll/${code}`, {
+  const response = await authFetch(`${API_BASE_URL}/high/payroll/${code}`, {
     method: 'PUT',
     headers: {
       'Content-Type': 'application/json',
@@ -672,7 +681,7 @@ export const updatePayroll = async (code: number, payrollData: Omit<any, "code">
   return await response.json();
 };
 export const deletePayroll = async (code: number) => {
-  const response = await fetch(`${API_BASE_URL}/high/payroll/${code}`, {
+  const response = await authFetch(`${API_BASE_URL}/high/payroll/${code}`, {
     method: 'DELETE',
     headers: {
       'Authorization': `Bearer ${localStorage.getItem('authToken')}`
