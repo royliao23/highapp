@@ -277,6 +277,17 @@ export const fetchInvoice = async () => {
   return data; // Assuming your Express API returns { jobs: [...] }
 };
 
+export const fetchUnpaidInvoice = async () => {
+  const response = await authFetch(`${API_BASE_URL}/high/invoice/unpaid`, {
+    headers: {
+      'Authorization': `Bearer ${localStorage.getItem('authToken')}`
+    }
+  });
+  if (!response.ok) throw new Error('Error fetching unpaid invoice');
+  const data = await response.json();
+  return data; // Assuming your Express API returns { jobs: [...] }
+};
+
 export const fetchInNPay = async () => {
   const response = await authFetch(`${API_BASE_URL}/high/invoice/invnpay`, {
     headers: {
@@ -382,6 +393,19 @@ export const updatePay = async (code: number, payData: Omit<any, "code">) => {
   if (!response.ok) throw new Error('Error updating pay');
   return await response.json();
 };
+export const updateInvStatus = async (code: number, payData: Omit<any, "code">) => {
+  const response = await authFetch(`${API_BASE_URL}/high/pay/payupdatestatus/${code}`, {
+    method: 'PUT',
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${localStorage.getItem('authToken')}`
+    },
+    body: JSON.stringify(payData)
+  });
+  if (!response.ok) throw new Error('Error updating pay');
+  return await response.json();
+};
+
 export const deletePay = async (code: number) => {
   const response = await authFetch(`${API_BASE_URL}/high/pay/${code}`, {
     method: 'DELETE',

@@ -1,9 +1,10 @@
 import React, { useState, useEffect } from "react";
-import { supabase } from "../supabaseClient";
+// import { supabase } from "../supabaseClient";
 import { Container, Typography, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, Button } from "@mui/material";
 import { Invoice } from "../models";
 import CSVUploader from "../components/BankUpload";
 import { BankRecord } from "../models";
+import { fetchUnpaidInvoice, updateInvStatus, createPay } from "../api";
 // Interface for Pay (Matched Payments)
 interface Pay {
     invoice_id: number;
@@ -19,9 +20,9 @@ interface Pay {
 
 // Dummy Bank Records (from bank statement)
 const bankRecords = [
-    { id: 1, date: "2024-02-20", amount: 500, description: "Bank Transfer ABC" },
+    { id: 1, date: "2024-02-20", amount: 101, description: "Bank Transfer ABC" },
     { id: 2, date: "2024-02-18", amount: 4303.80, description: "Bank Deposit XYZ" },
-    { id: 3, date: "2024-02-18", amount: 49.3, description: "Bank Deposit XYZ" },
+    { id: 3, date: "2024-02-18", amount: 24, description: "Bank Deposit XYZ" },
 ];
 
 
@@ -31,23 +32,20 @@ const BankReconciliation = () => {
     const [loading, setLoading] = useState<boolean>(true); // State to handle loading state
     const [error, setError] = useState<string | null>(null); // State to handle error messages
     const [bankRecords, setBankRecords] = useState<BankRecord[]>([
-        { id: 1, date: "2024-02-20", amount: 500, description: "Bank Transfer ABC" },
+        { id: 1, date: "2024-02-20", amount: 101, description: "Bank Transfer ABC" },
         { id: 2, date: "2024-02-18", amount: 4303.80, description: "Bank Deposit XYZ" },
-        { id: 3, date: "2024-02-18", amount: 49.3, description: "Bank Deposit XYZ" },
+        { id: 3, date: "2024-02-18", amount: 24, description: "Bank Deposit XYZ" },
     ]);
     // Fetch invoices from Supabase API
     useEffect(() => {
         const fetchInvoices = async () => {
             try {
-                const { data, error } = await supabase.from("jobby").select("*");
-
-                if (error) {
-                    throw error;
+                const data = await fetchUnpaidInvoice(); // Fetch unpaid invoices from the API
+                if (data.error) {
+                    throw new Error(data.error.message || "Failed to fetch invoices");
                 }
 
-                const unpaidInvoices = data?.filter((filteredInvoice) => filteredInvoice.status !== "paid");
-                console.log("unpaidInvoices:", unpaidInvoices);
-                setInvoices(unpaidInvoices);
+                setInvoices(data);
             } catch (err) {
                 setError("Failed to fetch invoices.");
                 console.error("Error fetching invoices:", err);
@@ -72,25 +70,18 @@ const BankReconciliation = () => {
         };
 
         // Insert into Supabase
-        const { data, error } = await supabase.from("pay").insert([newPayRecord]);
-
-        // Update the invoice status to "paid"
-        const { error: updateError } = await supabase
-            .from("jobby")
-            .update({ status: "paid" })  // Corrected update syntax
-            .eq("code", invoice.code);
-
-        if (updateError) {
-            console.error("Error updating invoice status:", updateError);
-            alert("Failed to update invoice status!");
-            return;
-        }
-
-
-        if (error) {
-            console.error("Error inserting pay record:", error);
+        const data = await createPay(newPayRecord);
+        if (data.error) {
+            console.error("Error inserting pay record:", data?.error);
             alert("Failed to save payment!");
-            return;
+            throw new Error(data.error.message || "Failed to save payment");
+        }
+        // Update the invoice status to "paid"
+        const newdata = await updateInvStatus(invoice.code, newPayRecord);
+        if (newdata.error) {
+            console.error("Error updating invoice status:", newdata?.error);
+            alert("Failed to update invoice status!");
+            throw new Error(newdata.error.message || "Failed to update invoice status");
         }
 
 
@@ -178,7 +169,7 @@ const BankReconciliation = () => {
                                                 color: isMatched ? "gray" : "black",
                                             }}
                                         >${invoice.cost}</TableCell>
-                                        <TableCell>{invoice.due_at.toString()}</TableCell>
+                                        <TableCell>{invoice.due_at?.toString()}</TableCell>
                                         <TableCell>
                                             {bankRecords.map((record) =>
                                                 record.amount === invoice.cost && !isMatched ? (
