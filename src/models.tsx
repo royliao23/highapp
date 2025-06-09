@@ -123,7 +123,9 @@ export interface InvoiceDeep {
   description?: string;
   note?: string;
   outstanding?: number;
+  contractor?: Contractor;
 }
+
 
 export interface AgeInvoice  {
   totalPaid: number;

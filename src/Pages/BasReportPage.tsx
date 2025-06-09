@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { fetchInvoicesForPeriodDeep } from '../services/SupaEndPoints';
+// import { fetchInvoicesForPeriodDeep } from '../services/SupaEndPoints';
+import { fetchBasReport } from '../api';
 import {
   Box,
   FormControl,
@@ -159,7 +160,13 @@ const BASReportPage: React.FC = () => {
     setError(null);
 
     try {
-      const fetchedInvoices = await fetchInvoicesForPeriodDeep(startDate, endDate);
+      const fetchedInvoices = await fetchBasReport(startDate, endDate);
+      console.log('Fetched invoices:', fetchedInvoices);
+      if (!fetchedInvoices || fetchedInvoices.length === 0) {
+        setError('No invoices found for the selected period.');
+        setInvoices([]);
+        return;
+      }
       setInvoices(fetchedInvoices);
     } catch (err: any) {
       setError(err.message || 'Failed to fetch invoice data.');
@@ -196,9 +203,9 @@ const BASReportPage: React.FC = () => {
       const gstData = invoices.map(invoice => ({
         invoiceId: invoice.code,
         date: invoice.create_at.toString(),
-        supplier: invoice.by_id.company_name,
+        supplier: invoice.contractor?.company_name || 'N/A',
         grossAmount: formatNumber(invoice.cost),
-        gstAmount: formatNumber(calculateGST2(invoice.cost, invoice.by_id.gst_registered)),
+        gstAmount: formatNumber(calculateGST2(invoice.cost, invoice.contractor?.gst_registered ?? false)),
       }));
       downloadCSV(gstData, 'gst_report_ato.csv');
     } else {
@@ -206,10 +213,10 @@ const BASReportPage: React.FC = () => {
       const tparData = invoices.map(invoice => ({
         invoiceId: invoice.code,
         date: invoice.create_at.toString(),
-        contractorABN: invoice.by_id.abn, // You'll need to fetch contractor ABN
-        contractorName: invoice.by_id.company_name,
+        contractorABN: invoice.contractor?.abn, // You'll need to fetch contractor ABN
+        contractorName: invoice.contractor?.company_name,
         grossAmountPaid: formatNumber(invoice.cost),
-        gstPaid: formatNumber(calculateGST2(invoice.cost, invoice.by_id.gst_registered)), // Assuming cost includes GST
+        gstPaid: formatNumber(calculateGST2(invoice.cost, invoice.contractor?.gst_registered ?? false)), // Assuming cost includes GST
       }));
       downloadCSV(tparData, 'tpar_report_ato.csv');
     }
@@ -221,9 +228,9 @@ const BASReportPage: React.FC = () => {
       const gstData = invoices.map(invoice => ({
         date: invoice.create_at.toString(),
         invoiceId: invoice.code,
-        supplier: invoice.by_id.company_name,
+        supplier: invoice.contractor?.company_name,
         total: formatNumber(invoice.cost),
-        gst: formatNumber(calculateGST2(invoice.cost, invoice.by_id.gst_registered)),
+        gst: formatNumber(calculateGST2(invoice.cost, invoice.contractor?.gst_registered ?? false)),
         // Add other MYOB specific fields
       }));
       downloadCSV(gstData, 'gst_report_myob.csv');
@@ -232,9 +239,9 @@ const BASReportPage: React.FC = () => {
       const tparData = invoices.map(invoice => ({
         date: invoice.create_at.toString(),
         invoiceId: invoice.code,
-        contractor: invoice.by_id.company_name,
+        contractor: invoice.contractor?.company_name,
         amount: formatNumber(invoice.cost),
-        gst: formatNumber(calculateGST2(invoice.cost, invoice.by_id.gst_registered)),
+        gst: formatNumber(calculateGST2(invoice.cost, invoice.contractor?.gst_registered ?? false)),  
         // Add other MYOB specific fields
       }));
       downloadCSV(tparData, 'tpar_report_myob.csv');
@@ -329,10 +336,10 @@ const BASReportPage: React.FC = () => {
                       </Box>
                       <Box textAlign="right">
                         <Typography variant="body2">{formatNumber(invoice.cost)}</Typography>
-                        <Typography variant="caption">GST: {formatNumber(calculateGST2(invoice.cost, invoice.by_id.gst_registered))}</Typography>
+                        <Typography variant="caption">GST: {formatNumber(calculateGST2(invoice.cost, invoice.contractor?.gst_registered ?? false))}</Typography>
                       </Box>
                     </Box>
-                    <Typography variant="body2" sx={{ mt: 1 }}>{invoice.by_id.company_name}</Typography>
+                    <Typography variant="body2" sx={{ mt: 1 }}>{invoice.contractor?.company_name}</Typography>
                   </Paper>
                 ))}
               </Box>
@@ -369,11 +376,11 @@ const BASReportPage: React.FC = () => {
                           overflow: 'hidden',
                           textOverflow: 'ellipsis'
                         }}>
-                          {invoice.by_id.company_name}
+                          {invoice.contractor?.company_name}
                         </TableCell>
                         <TableCell align="right">{formatNumber(invoice.cost)}</TableCell>
                         <TableCell align="right">
-                          {formatNumber(calculateGST2(invoice.cost, invoice.by_id.gst_registered))}
+                          {formatNumber(calculateGST2(invoice.cost, invoice.contractor?.gst_registered ?? false))}
                         </TableCell>
                       </TableRow>
                     ))}
@@ -400,17 +407,17 @@ const BASReportPage: React.FC = () => {
                       <Box textAlign="right">
                         <Typography variant="body2">{formatNumber(invoice.cost)}</Typography>
                         <Typography variant="caption">
-                          GST: {formatNumber(calculateGST2(invoice.cost, invoice.by_id.gst_registered))}
+                          GST: {formatNumber(calculateGST2(invoice.cost, invoice.contractor?.gst_registered ?? false))}
                         </Typography>
                       </Box>
                     </Box>
                     <Typography variant="body2" sx={{ mt: 1 }}>
-                      Contractor: {invoice.by_id.company_name}
+                      Contractor: {invoice.contractor?.company_name}
                     </Typography>
                     {/* Add any additional TPAR-specific fields here */}
                     <Typography variant="caption" sx={{ display: 'block', mt: 1 }}>
                       {/* Example of additional TPAR data - adjust based on your needs */}
-                      ABN: {invoice.by_id.abn || 'N/A'}
+                      ABN: {invoice.contractor?.abn || 'N/A'}
                     </Typography>
                   </Paper>
                 ))}
@@ -449,14 +456,14 @@ const BASReportPage: React.FC = () => {
                           overflow: 'hidden',
                           textOverflow: 'ellipsis'
                         }}>
-                          {invoice.by_id.company_name}
+                          {invoice.contractor?.company_name}
                         </TableCell>
                         <TableCell sx={{ whiteSpace: 'nowrap' }}>
-                          {invoice.by_id.abn || 'N/A'}
+                          {invoice.contractor?.abn || 'N/A'}
                         </TableCell>
                         <TableCell align="right">{formatNumber(invoice.cost)}</TableCell>
                         <TableCell align="right">
-                          {formatNumber(calculateGST2(invoice.cost, invoice.by_id.gst_registered))}
+                          {formatNumber(calculateGST2(invoice.cost, invoice.contractor?.gst_registered ?? false))}  
                         </TableCell>
                       </TableRow>
                     ))}

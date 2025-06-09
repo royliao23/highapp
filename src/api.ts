@@ -725,3 +725,18 @@ export const fetchAgingReport = async () => {
   const data = await response.json();
   return data; // Assuming your Express API returns { jobs: [...] }
 }
+
+// BAS
+export const fetchBasReport = async (start: Date, end: Date) => {
+  const response = await authFetch(`${API_BASE_URL}/high/agingreport/bas`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${localStorage.getItem('authToken')}`
+    },
+    body: JSON.stringify({ start:start, end:end })
+  });
+  if (!response.ok) throw new Error('Error fetching BAS report');
+  const data = await response.json();
+  return data; // Assuming your Express API returns { jobs: [...] }
+}
