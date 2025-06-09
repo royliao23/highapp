@@ -689,3 +689,15 @@ export const deletePayroll = async (code: number) => {
   });
   if (!response.ok) throw new Error('Error deleting payroll');
 };
+
+// Aging Report
+export const fetchAgingReport = async () => {
+  const response = await authFetch(`${API_BASE_URL}/high/agingreport`, {
+    headers: {
+      'Authorization': `Bearer ${localStorage.getItem('authToken')}`
+    }
+  });
+  if (!response.ok) throw new Error('Error fetching aging report');
+  const data = await response.json();
+  return data; // Assuming your Express API returns { jobs: [...] }
+}

@@ -1,9 +1,10 @@
 import React, { useState, useEffect, ChangeEvent, useRef } from "react";
-import { supabase } from "../supabaseClient";
+// import { supabase } from "../supabaseClient";
 import styled from "styled-components";
 import SearchBox from "../components/SearchBox";
 import { AgeInvoice } from "../models";
 import Pagination from "../components/Pagination";
+import { fetchAgingReport as fa } from "../api";
 // Styled Components for Styling
 const Container = styled.div`
   max-width: 1500px;
@@ -94,27 +95,20 @@ const AgingReport: React.FC = () => {
     useEffect(() => {
         const fetchAgingReport = async () => {
             setLoading(true);
-            let { data, error } = await supabase
-                .from("jobby") // Invoice table
-                .select(`
-                    code,
-                    due_at,
-                    cost,
-                    ref,
-                    contractor(*),
-                    pay(amount)
-                `)
-                .order("due_at", { ascending: true });
-
-            if (error) {
-                console.error("Error fetching data:", error);
-                setLoading(false);
+            let data = await fa();
+            let error = null;
+            if (data.error) {
+                error = data.error;
+                console.error("Error fetching aging report:", error);
                 return;
             }
-
+            if (!data || !Array.isArray(data)) {
+                error = new Error("Invalid data format");
+            }     
+      
             const today = new Date();
-            const invoicesProcessed = data?.map((invoice) => {
-                const totalPaid = invoice.pay ? invoice.pay.reduce((sum, p) => sum + p.amount, 0) : 0;
+            const invoicesProcessed = data?.map((invoice:any) => {
+                const totalPaid = invoice.pay ? invoice.pay.reduce((sum:any, p:any) => sum + p.amount, 0) : 0;
                 const amountDue = invoice.cost - totalPaid;
 
                 let agingBucket;
