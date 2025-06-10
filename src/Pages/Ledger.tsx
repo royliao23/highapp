@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import styled from 'styled-components';
-import { getForLedgerSingle } from '../services/LedgerServices';
-import { getAllProjectCodes } from '../services/SharedServices';
-
+// import { getForLedgerSingle } from '../services/LedgerServices';
+// import { getAllProjectCodes } from '../services/SharedServices';
+import { getAllProjectCodes, getForLedgerSingle } from '../services/fastApiLedgerServices';
 // Define types based on the provided models
 export interface InvoiceLedger {
   id: number;
@@ -97,6 +97,7 @@ const LedgerCategory = () => {
   const fetchProjectDetails = async (projectCode: number) => {
     try {
       const details = await getForLedgerSingle(projectCode);
+      console.log('Project details:', details);
       setProjectDetails((prev) => ({
         ...prev,
         [projectCode]: details[0], // Assuming the API returns an array with a single project

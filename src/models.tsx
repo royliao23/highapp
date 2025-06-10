@@ -171,3 +171,8 @@ export interface Company {
   email: string;
 }
 
+export interface InvoiceFilter {
+    job_codes: number[]
+    project_code: number | null
+}
+
