@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { BarChart, Bar, XAxis, YAxis, Tooltip, Legend, ResponsiveContainer } from "recharts";
 import { Button, Card, Typography, Box, Stack, useMediaQuery } from "@mui/material";
-import { getProjectData, getJobDataByProject,getPayeeData, getAllProjectCodes, getJobCategoryData } from "../services/SharedServices";
+import { getProjectData, getJobDataByProject,getPayeeData, getAllProjectCodes, getJobCategoryData } from "../services/chartDataServices";
 
 
   
