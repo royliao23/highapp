@@ -222,7 +222,7 @@ const Budget: React.FC = () => {
       setFormData({
         code: jobBudget.code,
         job_id: jobBudget.job_id || jobBudget.job?.code || 0,
-        project_id: jobBudget.project_id || jobBudget.project?.code || 0,
+        project_id: jobBudget.project_id || jobBudget.project?.id || 0,
         budget: jobBudget.budget,
         note: jobBudget.note,
       });

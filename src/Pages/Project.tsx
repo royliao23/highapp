@@ -103,7 +103,8 @@ const ListItem = styled.li`
 
 const ProjectComp: React.FC = () => {
   const [projects, setProjects] = useState<Project[]>([]);
-  const [formData, setFormData] = useState<Omit<Project, "code">>({
+  const [formData, setFormData] = useState<any>({
+    id: null, // Optional ID for editing existing projects
     project_name: "",
     manager: "",
     description: "",
@@ -236,8 +237,8 @@ const ProjectComp: React.FC = () => {
       {isMobileView ? (
         <List>
           {filteredProjects.map((project) => (
-            <ListItem key={project.code}>
-              <strong>Project Code:</strong> {project.code} <br />
+            <ListItem key={project.id}>
+              <strong>Project ID:</strong> {project.id} <br />
               <strong>Project Name:</strong> {project.project_name} <br />
               <strong>Manager:</strong> {project.manager} <br />
               <strong>Description:</strong> {project.description} <br />
@@ -262,8 +263,8 @@ const ProjectComp: React.FC = () => {
           </thead>
           <tbody>
             {filteredProjects.map((project) => (
-              <tr key={project.code}>
-                <Td>{project.code}</Td>
+              <tr key={project.id}>
+                <Td>{project.id}</Td>
                 <Td>{project.project_name}</Td>
                 <Td>{project.manager}</Td>
                 <Td>{project.description}</Td>
@@ -272,7 +273,7 @@ const ProjectComp: React.FC = () => {
                   <Button onClick={() => handleOpenModal(project)}>Edit</Button>
                 </Td>
                 <Td>
-                  <DeleteButton onClick={() => handleDelete(project.code)}>Delete</DeleteButton>
+                  <DeleteButton onClick={() => handleDelete(project)}>Delete</DeleteButton>
                 </Td>
               </tr>
             ))}

@@ -28,7 +28,7 @@ export interface Categ {
   name: string;
 }
 export interface Project {
-  code: number;
+  id: number;
   project_name: string;
   manager: string;
   description: string;
