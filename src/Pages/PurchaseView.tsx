@@ -216,9 +216,9 @@ function PurchaseView() {
               <TableRow>
                 <TableCell>{projectDetails.project_name}</TableCell>
                 <TableCell>Job:{jobDetails.name}, {jobDetails.description}, Ref:{purchase.ref}</TableCell>
-                <TableCell align="right">{(purchase.cost).toFixed(2)}</TableCell>
+                <TableCell align="right">{purchase.cost || 0}</TableCell>
                 <TableCell align="right">1</TableCell>
-                <TableCell align="right">{(purchase.cost).toFixed(2)}</TableCell>
+                <TableCell align="right">{purchase.cost || 0}</TableCell>
               </TableRow>
             </TableBody>
           </Table>
@@ -227,8 +227,7 @@ function PurchaseView() {
         <Box mt={4} textAlign="right">
           <Typography variant="body1">GST: ${(purchase.cost/11).toFixed(2)}</Typography>
           <Typography variant="body1" fontWeight="bold">
-            Together with GST: ${(purchase.cost).toFixed(2)}
-          </Typography>
+            Together with GST: ${purchase.cost || 0}        </Typography>
         </Box>
 
         <Box mt={8} borderTop={1} borderColor="gray" pt={4} textAlign="center">

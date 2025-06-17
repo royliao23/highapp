@@ -631,14 +631,14 @@ const exportToCSV = () => {
             invoice.contact,
             projectOptions.find(option => option.value === invoice.project_id)?.label || "Unknown",
             jobOptions.find(option => option.value === invoice.job_id)?.label || "Unknown",
-            invoice.cost?.toFixed(2),
+            invoice.cost || 0,
             contractorOptions.find(option => option.value === invoice.by_id)?.label || "Unknown",
             invoice.ref,
             invoice.po_id,
-            invoice.pay?.reduce((sum, p) => sum + p.amount, 0) ?? 0, 
-            invoice.outstanding?.toFixed(2) || "0.00",
-            invoice.pay?.map(p => `$${p.amount.toFixed(2)} (pay#${p.code})`).join(" | ") || "N/A",
-            
+            invoice.pay?.reduce((sum, p) => sum + p.amount, 0) ?? 0,
+            invoice.outstanding || 0,
+            invoice.pay?.map(p => `$${p.amount || 0} (pay#${p.code})`).join(" | ") || "N/A",
+
         ].join(","))
     ].join("\n");
 
@@ -658,13 +658,13 @@ const exportToExcel = () => {
             "Contact Person": invoice.contact,
             "Project": projectOptions.find(option => option.value === invoice.project_id)?.label || "Unknown",
             "Job": jobOptions.find(option => option.value === invoice.job_id)?.label || "Unknown",
-            "Price": invoice.cost.toFixed(2),
+            "Price": invoice.cost || 0,
             "Supplier": contractorOptions.find(option => option.value === invoice.by_id)?.label || "Unknown",
             "Ref": invoice.ref,
             "PO": invoice.po_id,
-            "Paid Total": invoice.pay?.reduce((sum, p) => sum + p.amount, 0) ?? 0,   
-            "Outstanding": invoice.outstanding?.toFixed(2) || "0.00",
-            "Paid": invoice.pay?.map(p => `$${p.amount.toFixed(2)} (pay#${p.code})`).join(" | ") || "N/A",
+            "Paid Total": invoice.pay?.reduce((sum, p) => sum + p.amount, 0) ?? 0,
+            "Outstanding": invoice.outstanding || 0,
+            "Paid": invoice.pay?.map(p => `$${p.amount || 0} (pay#${p.code})`).join(" | ") || "N/A",
         }))
     );
 
@@ -747,7 +747,7 @@ const exportToExcel = () => {
               <strong>Contact Person:</strong> {Invoice.contact} <br />
               <strong>Project:</strong> {projectOptions.find((option) => option.value === Invoice.project_id)?.label || "Unknown"} <br />
               <strong>Supplier Name:</strong> {contractorOptions.find((option) => option.value === Invoice.by_id)?.label || "Unknown"} <br />
-              <strong>Price:</strong> {(Invoice.cost)?.toFixed(2)} <br />
+              <strong>Price:</strong> {Invoice.cost || 0} <br />
               <strong>Job:</strong> {jobOptions.find((option) => option.value === Invoice.job_id)?.label || "Unknown"} <br />
               <strong>PO:</strong> <span className="text-blue-500" onClick={async () => {
                   try {
@@ -824,7 +824,7 @@ const exportToExcel = () => {
                 <Td>{Invoice.contact}</Td>
                 <Td>{projectOptions.find((option) => option.value === Invoice.project_id)?.label || "Unknown"}</Td>
                 <Td>{jobOptions.find((option) => option.value === Invoice.job_id)?.label || "Unknown"}</Td>
-                <Td>{(Invoice.cost)?.toFixed(2)}</Td>
+                <Td>{Invoice.cost || 0}</Td>
                 <Td>{contractorOptions.find((option) => option.value === Invoice.by_id)?.label || "Unknown"}</Td>
                 <Td>{Invoice.ref}</Td>
                 <Td><span className="text-blue-500" onClick={async () => {

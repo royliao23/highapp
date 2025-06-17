@@ -158,7 +158,7 @@ function InvoiceView() {
             <Typography variant="body1">Invoice #: {invoice.code}</Typography>
             <Typography variant="body1">Create Date: {createDate.toLocaleDateString()}</Typography>
             <Typography variant="body1">Due Date: {dueDate ? new Date(dueDate).toLocaleDateString('en-GB') : ''}</Typography>
-            <Typography variant="body1">Amount: ${(invoice.cost).toFixed(2)}</Typography>
+            <Typography variant="body1">Amount: ${invoice.cost || 0}</Typography>
           </Box>
         </Box>
 
@@ -178,9 +178,9 @@ function InvoiceView() {
               <TableRow>
                 <TableCell>{projectDetails.project_name}</TableCell>
                 <TableCell>Job:{jobDetails.name}, {jobDetails.description}, Ref:{invoice.ref}</TableCell>
-                <TableCell align="right">{(invoice.cost).toFixed(2)}</TableCell>
+                <TableCell align="right">{invoice.cost || 0}</TableCell>
                 <TableCell align="right">1</TableCell>
-                <TableCell align="right">{(invoice.cost).toFixed(2)}</TableCell>
+                <TableCell align="right">{invoice.cost || 0}</TableCell>
               </TableRow>
             </TableBody>
           </Table>
@@ -188,11 +188,11 @@ function InvoiceView() {
         <Box mt={4} textAlign="right">
           <Typography variant="body1">GST: ${contractorDetails.gst_registered?(invoice.cost/11).toFixed(2):0}</Typography>
           <Typography variant="body1">
-            Together with GST: ${invoice.cost.toFixed(2)}
+            Together with GST: ${invoice.cost || 0}
           </Typography>
-          <Typography variant="body1">Amount Paid: ${invoice.paid?.toFixed(2)}</Typography>
+          <Typography variant="body1">Amount Paid: ${invoice.paid || 0}</Typography>
           <Typography variant="body1" fontWeight="bold">
-            Outstanding: ${(invoice.cost - invoice.paid).toFixed(2)}
+            Outstanding: ${invoice.cost - invoice.paid || 0}
           </Typography>
         </Box>
 
