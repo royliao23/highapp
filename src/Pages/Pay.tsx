@@ -229,7 +229,7 @@ const PayComp: React.FC = () => {
 
             return {
                 value: item.code, 
-                label: `inv#${item.code} ➡ $${item.cost.toFixed(2)} | Paid: $${totalPaid.toFixed(2)} | Balance: $${balance.toFixed(2)}`
+                label: `inv#${item.code} ➡ $${item.cost || 0} | Paid: $${totalPaid.toFixed(2)} | Balance: $${balance.toFixed(2)}`
             };
         });
 
@@ -297,77 +297,96 @@ const PayComp: React.FC = () => {
     setIsModalOpen(false);
   };
 
-
-
   const handleSubmit = async (e: FormEvent) => {
+  e.preventDefault();
+  
+  try {
+    // 1. Frontend validation
+    if (formData.amount <= 0) {
+      throw new Error('Amount must be positive');
+    }
+
+    // 2. Process payment
+    const result = editingCode
+      ? await updatePay(editingCode, formData)
+      : await createPay(formData);
+
+    // 3. Handle backend validation errors
+    if (result.error) {
+      if (result.max_allowed) {
+        throw new Error(
+          `Amount exceeds balance. Maximum allowed: $${result.max_allowed.toFixed(2)}`
+        );
+        
+      }
+      throw new Error(result.error);
+    }
+
+    // 4. Success flow
+    await Promise.all([fetchPays(), fetchInvoiceOptions()]);
+    handleCloseModal();
+    alert(`Payment ${editingCode ? 'updated' : 'created'} successfully`);
+
+  } catch (error) {
+    console.error('Payment error:', error);
+    alert(error instanceof Error ? error.message : 'Payment failed');
+  }
+};
+const handleSubmitFastApi = async (e: FormEvent) => {
     e.preventDefault();
 
     try {
-        // Fetch the invoice details to get the total cost and total paid amount
-        // const { data: invoiceData, error: invoiceError } = await supabase
-        //     .from("jobby")
-        //     .select("cost, pay(*)")
-        //     .eq("code", formData.invoice_id)
-        //     .single(); // Fetch only one record
-
-        // if (invoiceError) throw invoiceError;
-        // if (!invoiceData) throw new Error("Invoice not found.");
-
-        const invoiceData = await fetchInvoicePayDetails(formData.invoice_id); // Fetch invoice details by ID
-
-        // Calculate total paid amount
-        let totalPaid = invoiceData.pay?.reduce((sum:number, p:any) => sum + p.amount, 0) || 0;
-        if (editingCode !== null) {
-          // If editing, subtract the current payment from totalPaid
-          const currentPay = invoiceData.pay?.find((p: any) => p.code === editingCode);
-          if (currentPay) {
-              totalPaid -= currentPay.amount; // Exclude the existing amount from balance calculation
-          }
-      }
-        // Calculate the remaining balance
-        const balance = Math.max(0, invoiceData.cost - totalPaid);
-
-        // Check if the new payment exceeds the balance
-        if (formData.amount > parseFloat(balance.toFixed(2))) {
-            
-            alert(`You entered: $${formData.amount}, Payment exceeds balance! Remaining balance: $${balance.toFixed(2)}`);
-            return; // Stop execution
+        // 1. Validate form data first
+        if (!formData.invoice_id || !formData.amount) {
+            throw new Error("Invoice ID and amount are required");
         }
 
+        // 2. Fetch invoice data
+        const invoiceData = await fetchInvoicePayDetails(formData.invoice_id);
+        if (!invoiceData) throw new Error("Invoice not found");
+
+        // 3. Calculate payment balance
+        let totalPaid = invoiceData.pay?.reduce((sum: number, p: any) => sum + p.amount, 0) || 0;
+        
         if (editingCode !== null) {
-            // Update an existing Pay
-            const data = await updatePay(editingCode, formData); // Update Pay by code
+            const currentPay = invoiceData.pay?.find((p: any) => p.code === editingCode);
+            if (currentPay) totalPaid -= currentPay.amount;
+        }
 
-            if (data.error) { throw data.error }
-            alert('Update succeeded.')
-            
-            fetchPays(); // Refresh the list
+        const balance = invoiceData.cost - totalPaid;
 
-            setEditingCode(null);
-            handleCloseModal(); // Close the modal
-        } else {
-            // Add a new Pay
-            const data = await createPay(formData); // Create a new Pay
-            if (data.error) { throw data.error } else if (data.length > 0) {
-      
-            // Update the invoice status to "paid"
-            const invoiceUpdate = await updateInvoiceStatus(formData.invoice_id, { status: "paid" });
-            if (invoiceUpdate.error) {
-                console.error("Error updating invoice status:", invoiceUpdate.error);
-                alert("Failed to update invoice status!");
-                return;
-            }
-            } else {
-            // Refresh the list and reset the form
-            fetchPays();
-            handleCloseModal();
-            fetchInvoiceOptions(); // Refresh the invoice options
-            } } }
-            catch (error) {
-                  console.error("Error saving Pay:", error);
-              }
+        // 4. Validate payment amount
+        if (formData.amount > balance) {
+            throw new Error(
+                `Payment exceeds balance! Remaining: $${balance.toFixed(2)}`
+            );
+        }
+
+        // 5. Process payment (only one API call path)
+        const result = editingCode !== null 
+            ? await updatePay(editingCode, formData)
+            : await createPay(formData);
+
+        if (result.error) throw result.error;
+
+        // 6. Update invoice status if needed (only for new payments)
+        if (!editingCode) {
+            await updateInvoiceStatus(formData.invoice_id, { status: "paid" })
+                .catch(err => console.warn("Status update warning:", err));
+        }
+
+        // 7. Final cleanup
+        fetchPays();
+        fetchInvoiceOptions();
+        handleCloseModal();
+        
+        alert(editingCode ? "Update succeeded" : "Payment created");
+
+    } catch (error) {
+        console.error("Payment error:", error);
+        alert(error instanceof Error ? error.message : "Payment failed");
+    }
 };
-
 
   const handleEdit = (Pay: Pay) => {
     setEditingCode(Pay.code);
@@ -528,7 +547,7 @@ const PayComp: React.FC = () => {
                 <Td>{Pay.jobby.by_id.company_name}</Td>
                 <Td>{Pay.pay_via}</Td>
                 <Td>{Pay.supply_invoice}</Td>
-                <Td>{(Pay.amount)?.toFixed(2)}</Td>
+                <Td>{Pay.amount || 0}</Td>
                 <Td>{ Pay.note }</Td>
                 <Td>{ Pay.approved_by }</Td>
                 <Td>
