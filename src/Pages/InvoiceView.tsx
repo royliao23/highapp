@@ -99,7 +99,7 @@ function InvoiceView() {
   const { invoice } = location.state as { invoice: Invoice };
 
   console.log("invoice received:",invoice);
-  invoice.paid = invoice.pay?.reduce((sum, payment) => sum + payment.amount, 0);
+  invoice.paid = invoice.pay?.reduce((sum: number, payment) => sum + payment.amount, 0);
   const navigate = useNavigate();
 
   const handlePrint = () => {
@@ -126,10 +126,17 @@ function InvoiceView() {
     if (projectData) setProjectDetails(projectData);
   };
   useEffect(() => {
-    fetchJobs();
-    fetchContractors();
-    fetchProjects();
-    }, []);
+  const fetchSequentially = async () => {
+    try {
+      await fetchJobs();
+      await fetchContractors();
+      await fetchProjects();
+    } catch (error) {
+      console.error("Fetch error:", error);
+    }
+  };
+  fetchSequentially();
+}, []);
 
   return (
     <Box sx={{ p: 4, bgcolor: '#f0f0f0' }}> {/* Main container */}

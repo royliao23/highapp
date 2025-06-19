@@ -390,7 +390,7 @@ export const updatePay = async (code: number, payData: Omit<any, "code">) => {
     },
     body: JSON.stringify(payData)
   });
-  if (!response.ok) throw new Error('Error updating pay');
+  if (!response.ok) throw new Error('Error updating pay, check if the balance is exceeded!');
   return await response.json();
 };
 export const updateInvStatus = async (code: number, payData: Omit<any, "code">) => {
@@ -402,7 +402,7 @@ export const updateInvStatus = async (code: number, payData: Omit<any, "code">) 
     },
     body: JSON.stringify(payData)
   });
-  if (!response.ok) throw new Error('Error updating pay');
+  if (!response.ok) throw new Error('Error updating pay status');
   return await response.json();
 };
 

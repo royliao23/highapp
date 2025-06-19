@@ -173,8 +173,8 @@ if ( !emailJsKey || !emailJsServiceId || !emailJsTemplateId) {
             <Typography variant="body1">For Invoice #: {pay.jobby.code}</Typography>
             <Typography variant="body1">Pay Date: {createDate.toLocaleDateString()}</Typography>
             <Typography variant="body1">Due Date: {dueDate ? new Date(dueDate).toLocaleDateString() : ''}</Typography>
-            <Typography variant="body1">Invoiced Amount: ${(pay.jobby.cost).toFixed(2)}</Typography>
-            <Typography variant="body1">Pay Amount: ${(pay.amount).toFixed(2)}</Typography>
+            <Typography variant="body1">Invoiced Amount: ${pay.jobby.cost || 0}</Typography>
+            <Typography variant="body1">Pay Amount: ${pay.amount || 0}</Typography>
           </Box>
         </Box>
 
@@ -194,9 +194,9 @@ if ( !emailJsKey || !emailJsServiceId || !emailJsTemplateId) {
               <TableRow>
                 <TableCell>{projectDetails.project_name}</TableCell>
                 <TableCell>Job:{jobDetails.name}, {jobDetails.description}, Ref:{pay.jobby.ref}</TableCell>
-                <TableCell align="right">{(pay.jobby.cost).toFixed(2)}</TableCell>
+                <TableCell align="right">{pay.jobby.cost || 0}</TableCell>
                 <TableCell align="right">1</TableCell>
-                <TableCell align="right">{(pay.jobby.cost).toFixed(2)}</TableCell>
+                <TableCell align="right">{pay.jobby.cost || 0}</TableCell>
               </TableRow>
             </TableBody>
           </Table>
@@ -205,9 +205,9 @@ if ( !emailJsKey || !emailJsServiceId || !emailJsTemplateId) {
         <Box mt={4} textAlign="right">
           <Typography variant="body1">GST: ${contractorDetails.gst_registered?(pay.amount/11).toFixed(2):0}</Typography>
           <Typography variant="body1">
-            Together with GST: ${pay.amount.toFixed(2)}
+            Together with GST: ${pay.amount || 0}
           </Typography>
-          <Typography variant="body1">Amount Paid: ${pay.amount.toFixed(2)}</Typography>
+          <Typography variant="body1">Amount Paid: ${pay.amount || 0}</Typography>
           {/* <Typography variant="body1" fontWeight="bold">
             Balance Due: ${(invoice.cost).toFixed(2)}
           </Typography> */}
