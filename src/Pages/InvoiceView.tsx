@@ -47,7 +47,7 @@ interface Invoice {
     create_at: Date;
     updated_at: Date;
     due_at: Date;
-    pay: Pay[];
+    pay:any[];
     paid: number;
     abn?: string;
     gst_registered?: boolean;
@@ -99,7 +99,7 @@ function InvoiceView() {
   const { invoice } = location.state as { invoice: Invoice };
 
   console.log("invoice received:",invoice);
-  invoice.paid = invoice.pay?.reduce((sum: number, payment) => sum + payment.amount, 0);
+  invoice.paid = invoice.pay?.reduce((sum: number, payment) => sum + parseFloat(payment.amount), 0);
   const navigate = useNavigate();
 
   const handlePrint = () => {
@@ -197,9 +197,9 @@ function InvoiceView() {
           <Typography variant="body1">
             Together with GST: ${invoice.cost || 0}
           </Typography>
-          <Typography variant="body1">Amount Paid: ${invoice.paid || 0}</Typography>
+          <Typography variant="body1">Amount Paid: ${invoice.paid.toFixed(2) || 0}</Typography>
           <Typography variant="body1" fontWeight="bold">
-            Outstanding: ${invoice.cost - invoice.paid || 0}
+            Outstanding: ${(invoice.cost - invoice.paid).toFixed(2) || 0}
           </Typography>
         </Box>
 

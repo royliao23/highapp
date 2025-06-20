@@ -55,16 +55,17 @@ export const fetchInvoiceDetails =  async (code: number) => {
   if (!response.ok) throw new Error('Error fetching po details');
   const invoice = await response.json();
   if (invoice.error) throw new Error('Error fetching invoice details');
-  
-  const paid = invoice.pay?.reduce((sum:number, payment:any) => sum + payment.amount, 0) || 0;
+  console.log("Fetched invoice payment details:", invoice.pay);
+  const paid = invoice.pay?.reduce((sum:number, payment:any) => sum + parseFloat(payment.amount), 0) || 0;
 
   return {
       ...invoice,
       paid,  // Ensure 'paid' is part of the returned object
     };
 } catch (error) {
-  console.error("Error fetching invoice details:", error);}
+  console.error("Error fetching invoice details:", error);
 }
+};
 
 export const fetchInvoicePayDetails = async (invoiceId: number) => {
   const response = await fetch(`${API_BASE_URL}/high/invoice/singleinvpay/${invoiceId}`, {

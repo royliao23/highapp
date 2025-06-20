@@ -9,6 +9,7 @@ import { useNavigationService } from "../services/SharedServices";
 import { fetchInvoiceDetails, fetchInvoicePayDetails } from "../services/DetailService";
 import { PaginationContainer } from "../StyledComponent";
 import { createPay,updatePay,fetchPay,deletePay,fetchPayNInv, fetchInNPay, updateInvoiceStatus } from "../api";
+import { supabase } from "../supabaseClient";
 
 // Styled Components for Styling
 const Container = styled.div`
@@ -225,6 +226,8 @@ const PayComp: React.FC = () => {
             const totalPaid = item.pay?.reduce((sum:number, p:any) => sum + p.amount, 0) || 0;
             
             // Calculate balance (cost - totalPaid)
+            console.log("item.cost:", item.cost);
+            console.log("totalPaid:", totalPaid);
             const balance = Math.max(0, item.cost - totalPaid); // Ensure balance is not negative
 
             return {
@@ -332,59 +335,77 @@ const PayComp: React.FC = () => {
     alert(error instanceof Error ? error.message : 'Payment failed');
   }
 };
-const handleSubmitFastApi = async (e: FormEvent) => {
+const handleSubmitsupabase = async (e: FormEvent) => {
     e.preventDefault();
 
     try {
-        // 1. Validate form data first
-        if (!formData.invoice_id || !formData.amount) {
-            throw new Error("Invoice ID and amount are required");
-        }
+        // Fetch the invoice details to get the total cost and total paid amount
+        const { data: invoiceData, error: invoiceError } = await supabase
+            .from("jobby")
+            .select("cost, pay(*)")
+            .eq("code", formData.invoice_id)
+            .single(); // Fetch only one record
 
-        // 2. Fetch invoice data
-        const invoiceData = await fetchInvoicePayDetails(formData.invoice_id);
-        if (!invoiceData) throw new Error("Invoice not found");
+        if (invoiceError) throw invoiceError;
+        if (!invoiceData) throw new Error("Invoice not found.");
 
-        // 3. Calculate payment balance
-        let totalPaid = invoiceData.pay?.reduce((sum: number, p: any) => sum + p.amount, 0) || 0;
-        
+        // Calculate total paid amount
+        let totalPaid = invoiceData.pay?.reduce((sum, p) => sum + p.amount, 0) || 0;
         if (editingCode !== null) {
-            const currentPay = invoiceData.pay?.find((p: any) => p.code === editingCode);
-            if (currentPay) totalPaid -= currentPay.amount;
+          // If editing, subtract the current payment from totalPaid
+          const currentPay = invoiceData.pay?.find(p => p.code === editingCode);
+          if (currentPay) {
+              totalPaid -= currentPay.amount; // Exclude the existing amount from balance calculation
+          }
+      }
+        // Calculate the remaining balance
+        const balance = Math.max(0, invoiceData.cost - totalPaid);
+
+        // Check if the new payment exceeds the balance
+        if (formData.amount > parseFloat(balance.toFixed(2))) {
+            
+            alert(`You entered: $${formData.amount}, Payment exceeds balance! Remaining balance: $${balance.toFixed(2)}`);
+            return; // Stop execution
         }
 
-        const balance = invoiceData.cost - totalPaid;
+        if (editingCode !== null) {
+            // Update an existing Pay
+            const { data, error } = await supabase
+                .from("pay")
+                .update(formData)
+                .eq("code", editingCode).select();
 
-        // 4. Validate payment amount
-        if (formData.amount > balance) {
-            throw new Error(
-                `Payment exceeds balance! Remaining: $${balance.toFixed(2)}`
-            );
+                if (error) {throw error} else if (data.length > 0) {
+                  alert('Update succeeded.')
+                } else {
+                  alert('Only current month transactions are allowed to be updated or there are no matching rows')
+                }
+                fetchPays(); // Refresh the list
+
+            setEditingCode(null);
+        } else {
+            // Add a new Pay
+            const { error } = await supabase.from("pay").insert([formData]);
+            if (error) throw error;
+            // Update the invoice status to "paid"
+        const { error: updateError } = await supabase
+              .from("jobby")
+              .update({ status: "paid" })  // Corrected update syntax
+              .eq("code", formData.invoice_id);
+
+          if (updateError) {
+              console.error("Error updating invoice status:", updateError);
+              alert("Failed to update invoice status!");
+              return;
+          }
         }
 
-        // 5. Process payment (only one API call path)
-        const result = editingCode !== null 
-            ? await updatePay(editingCode, formData)
-            : await createPay(formData);
-
-        if (result.error) throw result.error;
-
-        // 6. Update invoice status if needed (only for new payments)
-        if (!editingCode) {
-            await updateInvoiceStatus(formData.invoice_id, { status: "paid" })
-                .catch(err => console.warn("Status update warning:", err));
-        }
-
-        // 7. Final cleanup
+        // Refresh the list and reset the form
         fetchPays();
-        fetchInvoiceOptions();
         handleCloseModal();
-        
-        alert(editingCode ? "Update succeeded" : "Payment created");
-
+        fetchInvoiceOptions(); // Refresh the invoice options
     } catch (error) {
-        console.error("Payment error:", error);
-        alert(error instanceof Error ? error.message : "Payment failed");
+        console.error("Error saving Pay:", error);
     }
 };
 
