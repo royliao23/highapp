@@ -251,6 +251,23 @@ const PayrollDashboard: React.FC = () => {
     return (51667 + (annualGrossPay - 180000) * 0.45) / 52;
   }
   }
+//  payload: {
+//     "employee_id": 3,
+//     "period": "2025-06-02 -- 2025-06-08",
+//     "gross_pay": 890.16,
+//     "tax": 105.97507692307691,
+//     "super": 89.02,
+//     "net_pay": 784.18,
+//     "base_hour": 1.9,
+//     "overtime_15": 2.9,
+//     "overtime_20": 3.9,
+//     "bonus": 4.9,
+//     "holiday_pay": 3.1,
+//     "other_pay": 140.1,
+//     "from_date": "2025-06-02",
+//     "to_date": "2025-06-08",
+//     "note": ""
+// }
 
   const handleAddPayroll = async () => {
     if (!selectedEmployee || !from_date || !to_date || grossPay <= 0) {
@@ -318,10 +335,10 @@ const PayrollDashboard: React.FC = () => {
     // Sum up the required fields
     const totals = employeePayrolls.reduce(
       (acc, payroll) => {
-        acc.gross_total += payroll.gross_pay;
-        acc.tax_total += payroll.tax;
-        acc.super_total += payroll.super;
-        acc.net_total += payroll.net_pay;
+        acc.gross_total += Number(payroll.gross_pay) || 0;
+        acc.tax_total += Number(payroll.tax) || 0;
+        acc.super_total += Number(payroll.super) || 0;
+        acc.net_total += Number(payroll.net_pay) || 0;
         
         return acc;
       },
@@ -465,16 +482,16 @@ const PayrollDashboard: React.FC = () => {
                           </TableCell>
                           <TableCell>{payroll.employee?.name}</TableCell>
                           <TableCell>{payroll.period}</TableCell>
-                          <TableCell>${payroll.gross_pay?.toFixed(2)}</TableCell>
+                          <TableCell>${Number(payroll.gross_pay || 0).toFixed(2)}</TableCell>
                           <TableCell>{payroll.base_hour}</TableCell>
                           <TableCell>{payroll.overtime_15}</TableCell>
                           <TableCell>{payroll.overtime_20}</TableCell>
                           <TableCell>{payroll.bonus}</TableCell>
                           <TableCell>{payroll.other_pay}</TableCell>
-                          <TableCell>${payroll.tax?.toFixed(2)}</TableCell>
-                          <TableCell>${payroll.super?.toFixed(2)}</TableCell>
-                          <TableCell>${payroll.net_pay?.toFixed(2)}</TableCell>
-                          <TableCell>${payroll.holiday_pay?.toFixed(2)}</TableCell>
+                          <TableCell>${Number(payroll.tax || 0).toFixed(2)}</TableCell>
+                          <TableCell>${Number(payroll.super || 0).toFixed(2) }</TableCell>
+                          <TableCell>${Number(payroll.net_pay || 0).toFixed(2) }</TableCell>
+                          <TableCell>${Number(payroll.holiday_pay || 0).toFixed(2)}</TableCell>
                           <TableCell>{payroll.note}</TableCell>
                           
                         </TableRow>
@@ -715,25 +732,27 @@ const PayrollDashboard: React.FC = () => {
                   <TableBody>
                       <TableRow>
                         <TableCell>This Pay</TableCell>
-                        <TableCell>${selectedPayroll.gross_pay?.toFixed(2) || "-"}</TableCell>
-                        <TableCell>${selectedPayroll.net_pay?.toFixed(2) || "-"}</TableCell>
-                        <TableCell>${selectedPayroll.super?.toFixed(2) || "-"}</TableCell>
-                        <TableCell>${`${selectedPayroll.tax?.toFixed(2) || "-"}` }</TableCell>
+                       
+                        <TableCell>${Number(selectedPayroll.gross_pay)?.toFixed(2) || "-"}</TableCell>
+                        <TableCell>${Number(selectedPayroll.net_pay)?.toFixed(2) || "-"}</TableCell>
+                        <TableCell>${Number(selectedPayroll.super)?.toFixed(2) || "-"}</TableCell>
+                        <TableCell>${`${Number(selectedPayroll.tax)?.toFixed(2) || "-"}` }</TableCell>
                       </TableRow>
                       <TableRow>
                         <TableCell>Ytd </TableCell>
-                        <TableCell>${ytd.gross_total?.toFixed(2) || "-"}</TableCell>
-                        <TableCell>${ytd.net_total?.toFixed(2) || "-"}</TableCell>
-                        <TableCell>${ytd.super_total?.toFixed(2) || "-"}</TableCell>
-                        <TableCell>${`${ytd.tax_total?.toFixed(2) || "-"}` }</TableCell>
+                       
+                        <TableCell>${Number(ytd.gross_total).toFixed(2) || "-"}</TableCell>
+                        <TableCell>${Number(ytd.net_total).toFixed(2) || "-"}</TableCell>
+                        <TableCell>${Number(ytd.super_total).toFixed(2) || "-"}</TableCell>
+                        <TableCell>${Number(ytd.tax_total).toFixed(2) || "-" }</TableCell>
                       </TableRow>
 
                   </TableBody>
                 </Table>
               </TableContainer>
 
-              <Typography variant="h6" align="right">Gross Pay: ${selectedPayroll.gross_pay?.toFixed(2)}</Typography>
-              <Typography variant="h6" align="right">Net Pay: ${selectedPayroll.net_pay?.toFixed(2)}</Typography>
+              <Typography variant="h6" align="right">Gross Pay: ${Number(selectedPayroll.gross_pay).toFixed(2) || "-"}</Typography>
+              <Typography variant="h6" align="right">Net Pay: ${Number(selectedPayroll.net_pay).toFixed(2) || "-"}</Typography>
 
               {/* Buttons (Hidden When Printing) */}
             <Box mt={2} display="flex" justifyContent="space-between" className="no-print">
