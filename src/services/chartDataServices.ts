@@ -1,5 +1,5 @@
 // chartDataService.ts
-
+import { authFetch } from "../authFetch";
 const API_BASE_URL = process.env.REACT_APP_API_NODE;
 if (!API_BASE_URL) {
   throw new Error("REACT_APP_API_NODE is not defined in .env");
@@ -14,7 +14,7 @@ type ProjectData = {
 
 export const getProjectData = async (): Promise<ProjectData[]> => {
   try {
-    const response = await fetch(`${API_BASE_URL}/high/chart/project-data`);
+    const response = await authFetch(`${API_BASE_URL}/high/chart/project-data`);
     if (!response.ok) throw new Error("Failed to fetch");
 
     return await response.json();
@@ -26,7 +26,7 @@ export const getProjectData = async (): Promise<ProjectData[]> => {
 
 export const getJobCategoryData = async (projectId: number): Promise<ProjectData[]> => {
   try {
-    const response = await fetch(`${API_BASE_URL}/high/chart/job-category-data/${projectId}`);
+    const response = await authFetch(`${API_BASE_URL}/high/chart/job-category-data/${projectId}`);
     if (!response.ok) throw new Error("Failed to fetch");
 
     return await response.json();
@@ -37,7 +37,7 @@ export const getJobCategoryData = async (projectId: number): Promise<ProjectData
 };
 export const getJobDataByProject = async (projectId: number) => {
   try {
-    const response = await fetch(`${API_BASE_URL}/high/chart/job-data/${projectId}`);
+    const response = await authFetch(`${API_BASE_URL}/high/chart/job-data/${projectId}`);
     if (!response.ok) throw new Error("Failed to fetch");
 
     return await response.json();
@@ -48,7 +48,7 @@ export const getJobDataByProject = async (projectId: number) => {
 };
 export const getPayeeData = async () => {
   try {
-    const response = await fetch(`${API_BASE_URL}/high/chart/payee-data`);
+    const response = await authFetch(`${API_BASE_URL}/high/chart/payee-data`);
     if (!response.ok) throw new Error("Failed to fetch");
 
     return await response.json();
@@ -60,7 +60,7 @@ export const getPayeeData = async () => {
 
 export const getAllProjectCodes = async () => {
   try {
-    const response = await fetch(`${API_BASE_URL}/high/chart/codes`);
+    const response = await authFetch(`${API_BASE_URL}/high/chart/codes`);
     if (!response.ok) throw new Error("Failed to fetch");
 
     return await response.json();
