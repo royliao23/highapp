@@ -205,7 +205,7 @@ const AgingReport: React.FC = () => {
                               <Td>{new Date(invoice.due_at).toLocaleDateString()}</Td>
                               <Td>{invoice.code}</Td>
                               <Td>{invoice.ref}</Td>
-                              <Td>${invoice.cost.toFixed(2)}</Td>
+                              <Td>${invoice.cost || 0}</Td>
                               <Td>${invoice.totalPaid.toFixed(2)}</Td>
                               <Td>${invoice.amountDue.toFixed(2)}</Td>
                               <Td>{invoice.agingBucket}</Td>

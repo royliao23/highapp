@@ -184,7 +184,7 @@ const LedgerCategory = () => {
                     </ExpandButton>
                     {proj.project_name}
                   </Td>
-                  <Td>${projectTotal.toFixed(2)}</Td>
+                  <Td>${Number(projectTotal).toFixed(2)}</Td>
                 </tr>
                 {expandedProjects[proj.code] && projectDetails[proj.code] && (
                   <>
@@ -205,7 +205,7 @@ const LedgerCategory = () => {
                                 </ExpandButton>
                                 {cat.name}
                               </Td>
-                              <Td>${categoryTotal.toFixed(2)}</Td>
+                              <Td>${Number(categoryTotal).toFixed(2)}</Td>
                             </tr>
                             {expandedCategories[`${proj.code}-${cat.code}`] && (
                               <>
@@ -226,14 +226,14 @@ const LedgerCategory = () => {
                                             </ExpandButton>
                                             {job.name}
                                           </Td>
-                                          <Td>${jobTotal.toFixed(2)}</Td>
+                                          <Td>${Number(jobTotal).toFixed(2)}</Td>
                                         </tr>
                                         {expandedJobs[`${proj.code}-${cat.code}-${job.code}`] && (
                                           <>
                                             {job.details?.map((invoice) => (
                                               <tr key={`${proj.code}-${cat.code}-${job.code}-${invoice.id}`} style={{ color: 'blue' }}>
                                                 <Td style={{ paddingLeft: '6rem' }}>Supplier Reference: {invoice.description}</Td>
-                                                <Td>inv#:{invoice.id}: ${invoice.amount.toFixed(2)}</Td>
+                                                <Td>inv#:{invoice.id}: ${Number(invoice.amount).toFixed(2)}</Td>
                                               </tr>
                                             ))}
                                           </>

@@ -194,7 +194,7 @@ const BASReportPage: React.FC = () => {
 
   const formatNumber = (num: number | undefined) => {
     if (num === undefined) return '';
-    return parseFloat(num.toFixed(2));
+    return parseFloat(Number(num).toFixed(2) || "-");
   };
 
   const handleExportATO = () => {

@@ -20,9 +20,9 @@ interface Pay {
 
 // Dummy Bank Records (from bank statement)
 const bankRecords = [
-    { id: 1, date: "2024-02-20", amount: 101, description: "Bank Transfer ABC" },
+    { id: 1, date: "2024-02-20", amount: 101.00, description: "Bank Transfer ABC" },
     { id: 2, date: "2024-02-18", amount: 4303.80, description: "Bank Deposit XYZ" },
-    { id: 3, date: "2024-02-18", amount: 24, description: "Bank Deposit XYZ" },
+    { id: 3, date: "2024-02-18", amount: 24.00, description: "Bank Deposit XYZ" },
 ];
 
 
@@ -32,7 +32,7 @@ const BankReconciliation = () => {
     const [loading, setLoading] = useState<boolean>(true); // State to handle loading state
     const [error, setError] = useState<string | null>(null); // State to handle error messages
     const [bankRecords, setBankRecords] = useState<BankRecord[]>([
-        { id: 1, date: "2024-02-20", amount: 101, description: "Bank Transfer ABC" },
+        { id: 1, date: "2024-02-20", amount: 101.00, description: "Bank Transfer ABC" },
         { id: 2, date: "2024-02-18", amount: 4303.80, description: "Bank Deposit XYZ" },
         { id: 3, date: "2024-02-18", amount: 24, description: "Bank Deposit XYZ" },
     ]);
@@ -61,7 +61,7 @@ const BankReconciliation = () => {
         const newPayRecord: Pay = {
             invoice_id: invoice.code,
             pay_via: "Bank Transfer",
-            amount: invoice.cost,
+            amount: Number(invoice.cost) || 0,
             supply_invoice: `SI-${invoice.ref}`,
             note: `Matched with Bank ID ${bankId}`,
             approved_by: "Admin",
@@ -172,7 +172,7 @@ const BankReconciliation = () => {
                                         <TableCell>{invoice.due_at?.toString()}</TableCell>
                                         <TableCell>
                                             {bankRecords.map((record) =>
-                                                record.amount === invoice.cost && !isMatched ? (
+                                                record.amount === Number(invoice.cost) && !isMatched ? (
                                                     <Button
                                                         key={record.id}
                                                         variant="contained"
