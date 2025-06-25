@@ -377,7 +377,11 @@ export const createPay = async (payData: Omit<any, "code">) => {
     },
     body: JSON.stringify(payData)
   });
-  if (!response.ok) throw new Error('Error creating pay');
+  if (!response.ok) {
+    const errorData = await response.json();
+    alert(errorData.detail || 'Error creating pay');
+    throw new Error(errorData.detail || 'Error creating pay');
+  }
   return await response.json();
 };  
 
@@ -402,7 +406,10 @@ export const updateInvStatus = async (code: number, payData: Omit<any, "code">) 
     },
     body: JSON.stringify(payData)
   });
-  if (!response.ok) throw new Error('Error updating pay status');
+  if (!response.ok) {
+    const errorData = await response.json();
+    throw new Error(errorData.detail || 'Error updating pay');
+  }
   return await response.json();
 };
 
@@ -414,7 +421,11 @@ export const deletePay = async (code: number) => {
       'Authorization': `Bearer ${localStorage.getItem('authToken')}`
     }
   });
-  if (!response.ok) throw new Error('Error deleting pay');
+  if (!response.ok) {
+    const errorData = await response.json();
+    alert(errorData.error || 'Error deleting pay');
+    throw new Error(errorData.detail || 'Error deleting pay');
+  }
   return await response.json();
 }
 
