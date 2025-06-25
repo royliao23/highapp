@@ -33,8 +33,9 @@ const BankReconciliation = () => {
     const [error, setError] = useState<string | null>(null); // State to handle error messages
     const [bankRecords, setBankRecords] = useState<BankRecord[]>([
         { id: 1, date: "2024-02-20", amount: 101.00, description: "Bank Transfer ABC" },
-        { id: 2, date: "2024-02-18", amount: 4303.80, description: "Bank Deposit XYZ" },
+        { id: 2, date: "2024-02-18", amount: 550.00, description: "Bank Deposit XYZ" },
         { id: 3, date: "2024-02-18", amount: 24, description: "Bank Deposit XYZ" },
+        { id: 4, date: "2024-03-18", amount: 222, description: "Bank Deposit abc" },
     ]);
     // Fetch invoices from Supabase API
     useEffect(() => {
@@ -77,12 +78,12 @@ const BankReconciliation = () => {
             throw new Error(data.error.message || "Failed to save payment");
         }
         // Update the invoice status to "paid"
-        const newdata = await updateInvStatus(invoice.code, newPayRecord);
-        if (newdata.error) {
-            console.error("Error updating invoice status:", newdata?.error);
-            alert("Failed to update invoice status!");
-            throw new Error(newdata.error.message || "Failed to update invoice status");
-        }
+        // const newdata = await updateInvStatus(invoice.code, newPayRecord);
+        // if (newdata.error) {
+        //     console.error("Error updating invoice status:", newdata?.error);
+        //     alert("Failed to update invoice status!");
+        //     throw new Error(newdata.error.message || "Failed to update invoice status");
+        // }
 
 
         // Add to state only if insertion is successful
@@ -168,11 +169,11 @@ const BankReconciliation = () => {
                                                 textDecoration: isMatched ? "line-through" : "none",
                                                 color: isMatched ? "gray" : "black",
                                             }}
-                                        >${invoice.cost}</TableCell>
+                                        >${invoice.cost - (invoice.paid ?? 0)}</TableCell>
                                         <TableCell>{invoice.due_at?.toString()}</TableCell>
                                         <TableCell>
                                             {bankRecords.map((record) =>
-                                                record.amount === Number(invoice.cost) && !isMatched ? (
+                                                record.amount === Number(invoice.cost - (invoice.paid ?? 0)) && !isMatched ? (
                                                     <Button
                                                         key={record.id}
                                                         variant="contained"

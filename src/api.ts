@@ -406,6 +406,7 @@ export const updateInvStatus = async (code: number, payData: Omit<any, "code">) 
   return await response.json();
 };
 
+
 export const deletePay = async (code: number) => {
   const response = await authFetch(`${API_BASE_URL}/high/pay/${code}`, {
     method: 'DELETE',
