@@ -19,11 +19,11 @@ export const fetchProjects = async () => {
   });
   if (!response.ok) throw new Error('Error fetching projects');
   const data = await response.json();
-  return data.projects; // Assuming your Express API returns { sales: [...] }
+  return data.projects || data; // Assuming your Express API returns { sales: [...] }
 };
 
 export const createProject = async (projectData: Omit<Project, "code">) => {
-  const response = await authFetch(`${API_BASE_URL}/high/projects`, {
+  const response = await authFetch(`${API_BASE_URL}/high/projects/`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
@@ -36,7 +36,7 @@ export const createProject = async (projectData: Omit<Project, "code">) => {
 };
 
 export const updateProject = async (code: number, projectData: Omit<Project, "code">) => {
-  const response = await authFetch(`${API_BASE_URL}/high/projects/${code}`, {
+  const response = await authFetch(`${API_BASE_URL}/high/projects/${code}/`, {
     method: 'PUT',
     headers: {
       'Content-Type': 'application/json',
@@ -49,14 +49,14 @@ export const updateProject = async (code: number, projectData: Omit<Project, "co
 };
 
 export const deleteProject = async (code: number) => {
-  const response = await authFetch(`${API_BASE_URL}/high/projects/${code}`, {
+  const response = await authFetch(`${API_BASE_URL}/high/projects/${code}/`, {
     method: 'DELETE',
     headers: {
       'Authorization': `Bearer ${localStorage.getItem('authToken')}`
     }
   });
   if (!response.ok) throw new Error('Error deleting project');
-  return await response.json();
+  return await response;
 };
 
 //Contractor
