@@ -412,8 +412,9 @@ const handleSubmitsupabase = async (e: FormEvent) => {
 
   const handleEdit = (Pay: Pay) => {
     setEditingCode(Pay.code);
+    console.log("pay selected:", Pay)
     setFormData({
-        invoice_id: Pay.invoice_id,
+        invoice_id: Pay.invoice_id | Pay.jobby.code,
         pay_via: Pay.pay_via,
         amount: Pay.amount,
         supply_invoice: Pay.supply_invoice,
@@ -422,16 +423,12 @@ const handleSubmitsupabase = async (e: FormEvent) => {
         create_at: Pay.create_at,
         updated_at: Pay.updated_at,
     });
+    console.log("form data", formData)
   };
 
   const handleDelete = async (code: number) => {
     try {
       const data  = await deletePay(code); // Delete Pay by code
-      if (data.error) {throw data.error} else if (data.length > 0) {
-        alert('Deletion succeeded.')
-      } else {
-        alert('Only current month transactions are allowed to be deleted or there are no matching rows')
-      }
       fetchPays(); // Refresh the list
     } catch (error) {
       console.error("Error deleting Pay:", error);
@@ -525,10 +522,10 @@ const handleSubmitsupabase = async (e: FormEvent) => {
                                 } catch (error) {
                                   console.error("Error fetching purchase details:", error);
                                   // Handle the error (e.g., show an error message)
-                                }}} className="text-blue-500">{Pay.invoice_id} </span><br />
+                                }}} className="text-blue-500">{Pay.invoice_id | Pay.jobby.code} </span><br />
               <strong>Pay Via:</strong> {Pay.pay_via} <br />
               <strong>Supplier Invoice:</strong> {Pay.supply_invoice} <br />
-              <strong>Price:</strong> {(Pay.amount)?.toFixed(2)} <br />
+              <strong>Price:</strong> {Pay.amount || 0} <br />
               <strong>Note:</strong> { Pay.note } <br />
               <strong>Approved By:</strong> { Pay.approved_by } <br />
               <Button onClick={() => handleOpenModal(Pay)}>Edit</Button>
@@ -565,7 +562,7 @@ const handleSubmitsupabase = async (e: FormEvent) => {
                                 } catch (error) {
                                   console.error("Error fetching purchase details:", error);
                                   // Handle the error (e.g., show an error message)
-                                }}} className="text-blue-500">{Pay.invoice_id}</Td>
+                                }}} className="text-blue-500">{Pay.invoice_id | Pay.jobby.code}</Td>
                 <Td>{Pay.jobby.by_id.company_name}</Td>
                 <Td>{Pay.pay_via}</Td>
                 <Td>{Pay.supply_invoice}</Td>

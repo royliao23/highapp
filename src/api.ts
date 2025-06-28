@@ -435,12 +435,13 @@ export const deletePay = async (code: number) => {
       'Authorization': `Bearer ${localStorage.getItem('authToken')}`
     }
   });
-  if (!response.ok) {
-    const errorData = await response.json();
-    alert(errorData.error || 'Error deleting pay');
-    throw new Error(errorData.detail || 'Error deleting pay');
-  }
-  return deleteResponse('Pay', response);
+  if (response.status === 204) {
+    // Success – no content
+    alert("Deleted successfully");
+    // Update UI or refresh data
+  } else
+  
+  { alert("Cannot delete, please check the permission and date!");}
 }
 
 //jobbudget
