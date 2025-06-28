@@ -223,16 +223,17 @@ const PayComp: React.FC = () => {
         // Transform data into { value, label } format
         const transformedData = data.map((item: any) => {
             // Calculate total paid amount
-            const totalPaid = item.pay?.reduce((sum:number, p:any) => sum + p.amount, 0) || 0;
+            const totalPaid = item.pay?.reduce((sum:number, p:any) => sum + Number(p.amount), 0) || 0;
             
             // Calculate balance (cost - totalPaid)
             console.log("item.cost:", item.cost);
             console.log("totalPaid:", totalPaid);
-            const balance = Math.max(0, item.cost - totalPaid); // Ensure balance is not negative
+            const balance = Math.max(0, Number(item.cost) - Number(totalPaid)); // Ensure balance is not negative
 
             return {
                 value: item.code, 
-                label: `inv#${item.code} ➡ $${item.cost || 0} | Paid: $${totalPaid.toFixed(2)} | Balance: $${balance.toFixed(2)}`
+                // label: `inv#${item.code} ➡ $${item.cost || 0} | Paid: $${totalPaid.toFixed(2)} | Balance: $${balance.toFixed(2)}`
+                label: `inv#${item.code} ➡ $${item.cost || 0} | Paid: $${(Number(totalPaid)).toFixed(2)} | Balance: $${balance.toFixed(2)}`
             };
         });
 

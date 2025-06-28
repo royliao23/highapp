@@ -404,7 +404,11 @@ export const updatePay = async (code: number, payData: Omit<any, "code">) => {
     },
     body: JSON.stringify(payData)
   });
-  if (!response.ok) throw new Error('Error updating pay, check if the balance is exceeded!');
+  if (!response.ok) {
+    const errorData = await response.json();
+    alert(errorData.detail || 'Error updating pay');
+    throw new Error(errorData.detail || 'Error updating pay');
+  }
   return await response.json();
 };
 export const updateInvStatus = async (code: number, payData: Omit<any, "code">) => {
