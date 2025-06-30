@@ -43,7 +43,7 @@ export const fetchPurchaseDetails = async (code: number) => { const response = a
   if (!response.ok) throw new Error('Error fetching po details');
   const data = await response.json();
   
-  return data || data.po; 
+  return  data.po || data; 
 };
 
 export const fetchInvoiceDetails =  async (code: number) => { 

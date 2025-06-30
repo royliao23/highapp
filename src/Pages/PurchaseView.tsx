@@ -153,7 +153,9 @@ function PurchaseView() {
   };
 
   const fetchJobs = async () => {
-    const jobData = await fetchJobDetails(purchase.job_id);
+    console.log("purchase?", purchase )
+    console.log("job id?", purchase.job_id )
+    const jobData = await fetchJobDetails(purchase?.job_id);
     if (jobData) setJobDetails(jobData);
   };
 
