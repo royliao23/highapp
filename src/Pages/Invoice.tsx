@@ -294,8 +294,8 @@ const InvoiceComp: React.FC = () => {
   
       const invoicesWithPaid = data.map((invoice: any) => ({
       ...invoice,
-      paid: invoice.pay?.reduce((sum: number, payment: any) => sum + payment.amount, 0) || 0,
-      outstanding: (invoice.cost || 0) - (invoice.pay?.reduce((sum: number, payment: any) => sum + payment.amount, 0) || 0)
+      paid: invoice.pay?.reduce((sum: number, payment: any) => sum + Number(payment.amount), 0) || 0,
+      outstanding: (Number(invoice.cost) || 0) - (invoice.pay?.reduce((sum: number, payment: any) => sum + Number(payment.amount), 0) || 0)
     }));
 
     setInvoices(invoicesWithPaid);
@@ -622,7 +622,7 @@ const InvoiceComp: React.FC = () => {
   );
 
 const exportToCSV = () => {
-    const headers = ["Inv#", "Contact Person", "Project", "Job", "Price", "Supplier", "Ref", "PO", "Paid Total", "Outstanding","Paid"];
+    const headers = ["Inv#", "Contact Person", "Project", "Job", "Price", "Supplier", "Ref", "PO", "Paid Total", "Outstanding","Paid History"];
     
     const csvRows = [
         headers.join(","), // Add headers
@@ -635,7 +635,7 @@ const exportToCSV = () => {
             contractorOptions.find(option => option.value === invoice.by_id)?.label || "Unknown",
             invoice.ref,
             invoice.po_id,
-            invoice.pay?.reduce((sum, p) => sum + p.amount, 0) ?? 0,
+            invoice.pay?.reduce((sum, p) => sum + Number(p.amount), 0) ?? 0,
             invoice.outstanding || 0,
             invoice.pay?.map(p => `$${p.amount || 0} (pay#${p.code})`).join(" | ") || "N/A",
 
@@ -662,9 +662,9 @@ const exportToExcel = () => {
             "Supplier": contractorOptions.find(option => option.value === invoice.by_id)?.label || "Unknown",
             "Ref": invoice.ref,
             "PO": invoice.po_id,
-            "Paid Total": invoice.pay?.reduce((sum, p) => sum + p.amount, 0) ?? 0,
+            "Paid Total": invoice.pay?.reduce((sum, p) => sum + Number(p.amount), 0) ?? 0,
             "Outstanding": invoice.outstanding || 0,
-            "Paid": invoice.pay?.map(p => `$${p.amount || 0} (pay#${p.code})`).join(" | ") || "N/A",
+            "Paid History": invoice.pay?.map(p => `$${p.amount || 0} (pay#${p.code})`).join(" | ") || "N/A",
         }))
     );
 
@@ -830,6 +830,7 @@ const exportToExcel = () => {
                 <Td><span className="text-blue-500" onClick={async () => {
                   try {
                     const purchase: any = await fetchPurchaseDetails(Invoice.po_id || 0); // Await the Promise
+                    console.log("Got purchase from fetch:", purchase);  // Debug log
                     handleViewPurchase(purchase);
                   } catch (error) {
                     console.error("Error fetching purchase details:", error);

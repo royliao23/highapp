@@ -4,6 +4,7 @@ import { useNavigate } from "react-router-dom";
 
 const Signup: React.FC = () => {
   const [email, setEmail] = useState<string>("");
+  const [username, setUsername] = useState<string>("");
   const [password, setPassword] = useState<string>("");
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(false);
@@ -15,8 +16,8 @@ const Signup: React.FC = () => {
     setIsLoading(true);
 
     try {
-      await axios.post(`${process.env.REACT_APP_API_URL}/auth/v1/signup`, {
-        email,
+      await axios.post(`${process.env.REACT_APP_API_NODE}/auth/v1/signup`, {
+        username,
         password,
       },
       {
@@ -40,14 +41,14 @@ const Signup: React.FC = () => {
         <h2>Sign Up</h2>
         <form onSubmit={handleSignup} className="login_form">
           <label htmlFor="email" className="login_label">
-            Email
+            User Name
           </label>
           <input
-            type="email"
-            id="email"
-            placeholder="Enter your email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
+            type="text"
+            id="username"
+            placeholder="Enter username"
+            value={username}
+            onChange={(e) => setUsername(e.target.value)}
             aria-label="Email"
             className="login_box"
             required

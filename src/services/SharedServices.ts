@@ -269,6 +269,7 @@ export const useNavigationService = () => {
   const navigate = useNavigate();
 
   const handleViewPurchase = (purchase: Purchase) => {
+    console.log("po passed:", purchase)
     navigate(`/purchase/${purchase.code}`, { state: { purchase } });
   };
   const handleViewInvoice = (invoice: Invoice) => {
