@@ -6,7 +6,7 @@ import { fetchProjectDetails } from './DetailService'; // Assuming you have a se
 const API_BASE_URL = process.env.REACT_APP_API_NODE || 'http://localhost:8000'; // Set your API base URL here
 
 export const getAllProjectCodes = async () => {
-  const response = await authFetch(`${API_BASE_URL}/high/projects/pjcodeandname`, {
+  const response = await authFetch(`${API_BASE_URL}/high/projects/pjcodeandname/`, {
     headers: {
       'Authorization': `Bearer ${localStorage.getItem('authToken')}`
     }
@@ -18,7 +18,7 @@ export const getAllProjectCodes = async () => {
 
 
 const fetchJobByCategoryList = async (categoryCodes: number[]) => {
-  const response = await authFetch(`${API_BASE_URL}/high/job/jobs-by-category`, {
+  const response = await authFetch(`${API_BASE_URL}/high/job/jobs-by-category/`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
@@ -31,7 +31,7 @@ const fetchJobByCategoryList = async (categoryCodes: number[]) => {
 };
 
 const fetchInvoicesByJobList = async (invoiceFilter: InvoiceFilter) => {
-  const response = await authFetch(`${API_BASE_URL}/high/invoice/invoices-by-jobs`, {
+  const response = await authFetch(`${API_BASE_URL}/high/invoice/invoices-by-jobs/`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',

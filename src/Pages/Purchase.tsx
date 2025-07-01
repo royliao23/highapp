@@ -627,6 +627,7 @@ const PurchaseComp: React.FC = () => {
       due_at: formData.due_at,
       create_at: new Date(),
     };
+    console.log("invoice payload:", invoicePayload)
     onCreateInvoice(invoicePayload);
   };
   const paginatedPurchases = filteredPurchases.slice(
