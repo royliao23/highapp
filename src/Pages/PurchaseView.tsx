@@ -130,7 +130,7 @@ function PurchaseView() {
         from_name: "Green Real Pty Ltd",
         company_name: contractorDetails.company_name,
         invoice_number: purchase.code,
-        amount: purchase.cost.toFixed(2),
+        amount: Number(purchase.cost).toFixed(2),
         gst: (purchase.cost/11).toFixed(2),
         description: "Job:"+jobDetails.name+",  "+ jobDetails.description,
         project_name: projectDetails.project_name,

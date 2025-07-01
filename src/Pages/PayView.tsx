@@ -103,7 +103,7 @@ if ( !emailJsKey || !emailJsServiceId || !emailJsTemplateId) {
         from_name: "Green Real Pty Ltd",
         company_name: contractorDetails.company_name,
         invoice_number: pay.code,
-        amount: pay.amount.toFixed(2),
+        amount: Number(pay.amount).toFixed(2),
         gst: (pay.amount/11).toFixed(2),
         description: "Job:"+jobDetails.name+",  "+ jobDetails.description +". Your Ref:"+pay.jobby.ref +". Our ref:"+pay.code,
         project_name: projectDetails.project_name,
