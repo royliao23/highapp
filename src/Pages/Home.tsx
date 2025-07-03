@@ -30,7 +30,7 @@ const Home: React.FC = () => {
   return (
     <div className="home">
       <h1>Home</h1>
-      <p>A reactive typescript page with kafka, redux, zustand, react hooks for state change management and supabase connection!!</p>
+      <p>A reactive typescript page frontend for construction project management!!</p>
             <ul>
                 {users.map((user, index) => (
                     <li key={index}>{user.name}</li>

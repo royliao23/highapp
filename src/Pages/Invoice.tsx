@@ -764,7 +764,7 @@ const exportToExcel = () => {
               {Invoice.pay && Invoice.pay.length > 0
                 ? Invoice.pay.map((p: any, index: number) => 
                     <span key={p.code} className="invoiceList">
-                      {p.amount?'$'+p.amount?.toFixed(2):0}
+                      {p.amount?'$'+Number(p.amount)?.toFixed(2):0}
                       <button
                         onClick={async () => {
                           try {

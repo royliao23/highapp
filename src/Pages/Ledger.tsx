@@ -1,7 +1,5 @@
 import React, { useState, useEffect } from 'react';
 import styled from 'styled-components';
-// import { getForLedgerSingle } from '../services/LedgerServices';
-// import { getAllProjectCodes } from '../services/SharedServices';
 import { getAllProjectCodes, getForLedgerSingle } from '../services/fastApiLedgerServices';
 // Define types based on the provided models
 export interface InvoiceLedger {
@@ -22,7 +20,7 @@ export interface Project {
   manager: string;
   description: string;
   status: string;
-  categories?: Categ[]; // Assuming categories are part of the Project
+  categories?: Categ[]; 
 }
 
 export interface Job {
@@ -30,7 +28,7 @@ export interface Job {
   job_category_id: number;
   name: string;
   description: string;
-  details?: InvoiceLedger[]; // Assuming invoices are part of the Job
+  details?: InvoiceLedger[]; 
 }
 
 // Styled Components
@@ -100,7 +98,7 @@ const LedgerCategory = () => {
       console.log('Project details:', details);
       setProjectDetails((prev) => ({
         ...prev,
-        [projectCode]: details[0], // Assuming the API returns an array with a single project
+        [projectCode]: details[0], 
       }));
     } catch (error) {
       console.error('Error fetching project details:', error);
@@ -169,9 +167,6 @@ const LedgerCategory = () => {
           {projects.map((proj) => {
             const projectTotal = calculateProjectTotal(projectDetails[proj.code] || { categories: [] });
 
-            // Skip rendering if project total is 0
-            // if (projectTotal === 0) return null;
-
             return (
               <React.Fragment key={proj.code}>
                 <tr>
@@ -184,7 +179,7 @@ const LedgerCategory = () => {
                     </ExpandButton>
                     {proj.project_name}
                   </Td>
-                  <Td>${Number(projectTotal).toFixed(2)}</Td>
+                  <Td>${Number(Number(projectTotal)).toFixed(2)}</Td>
                 </tr>
                 {expandedProjects[proj.code] && projectDetails[proj.code] && (
                   <>
