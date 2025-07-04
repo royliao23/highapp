@@ -197,9 +197,9 @@ function InvoiceView() {
           <Typography variant="body1">
             Together with GST: ${invoice.cost || 0}
           </Typography>
-          <Typography variant="body1">Amount Paid: ${invoice.paid.toFixed(2) || 0}</Typography>
+          <Typography variant="body1">Amount Paid: ${invoice.paid || 0}</Typography>
           <Typography variant="body1" fontWeight="bold">
-            Outstanding: ${(invoice.cost - invoice.paid).toFixed(2) || 0}
+            Outstanding: ${(invoice.cost - (invoice.paid || 0)).toFixed(2) || 0}
           </Typography>
         </Box>
 

@@ -747,7 +747,7 @@ const exportToExcel = () => {
               <strong>Contact Person:</strong> {Invoice.contact} <br />
               <strong>Project:</strong> {projectOptions.find((option) => option.value === Invoice.project_id)?.label || "Unknown"} <br />
               <strong>Supplier Name:</strong> {contractorOptions.find((option) => option.value === Invoice.by_id)?.label || "Unknown"} <br />
-              <strong>Price:</strong> {Invoice.cost || 0} <br />
+              <strong>Price:</strong> {Invoice.cost.toFixed(2) || 0} <br />
               <strong>Job:</strong> {jobOptions.find((option) => option.value === Invoice.job_id)?.label || "Unknown"} <br />
               <strong>PO:</strong> <span className="text-blue-500" onClick={async () => {
                   try {
@@ -824,7 +824,7 @@ const exportToExcel = () => {
                 <Td>{Invoice.contact}</Td>
                 <Td>{projectOptions.find((option) => option.value === Invoice.project_id)?.label || "Unknown"}</Td>
                 <Td>{jobOptions.find((option) => option.value === Invoice.job_id)?.label || "Unknown"}</Td>
-                <Td>{Invoice.cost || 0}</Td>
+                <Td>{Invoice.cost.toFixed(2) || 0}</Td>
                 <Td>{contractorOptions.find((option) => option.value === Invoice.by_id)?.label || "Unknown"}</Td>
                 <Td>{Invoice.ref}</Td>
                 <Td><span className="text-blue-500" onClick={async () => {

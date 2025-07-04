@@ -95,7 +95,6 @@ const LedgerCategory = () => {
   const fetchProjectDetails = async (projectCode: number) => {
     try {
       const details = await getForLedgerSingle(projectCode);
-      console.log('Project details:', details);
       setProjectDetails((prev) => ({
         ...prev,
         [projectCode]: details[0], 
@@ -166,7 +165,7 @@ const LedgerCategory = () => {
         <tbody>
           {projects.map((proj) => {
             const projectTotal = calculateProjectTotal(projectDetails[proj.code] || { categories: [] });
-
+            
             return (
               <React.Fragment key={proj.code}>
                 <tr>
