@@ -235,10 +235,10 @@ const loadContractors = async () => {
   // Filter contractors dynamically based on the search term
   const filteredContractors = contractors.filter((contractor) => {
     return (
-      contractor.contact_person.toLowerCase().includes(searchTerm) ||
-      contractor.company_name.toLowerCase().includes(searchTerm) ||
-      contractor.email.toLowerCase().includes(searchTerm) ||
-      contractor.phone_number.includes(searchTerm)
+      contractor.contact_person?.toLowerCase().includes(searchTerm) ||
+      contractor.company_name?.toLowerCase().includes(searchTerm) ||
+      contractor.email?.toLowerCase().includes(searchTerm) ||
+      contractor.phone_number?.includes(searchTerm)
     );
   });
 

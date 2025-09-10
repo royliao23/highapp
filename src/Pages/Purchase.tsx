@@ -866,7 +866,7 @@ const PurchaseComp: React.FC = () => {
 
             <div>
               <strong>Total Already Invoiced Amount:</strong>{" "}
-              {(formData.invoice || []).reduce((total, inv) => total + (inv.cost || 0), 0).toFixed(2)}
+              {Number((formData.invoice || []).reduce((total, inv) => total + (inv.cost || 0), 0)).toFixed(2)}
             </div>
 
             <div>
@@ -879,7 +879,10 @@ const PurchaseComp: React.FC = () => {
 
             <Button onClick={handleSubmit}>Save Purchase</Button>
 
-            {(formData.invoice || []).reduce((total, inv) => total + (inv.cost || 0), 0) < originalCost && (
+            {(
+                originalCost -
+                (formData.invoice || []).reduce((total, inv) => total + (inv.cost || 0), 0)
+              ) > 0 && (
               <Button
                 onClick={() => {
                   const balance = (

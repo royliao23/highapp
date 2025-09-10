@@ -21,7 +21,7 @@ const deleteResponse = async(acton: string, response:any) =>{
 };
 // Project
 export const fetchProjects = async () => {
-  const response = await authFetch(`${API_BASE_URL}/high/projects`, {
+  const response = await authFetch(`${API_BASE_URL}/high/projects/`, {
     headers: {
       'Authorization': `Bearer ${localStorage.getItem('authToken')}`
     }
