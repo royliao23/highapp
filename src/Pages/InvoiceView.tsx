@@ -95,7 +95,6 @@ function InvoiceView() {
         gst_registered: true,
     });
   const location = useLocation();
-  console.log("invoice state:", location.state);
   const { invoice } = location.state as { invoice: Invoice };
 
   console.log("invoice received:",invoice);

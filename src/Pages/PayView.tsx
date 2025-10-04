@@ -77,7 +77,7 @@ function PayView() {
   const location = useLocation();
   const { pay } = location.state as { pay: Pay };
   console.log("pay state received:", location.state);
-  console.log("pay received:", pay);
+  console.log("pay details received:", pay);
   console.log("jobby:", pay.jobby);
   const navigate = useNavigate();
 
@@ -85,8 +85,10 @@ function PayView() {
     window.print();
   };
 
-  const dueDate = new Date(pay.jobby.due_at);
-  const createDate = new Date(pay.create_at);
+  const dueDate = new Date(pay.jobby?.due_at ? pay.jobby.due_at : '');
+  const createDate = new Date(pay.create_at ? pay.create_at : '');
+
+  // EmailJS configuration'');
   const emailJsKey = process.env.REACT_APP_EMAILJS_PUBLIC_KEY;
   const emailJsServiceId = process.env.REACT_APP_SERVICE_ID;
   const emailJsTemplateId = process.env.REACT_APP_PTID;

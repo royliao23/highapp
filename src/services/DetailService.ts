@@ -4,7 +4,7 @@ const API_BASE_URL = process.env.REACT_APP_API_NODE;
 if (!API_BASE_URL) {
   throw new Error("REACT_APP_API_NODE is not defined in .env");
 }
-export const fetchJobDetails = async (jobId: number) => { const response = await fetch(`${API_BASE_URL}/high/job/${jobId}`, {
+export const fetchJobDetails = async (jobId: number) => { const response = await fetch(`${API_BASE_URL}/high/job/${jobId}/`, {
     headers: {
       'Authorization': `Bearer ${localStorage.getItem('authToken')}`
     }
@@ -14,7 +14,7 @@ export const fetchJobDetails = async (jobId: number) => { const response = await
   return data; // Assuming your Express API returns { jobs: [...] }
 };
 
-export const fetchProjectDetails = async (code: number) => { const response = await fetch(`${API_BASE_URL}/high/projects/${code}`, {
+export const fetchProjectDetails = async (code: number) => { const response = await fetch(`${API_BASE_URL}/high/projects/${code}/`, {
     headers: {
       'Authorization': `Bearer ${localStorage.getItem('authToken')}`
     }
@@ -25,7 +25,7 @@ export const fetchProjectDetails = async (code: number) => { const response = aw
 };
 
 
-export const fetchContractorDetails = async (code: number) => { const response = await fetch(`${API_BASE_URL}/high/contractor/${code}`, {
+export const fetchContractorDetails = async (code: number) => { const response = await fetch(`${API_BASE_URL}/high/contractor/${code}/`, {
     headers: {
       'Authorization': `Bearer ${localStorage.getItem('authToken')}`
     }
@@ -35,7 +35,7 @@ export const fetchContractorDetails = async (code: number) => { const response =
   return data; 
 };
 
-export const fetchPurchaseDetails = async (code: number) => { const response = await fetch(`${API_BASE_URL}/high/po/${code}`, {
+export const fetchPurchaseDetails = async (code: number) => { const response = await fetch(`${API_BASE_URL}/high/po/${code}/`, {
     headers: {
       'Authorization': `Bearer ${localStorage.getItem('authToken')}`
     }
@@ -80,7 +80,7 @@ export const fetchInvoicePayDetails = async (invoiceId: number) => {
 };
 
 export const fetchPayDetails = async (code: number) => {
-  const response = await fetch(`${API_BASE_URL}/high/pay/${code}`, {
+  const response = await fetch(`${API_BASE_URL}/high/pay/${code}/`, {
     headers: {
       'Authorization': `Bearer ${localStorage.getItem('authToken')}`
     }

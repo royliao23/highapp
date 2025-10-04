@@ -733,6 +733,7 @@ const PurchaseComp: React.FC = () => {
                     <span className="invoiceList" key={index} onClick={async () => {
                       try {
                         const invoice: any = await fetchPoandInv(inv.code || 0); // Await the Promise
+                        console.log("Fetched invoice for viewing:", invoice);
                         handleViewInvoice(invoice);
                       } catch (error) {
                         console.error("Error fetching purchase details:", error);
